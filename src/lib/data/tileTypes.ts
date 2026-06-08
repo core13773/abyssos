@@ -38,4 +38,6 @@ export const EVENT_KIND_INFO: Record<EventKind, EventKindInfo> = {
   trap:     { kind: 'trap',     label: '함정', icon: '⚠', color: 'text-red-400' },
   blessing: { kind: 'blessing', label: '축복', icon: '★', color: 'text-sky-400' },
   curse:    { kind: 'curse',    label: '저주', icon: '☠', color: 'text-violet-400' },
+  treasure: { kind: 'treasure', label: '보물', icon: '💎', color: 'text-yellow-400' },
+  choice:   { kind: 'choice',   label: '선택', icon: '🤔', color: 'text-amber-400' },
 };
