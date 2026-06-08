@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // For GitHub Pages deployment, uncomment:
+  // output: 'export',
+  // basePath: '/Abyssos',
+  // assetPrefix: '/Abyssos',
+  // images: { unoptimized: true },
 };
 
 export default nextConfig;

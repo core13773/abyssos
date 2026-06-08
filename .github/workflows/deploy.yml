@@ -1,0 +1,58 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master, main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Override next.config.ts for GitHub Pages static export
+      - run: |
+          cat > next.config.ts << 'NEXTCONF'
+          import type { NextConfig } from "next";
+          const nextConfig: NextConfig = {
+            output: 'export',
+            basePath: '/Abyssos',
+            assetPrefix: '/Abyssos',
+            images: { unoptimized: true },
+          };
+          export default nextConfig;
+          NEXTCONF
+
+      - run: npm run build
+
+      - uses: actions/configure-pages@v4
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
