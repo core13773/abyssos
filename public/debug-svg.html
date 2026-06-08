@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html><body style="background:#333;padding:40px">
+<h1 style="color:#fff">SVG Debug — 5 tests</h1>
+
+<div style="margin:10px;padding:10px;background:#555">
+  <p style="color:#fff">Test 1: Inline SVG (should show gold circle)</p>
+  <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="#1a1a2e" rx="10"/>
+    <circle cx="100" cy="80" r="50" fill="#daa520"/>
+    <text x="100" y="170" text-anchor="middle" fill="#f0d060" font-size="20">OK</text>
+  </svg>
+</div>
+
+<div style="margin:10px;padding:10px;background:#555">
+  <p style="color:#fff">Test 2: test-card.svg via img</p>
+  <img src="/test-card.svg" width="200" style="border:3px solid white">
+</div>
+
+<div style="margin:10px;padding:10px;background:#555">
+  <p style="color:#fff">Test 3: monster-9a.svg via img</p>
+  <img src="/images/monsters/monster-9a.svg" width="200" style="border:3px solid white">
+</div>
+
+<div style="margin:10px;padding:10px;background:#555">
+  <p style="color:#fff">Test 4: img with explicit size</p>
+  <img src="/images/monsters/monster-9a.svg" width="375" height="525" style="border:3px solid red">
+</div>
+
+<div style="margin:10px;padding:10px;background:#555">
+  <p style="color:#fff">Test 5: object tag</p>
+  <object data="/images/monsters/monster-9a.svg" type="image/svg+xml" width="375" height="525" style="border:3px solid green"></object>
+</div>
+
+</body></html>

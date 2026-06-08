@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html><body style="background:#333;padding:20px;color:#fff">
+<h1>Which element breaks img?</h1>
+<div id="tests"></div>
+<script>
+const BASE = '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">';
+
+const END = '</svg>';
+
+const bodies = {
+  'plain rect+text': `<rect width="750" height="1050" fill="#1a1a2e"/><text x="375" y="500" text-anchor="middle" font-size="50" fill="#daa520">TEST</text>`,
+  '+ defs with gradient': `<defs><linearGradient id="g1"><stop offset="0%" stop-color="#7ec8e3"/><stop offset="100%" stop-color="#0a1218"/></linearGradient></defs><rect width="750" height="1050" fill="url(#g1)"/><text x="375" y="500" text-anchor="middle" font-size="50" fill="#daa520">TEST</text>`,
+  '+ filter dropShadow': `<defs><linearGradient id="g2"><stop offset="0%" stop-color="#7ec8e3"/><stop offset="100%" stop-color="#0a1218"/></linearGradient><filter id="f1"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#daa520" flood-opacity="0.4"/></filter></defs><rect width="750" height="1050" fill="url(#g2)"/><text x="375" y="500" text-anchor="middle" font-size="50" fill="#daa520" filter="url(#f1)">TEST</text>`,
+  '+ Korean text': `<defs><linearGradient id="g3"><stop offset="0%" stop-color="#7ec8e3"/><stop offset="100%" stop-color="#0a1218"/></linearGradient></defs><rect width="750" height="1050" fill="url(#g3)"/><text x="375" y="500" text-anchor="middle" font-size="50" fill="#daa520">얼음 망자</text>`,
+  '+ many elements (like real card)': null,
+};
+
+// Fetch real card content
+fetch('/images/monsters/monster-9a.svg')
+  .then(r => r.text())
+  .then(realSvg => {
+    const realBody = realSvg.replace(/.*<svg[^>]*>/, '').replace(/<\/svg>.*/, '');
+    bodies['+ many elements (real card)'] = realBody;
+
+    let html = '';
+    let n = 1;
+    for (const [label, body] of Object.entries(bodies)) {
+      const svg = BASE + body + END;
+      const uri = 'data:image/svg+xml,' + encodeURIComponent(svg);
+      html += `<div style="margin:10px;padding:10px;background:#444">
+        <p>Test ${n}: ${label}</p>
+        <img src="${uri}" width="200" style="border:2px solid white">
+        <span style="margin-left:10px">${n}.</span>
+      </div>`;
+      n++;
+    }
+    document.getElementById('tests').innerHTML = html;
+  });
+</script>
+</body></html>

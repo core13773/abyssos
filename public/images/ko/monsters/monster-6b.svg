@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">
+  <defs>
+    <linearGradient id="gold"><stop offset="0%" stop-color="#f0d060"/><stop offset="25%" stop-color="#daa520"/><stop offset="50%" stop-color="#f5e6a0"/><stop offset="75%" stop-color="#b8860b"/><stop offset="100%" stop-color="#f0d060"/></linearGradient>
+    <linearGradient id="goldV"><stop offset="0%" stop-color="#f5e6a0"/><stop offset="30%" stop-color="#daa520"/><stop offset="60%" stop-color="#b8860b"/><stop offset="100%" stop-color="#f0d060"/></linearGradient>
+    <linearGradient id="goldSubtle"><stop offset="0%" stop-color="#a08030"/><stop offset="50%" stop-color="#c4a040"/><stop offset="100%" stop-color="#a08030"/></linearGradient>
+    <radialGradient id="divineGlow" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#f5e6a0" stop-opacity="0.3"/><stop offset="50%" stop-color="#daa520" stop-opacity="0.1"/><stop offset="100%" stop-color="#1a1208" stop-opacity="0"/></radialGradient>
+    
+  <linearGradient id="ebg-monster-6b" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#180e05"/><stop offset="50%" stop-color="#0a0a10"/><stop offset="100%" stop-color="#180e05"/>
+  </linearGradient>
+  <linearGradient id="egl-monster-6b" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#e67e22"/><stop offset="50%" stop-color="#b8551a"/><stop offset="100%" stop-color="#e67e22"/>
+  </linearGradient>
+  <radialGradient id="eglow-monster-6b" cx="50%" cy="35%" r="40%">
+    <stop offset="0%" stop-color="#e67e22" stop-opacity="0.2"/><stop offset="100%" stop-color="#0a0a10" stop-opacity="0"/>
+  </radialGradient>
+  </defs>
+  <rect width="750" height="1050" fill="url(#ebg-monster-6b)"/>
+  <rect x="30" y="30" width="690" height="990" rx="14" fill="none" stroke="url(#egl-monster-6b)" stroke-width="5"/>
+  <rect x="38" y="38" width="674" height="974" rx="10" fill="none" stroke="#b8551a" stroke-width="2"/>
+
+  <path d="M35 53 Q35 35 53 35 M35 47.6 Q40.4 40.4 47.6 35" stroke="url(#gold)" stroke-width="1.5" fill="none"/> <path d="M697 35 Q715 35 715 53 M702.4 35 Q709.6 40.4 715 47.6" stroke="url(#gold)" stroke-width="1.5" fill="none"/>
+  <path d="M35 997 Q35 1015 53 1015 M35 1002.4 Q40.4 1009.6 47.6 1015" stroke="url(#gold)" stroke-width="1.5" fill="none"/> <path d="M697 1015 Q715 1015 715 997 M702.4 1015 Q709.6 1009.6 715 1002.4" stroke="url(#gold)" stroke-width="1.5" fill="none"/>
+
+  <!-- TIER BADGE -->
+  <rect x="320" y="44" width="110" height="42" rx="21" fill="#ef4444"/>
+  <text x="375" y="73" text-anchor="middle" font-family="serif" font-size="22" font-weight="bold" fill="#fff" letter-spacing="3">상급</text>
+
+  <line x1="295" y1="102" x2="455" y2="102" stroke="url(#egl-monster-6b)" stroke-width="1.5"/>
+  <circle cx="375" cy="102" r="4" fill="#e67e22"/>
+
+  <!-- CARD NAME (large, only one language) -->
+  <text x="375" y="970" text-anchor="middle" font-family="serif" font-size="34" font-weight="bold" fill="#e67e22" letter-spacing="3">이단 재판관</text>
+
+  <!-- ILLUSTRATION AREA -->
+  <g transform="translate(375, 500)">
+    <circle cx="0" cy="0" r="130" fill="none" stroke="#e67e22" stroke-width="2"/>
+    <circle cx="0" cy="0" r="110" fill="none" stroke="#e67e22" stroke-width="1"/>
+    <circle cx="0" cy="0" r="85" fill="url(#eglow-monster-6b)"/>
+
+    <!-- POWER NUMBER (large) -->
+    <text x="0" y="12" text-anchor="middle" font-family="serif" font-size="90" font-weight="bold" fill="url(#egl-monster-6b)">8</text>
+    <text x="0" y="-50" text-anchor="middle" font-family="serif" font-size="18" fill="#f0a050" letter-spacing="4">전투력</text>
+
+    <text x="0" y="-110" text-anchor="middle" font-size="70">🔥</text>
+
+    <!-- ABILITY BOX -->
+    <rect x="-220" y="55" width="440" height="80" rx="10" fill="#180e05" stroke="#e67e22" stroke-width="1.5"/>
+    <text x="0" y="80" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#f0a050" letter-spacing="2">특수 능력</text>
+    <text x="0" y="102" text-anchor="middle" font-family="serif" font-size="16" fill="#f0a050">화형 선고: 매 턴 전투력 +1 (최대+3)</text>
+
+    <!-- REWARD / PENALTY -->
+    <rect x="-220" y="148" width="215" height="40" rx="6" fill="#0a2a0a" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="-112" y="174" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#4ade80">승리: HP +undefined</text>
+
+    <rect x="5" y="148" width="215" height="40" rx="6" fill="#2a0a0a" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="112" y="174" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#f87171">패배: HP -undefined</text>
+  </g></svg>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html><body style="background:#333;padding:20px;color:#fff">
+<h1>Which step breaks img rendering?</h1>
+<div id="tests"></div>
+<script>
+const steps = [
+  {label:'Step 1: plain rect+text', file:'/step1.svg'},
+  {label:'Step 2: + one gradient in defs', file:'/step2.svg'},
+  {label:'Step 3: + many gradients (6)', file:'/step3.svg'},
+  {label:'Step 4: + Korean text', file:'/step4.svg'},
+  {label:'Step 5: actual generated monster-9a', file:'/step5.svg'},
+];
+let html = '';
+steps.forEach((s, i) => {
+  html += `<div style="margin:10px;padding:10px;background:#444">
+    <p>${i+1}. ${s.label}</p>
+    <img src="${s.file}" width="200" style="border:2px solid ${i<4?'lime':'red'}">
+    <span>${i+1}</span>
+  </div>`;
+});
+document.getElementById('tests').innerHTML = html;
+</script>
+</body></html>

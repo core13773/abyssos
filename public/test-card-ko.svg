@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">
+  <rect width="750" height="1050" fill="#1a1a2e"/>
+  <rect x="30" y="30" width="690" height="990" rx="12" fill="none" stroke="#f0d060" stroke-width="4"/>
+  <text x="375" y="450" text-anchor="middle" font-family="serif" font-size="50" fill="#f0d060">얼음 망자</text>
+  <text x="375" y="520" text-anchor="middle" font-family="serif" font-size="30" fill="#daa520">Frost Wraith</text>
+  <text x="375" y="580" text-anchor="middle" font-family="serif" font-size="20" fill="#7ec8e3">❄️ 얼음 계열</text>
+</svg>

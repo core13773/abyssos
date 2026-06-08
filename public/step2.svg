@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">
+  <defs>
+    <linearGradient id="g1"><stop offset="0%" stop-color="#0a1218"/><stop offset="100%" stop-color="#000"/></linearGradient>
+  </defs>
+  <rect width="750" height="1050" fill="url(#g1)"/>
+  <text x="375" y="500" text-anchor="middle" font-size="50" fill="#daa520">TEST</text>
+</svg>

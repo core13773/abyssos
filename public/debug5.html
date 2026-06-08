@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html><body style="background:#333;padding:20px;color:#fff">
+<h1>Raw comparison test</h1>
+
+<div style="margin:10px;padding:10px;background:#444">
+  <p>1: test-card.svg (working) via img</p>
+  <img src="/test-card.svg" width="300" style="border:2px solid lime">
+</div>
+
+<div style="margin:10px;padding:10px;background:#444">
+  <p>2: monster-9a.svg via img</p>
+  <img src="/images/monsters/monster-9a.svg" width="300" style="border:2px solid red">
+</div>
+
+<div style="margin:10px;padding:10px;background:#444">
+  <p>3: test-card with ONE gradient added via img</p>
+  <img src="/test-card-grad.svg" width="300" style="border:2px solid yellow">
+</div>
+
+<div style="margin:10px;padding:10px;background:#444">
+  <p>4: test-card with Korean text via img</p>
+  <img src="/test-card-ko.svg" width="300" style="border:2px solid cyan">
+</div>
+
+<div style="margin:10px;padding:10px;background:#444">
+  <p>5: monster-9a served with text/html content-type</p>
+  <img id="img5" width="300" style="border:2px solid orange">
+</div>
+
+<script>
+// Test 5: load monster SVG via fetch, create blob URL
+fetch('/images/monsters/monster-9a.svg')
+  .then(r => r.blob())
+  .then(blob => {
+    document.getElementById('img5').src = URL.createObjectURL(blob);
+  });
+</script>
+</body></html>

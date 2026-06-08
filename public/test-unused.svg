@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">
+  <defs>
+    <linearGradient id="used"><stop offset="0%" stop-color="#0a1218"/><stop offset="100%" stop-color="#000"/></linearGradient>
+    <linearGradient id="unused1"><stop offset="0%" stop-color="#f0d060"/><stop offset="25%" stop-color="#daa520"/><stop offset="50%" stop-color="#f5e6a0"/><stop offset="75%" stop-color="#b8860b"/><stop offset="100%" stop-color="#f0d060"/></linearGradient>
+    <linearGradient id="unused2"><stop offset="0%" stop-color="#f5e6a0"/><stop offset="30%" stop-color="#daa520"/><stop offset="60%" stop-color="#b8860b"/><stop offset="100%" stop-color="#f0d060"/></linearGradient>
+    <linearGradient id="unused3"><stop offset="0%" stop-color="#a08030"/><stop offset="50%" stop-color="#c4a040"/><stop offset="100%" stop-color="#a08030"/></linearGradient>
+    <radialGradient id="unused4" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#f5e6a0" stop-opacity="0.3"/><stop offset="50%" stop-color="#daa520" stop-opacity="0.1"/><stop offset="100%" stop-color="#1a1208" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="750" height="1050" fill="url(#used)"/>
+  <text x="375" y="500" text-anchor="middle" font-size="50" fill="#daa520">UNUSED TEST</text>
+</svg>

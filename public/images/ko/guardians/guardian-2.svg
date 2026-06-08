@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">
+  <defs>
+    <linearGradient id="gold"><stop offset="0%" stop-color="#f0d060"/><stop offset="25%" stop-color="#daa520"/><stop offset="50%" stop-color="#f5e6a0"/><stop offset="75%" stop-color="#b8860b"/><stop offset="100%" stop-color="#f0d060"/></linearGradient>
+    <linearGradient id="goldV"><stop offset="0%" stop-color="#f5e6a0"/><stop offset="30%" stop-color="#daa520"/><stop offset="60%" stop-color="#b8860b"/><stop offset="100%" stop-color="#f0d060"/></linearGradient>
+    <linearGradient id="goldSubtle"><stop offset="0%" stop-color="#a08030"/><stop offset="50%" stop-color="#c4a040"/><stop offset="100%" stop-color="#a08030"/></linearGradient>
+    <radialGradient id="divineGlow" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#f5e6a0" stop-opacity="0.3"/><stop offset="50%" stop-color="#daa520" stop-opacity="0.1"/><stop offset="100%" stop-color="#1a1208" stop-opacity="0"/></radialGradient>
+    
+  <radialGradient id="gdbg-guardian-2" cx="50%" cy="40%" r="50%">
+    <stop offset="0%" stop-color="#9b59b6" stop-opacity="0.25"/><stop offset="50%" stop-color="#daa520" stop-opacity="0.08"/><stop offset="100%" stop-color="#121008" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="gdgold-guardian-2" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#f0d060"/><stop offset="50%" stop-color="#f5e6a0"/><stop offset="100%" stop-color="#daa520"/>
+  </linearGradient>
+  </defs>
+  <rect width="750" height="1050" fill="#121008"/>
+  <rect width="750" height="1050" fill="url(#divineGlow)"/>
+  <rect width="750" height="1050" fill="url(#gdbg-guardian-2)"/>
+
+  <rect x="30" y="30" width="690" height="990" rx="16" fill="none" stroke="url(#gdgold-guardian-2)" stroke-width="8"/>
+  <rect x="40" y="40" width="670" height="970" rx="12" fill="none" stroke="url(#goldSubtle)" stroke-width="2"/>
+  <rect x="46" y="46" width="658" height="958" rx="9" fill="none" stroke="#9b59b6" stroke-width="1.5"/>
+
+  <path d="M37 55 Q37 37 55 37 M37 49.6 Q42.4 42.4 49.6 37" stroke="url(#gold)" stroke-width="1.5" fill="none"/> <path d="M695 37 Q713 37 713 55 M700.4 37 Q707.6 42.4 713 49.6" stroke="url(#gold)" stroke-width="1.5" fill="none"/> <path d="M37 995 Q37 1013 55 1013 M37 1000.4 Q42.4 1007.6 49.6 1013" stroke="url(#gold)" stroke-width="1.5" fill="none"/> <path d="M695 1013 Q713 1013 713 995 M700.4 1013 Q707.6 1007.6 713 1000.4" stroke="url(#gold)" stroke-width="1.5" fill="none"/>
+
+  <!-- GUARDIAN BADGE -->
+  <rect x="295" y="42" width="160" height="44" rx="22" fill="#f0d060"/>
+  <text x="375" y="72" text-anchor="middle" font-family="serif" font-size="20" font-weight="bold" fill="#121008" letter-spacing="3">✨ 수호카드</text>
+
+  <!-- EFFECT TYPE -->
+  <rect x="320" y="96" width="110" height="28" rx="14" fill="#22c55e"/>
+  <text x="375" y="115" text-anchor="middle" font-family="serif" font-size="13" font-weight="bold" fill="#fff" letter-spacing="3">PASSIVE</text>
+
+  <text x="375" y="965" text-anchor="middle" font-family="serif" font-size="34" font-weight="bold" fill="url(#gdgold-guardian-2)" letter-spacing="4">폭풍의 은총</text>
+
+  <!-- ILLUSTRATION -->
+  <g transform="translate(375, 495)">
+    <!-- Rays -->
+    <line x1="45" y1="0" x2="170" y2="0" stroke="#f5e6a0" stroke-width="4"/><line x1="38.97114317029974" y1="22.499999999999996" x2="147.2243186433546" y2="84.99999999999999" stroke="#f5e6a0" stroke-width="4"/><line x1="22.500000000000004" y1="38.97114317029974" x2="85.00000000000001" y2="147.22431864335456" stroke="#f5e6a0" stroke-width="4"/><line x1="2.7554552980815448e-15" y1="45" x2="1.0409497792752502e-14" y2="170" stroke="#f5e6a0" stroke-width="4"/><line x1="-22.49999999999999" y1="38.97114317029974" x2="-84.99999999999996" y2="147.2243186433546" stroke="#f5e6a0" stroke-width="4"/><line x1="-38.97114317029974" y1="22.499999999999996" x2="-147.2243186433546" y2="84.99999999999999" stroke="#f5e6a0" stroke-width="4"/><line x1="-45" y1="5.5109105961630896e-15" x2="-170" y2="2.0818995585505004e-14" stroke="#f5e6a0" stroke-width="4"/><line x1="-38.97114317029974" y1="-22.500000000000004" x2="-147.22431864335456" y2="-85.00000000000001" stroke="#f5e6a0" stroke-width="4"/><line x1="-22.50000000000002" y1="-38.97114317029973" x2="-85.00000000000007" y2="-147.22431864335454" stroke="#f5e6a0" stroke-width="4"/><line x1="-8.266365894244634e-15" y1="-45" x2="-3.122849337825751e-14" y2="-170" stroke="#f5e6a0" stroke-width="4"/><line x1="22.500000000000004" y1="-38.97114317029974" x2="85.00000000000001" y2="-147.22431864335456" stroke="#f5e6a0" stroke-width="4"/><line x1="38.971143170299726" y1="-22.50000000000002" x2="147.22431864335454" y2="-85.00000000000007" stroke="#f5e6a0" stroke-width="4"/>
+
+    <circle cx="0" cy="0" r="95" fill="url(#divineGlow)"/>
+    <circle cx="0" cy="0" r="72" fill="none" stroke="url(#gdgold-guardian-2)" stroke-width="2"/>
+    <circle cx="0" cy="0" r="56" fill="none" stroke="#9b59b6" stroke-width="2"/>
+
+    <polygon points="0.0,-38.0 6.5,-15.7 26.9,-26.9 15.7,-6.5 38.0,0.0 15.7,6.5 26.9,26.9 6.5,15.7 0.0,38.0 -6.5,15.7 -26.9,26.9 -15.7,6.5 -38.0,0.0 -15.7,-6.5 -26.9,-26.9 -6.5,-15.7" fill="#daa520"/>
+    <polygon points="0.0,-25.0 4.2,-10.2 17.7,-17.7 10.2,-4.2 25.0,0.0 10.2,4.2 17.7,17.7 4.2,10.2 0.0,25.0 -4.2,10.2 -17.7,17.7 -10.2,4.2 -25.0,0.0 -10.2,-4.2 -17.7,-17.7 -4.2,-10.2" fill="#f5e6a0"/>
+
+    <text x="0" y="-90" text-anchor="middle" font-size="55">🌪</text>
+
+    <!-- MAIN EFFECT -->
+    <rect x="-245" y="60" width="490" height="80" rx="12" fill="#0a0805" stroke="url(#gdgold-guardian-2)" stroke-width="2"/>
+    <text x="0" y="88" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="url(#gdgold-guardian-2)" letter-spacing="3">주 효과</text>
+    <text x="0" y="112" text-anchor="middle" font-family="serif" font-size="17" fill="#f0d060">이동 주사위 최소값 +1 (1~2→3)</text>
+
+    <!-- SUB EFFECT -->
+    <rect x="-245" y="150" width="490" height="52" rx="10" fill="#0a0805" stroke="url(#goldSubtle)" stroke-width="1.5"/>
+    <text x="0" y="174" text-anchor="middle" font-family="serif" font-size="13" font-weight="bold" fill="url(#goldSubtle)" letter-spacing="2">부 효과</text>
+    <text x="0" y="194" text-anchor="middle" font-family="serif" font-size="14" fill="#a08030">강제 이동 완전 면역</text>
+  </g></svg>

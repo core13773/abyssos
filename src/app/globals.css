@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #e7e5e4;
+  --card-bg: #1c1917;
+  --border: #292524;
+  --accent: #d97706;
+  --accent-dim: #92400e;
+
+  --font-serif: 'Cinzel', 'Times New Roman', serif;
+  --font-body: 'Crimson Text', Georgia, serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-mono: ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1c1917;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #44403c;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #78716c;
+}
+
+/* Selection */
+::selection {
+  background: rgba(217, 119, 6, 0.3);
+  color: #fbbf24;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-flicker {
+  animation: flicker 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.1; }
+}
+
+/* ---- Dramatic Effects ---- */
+
+/* Screen shake */
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-4px, -2px); }
+  20% { transform: translate(3px, 1px); }
+  30% { transform: translate(-2px, 3px); }
+  40% { transform: translate(3px, -3px); }
+  50% { transform: translate(-1px, 2px); }
+  60% { transform: translate(2px, -1px); }
+  70% { transform: translate(-3px, -2px); }
+  80% { transform: translate(1px, 3px); }
+  90% { transform: translate(-2px, -1px); }
+}
+
+.screen-shake {
+  animation: screenShake 0.5s ease-out;
+}
+
+/* HP critical pulse */
+@keyframes hpCritical {
+  0%, 100% { box-shadow: inset 0 0 30px rgba(239, 68, 68, 0); }
+  50% { box-shadow: inset 0 0 30px rgba(239, 68, 68, 0.25); }
+}
+
+.hp-critical {
+  animation: hpCritical 1.2s ease-in-out infinite;
+}
+
+/* Sparkle burst */
+@keyframes sparkleBurst {
+  0% { opacity: 0; transform: scale(0.5); }
+  30% { opacity: 0.8; transform: scale(1.3); }
+  70% { opacity: 0.6; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+
+.sparkle-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  background: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.15) 0%, transparent 70%);
+  animation: sparkleBurst 1.5s ease-out forwards;
+}
+
+/* Gate shine */
+@keyframes gateShine {
+  0%, 100% { opacity: 0.4; filter: drop-shadow(0 0 2px #fbbf24); }
+  50% { opacity: 0.8; filter: drop-shadow(0 0 8px #fbbf24); }
+}
+
+.animate-gate {
+  animation: gateShine 2s ease-in-out infinite;
+}
+
+/* Critical hit flash */
+@keyframes critFlash {
+  0% { filter: brightness(1); }
+  25% { filter: brightness(2.5) saturate(2); }
+  100% { filter: brightness(1); }
+}
+
+.crit-flash {
+  animation: critFlash 0.4s ease-out;
+}
+
+/* Combo celebration */
+@keyframes comboGlow {
+  0%, 100% { text-shadow: 0 0 4px #fbbf24; }
+  50% { text-shadow: 0 0 16px #fbbf24, 0 0 32px #f59e0b; }
+}
+
+.combo-glow {
+  animation: comboGlow 0.8s ease-in-out infinite;
+}
+
+/* Ascend transition */
+@keyframes ascend {
+  0% { opacity: 0; transform: scale(0.9); filter: brightness(2); }
+  30% { opacity: 1; filter: brightness(1.5); }
+  100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+}
+
+.animate-ascend {
+  animation: ascend 0.6s ease-out;
+}
+
+@keyframes descend {
+  0% { opacity: 0; transform: scale(1.1) rotate(5deg); }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.animate-descend {
+  animation: descend 0.6s ease-out;
+}
+
+/* SVG text fallback */
+text {
+  user-select: none;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth board transitions */
+.ring-transition {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}

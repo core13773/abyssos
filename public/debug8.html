@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html><body style="background:#333;padding:10px;color:#fff">
+<h1>Stripping monster-9a.svg until it works</h1>
+<div id="tests"></div>
+<script>
+fetch('/images/monsters/monster-9a.svg')
+  .then(r => r.text())
+  .then(orig => {
+    // Extract the inner content (between <svg...> and </svg>)
+    const innerMatch = orig.match(/<svg[^>]*>([\s\S]*)<\/svg>/);
+    if (!innerMatch) return;
+    let inner = innerMatch[1];
+    
+    const tests = [];
+    
+    // Test 1: ONLY background rect + one text (bare minimum)
+    let t1 = inner.replace(/<defs>[\s\S]*?<\/defs>/g, '')
+      .replace(/fill="url\([^)]*\)"/g, 'fill="#0a1218"')
+      .replace(/stroke="url\([^)]*\)"/g, 'stroke="#7ec8e3"');
+    // Remove ALL elements except the first rect and one text
+    t1 = '<rect width="750" height="1050" fill="#0a1218"/>' +
+         '<text x="375" y="500" text-anchor="middle" font-size="50" fill="#daa520">TEST</text>';
+    tests.push({label:'1: Bare minimum (same structure as step4)', body: t1, border:'lime'});
+    
+    // Test 2: Keep original background + grad defs stripped
+    let t2 = inner.replace(/fill="url\([^)]*\)"/g, 'fill="#0a1218"')
+      .replace(/stroke="url\([^)]*\)"/g, 'stroke="#7ec8e3"')
+      .replace(/opacity="[^"]*"/g, 'opacity="1"');
+    tests.push({label:'2: All elements, no url() refs, opacity=1', body: t2, border:'yellow'});
+    
+    // Test 3: Same as 2 but keep opacity values
+    let t3 = inner.replace(/fill="url\([^)]*\)"/g, 'fill="#0a1218"')
+      .replace(/stroke="url\([^)]*\)"/g, 'stroke="#7ec8e3"');
+    tests.push({label:'3: All elements, no url() refs, keep opacity', body: t3, border:'orange'});
+    
+    // Test 4: Keep everything, just remove defs
+    let t4 = inner.replace(/<defs>[\s\S]*?<\/defs>/g, '');
+    tests.push({label:'4: Remove defs block entirely', body: t4, border:'cyan'});
+    
+    // Test 5: Keep defs but replace all url() with solid colors
+    let t5 = inner.replace(/fill="url\([^)]*\)"/g, 'fill="#0a1218"')
+      .replace(/stroke="url\([^)]*\)"/g, 'stroke="#7ec8e3"')
+      .replace(/fill="url\([^)]*\)"/g, 'fill="#1a1a2e"');
+    tests.push({label:'5: Replace url() refs with solid colors', body: t5, border:'pink'});
+    
+    // Test 6: Original with just defs stripped, url refs replaced
+    let t6 = inner.replace(/<defs>[\s\S]*?<\/defs>/g, '')
+      .replace(/fill="url\([^)]*\)"/g, 'fill="#1a1a2e"')
+      .replace(/stroke="url\([^)]*\)"/g, 'stroke="#daa520"');
+    tests.push({label:'6: No defs, no url refs (simplest version of full card)', body: t6, border:'red'});
+    
+    let html = '';
+    tests.forEach((t, i) => {
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">' + t.body + '</svg>';
+      const uri = 'data:image/svg+xml,' + encodeURIComponent(svg);
+      html += '<div style="margin:6px;padding:6px;background:#444">' +
+        '<p style="font-size:12px">' + t.label + ' (' + t.body.length + ' chars)</p>' +
+        '<img src="' + uri + '" width="140" style="border:2px solid ' + t.border + '">' +
+        '</div>';
+    });
+    document.getElementById('tests').innerHTML = html;
+  });
+</script>
+</body></html>

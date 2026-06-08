@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">
+  <defs>
+    <linearGradient id="gold"><stop offset="0%" stop-color="#f0d060"/><stop offset="25%" stop-color="#daa520"/><stop offset="50%" stop-color="#f5e6a0"/><stop offset="75%" stop-color="#b8860b"/><stop offset="100%" stop-color="#f0d060"/></linearGradient>
+    <linearGradient id="goldV"><stop offset="0%" stop-color="#f5e6a0"/><stop offset="30%" stop-color="#daa520"/><stop offset="60%" stop-color="#b8860b"/><stop offset="100%" stop-color="#f0d060"/></linearGradient>
+    <linearGradient id="goldSubtle"><stop offset="0%" stop-color="#a08030"/><stop offset="50%" stop-color="#c4a040"/><stop offset="100%" stop-color="#a08030"/></linearGradient>
+    <radialGradient id="divineGlow" cx="50%" cy="40%" r="50%"><stop offset="0%" stop-color="#f5e6a0" stop-opacity="0.3"/><stop offset="50%" stop-color="#daa520" stop-opacity="0.1"/><stop offset="100%" stop-color="#1a1208" stop-opacity="0"/></radialGradient>
+    
+  <linearGradient id="ebg-monster-3a" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#081208"/><stop offset="50%" stop-color="#0a0a10"/><stop offset="100%" stop-color="#081208"/>
+  </linearGradient>
+  <linearGradient id="egl-monster-3a" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#27ae60"/><stop offset="50%" stop-color="#1a7040"/><stop offset="100%" stop-color="#27ae60"/>
+  </linearGradient>
+  <radialGradient id="eglow-monster-3a" cx="50%" cy="35%" r="40%">
+    <stop offset="0%" stop-color="#27ae60" stop-opacity="0.2"/><stop offset="100%" stop-color="#0a0a10" stop-opacity="0"/>
+  </radialGradient>
+  </defs>
+  <rect width="750" height="1050" fill="url(#ebg-monster-3a)"/>
+  <rect x="30" y="30" width="690" height="990" rx="14" fill="none" stroke="url(#egl-monster-3a)" stroke-width="5"/>
+  <rect x="38" y="38" width="674" height="974" rx="10" fill="none" stroke="#1a7040" stroke-width="2"/>
+
+  <path d="M35 53 Q35 35 53 35 M35 47.6 Q40.4 40.4 47.6 35" stroke="url(#gold)" stroke-width="1.5" fill="none"/> <path d="M697 35 Q715 35 715 53 M702.4 35 Q709.6 40.4 715 47.6" stroke="url(#gold)" stroke-width="1.5" fill="none"/>
+  <path d="M35 997 Q35 1015 53 1015 M35 1002.4 Q40.4 1009.6 47.6 1015" stroke="url(#gold)" stroke-width="1.5" fill="none"/> <path d="M697 1015 Q715 1015 715 997 M702.4 1015 Q709.6 1009.6 715 1002.4" stroke="url(#gold)" stroke-width="1.5" fill="none"/>
+
+  <!-- TIER BADGE -->
+  <rect x="320" y="44" width="110" height="42" rx="21" fill="#22c55e"/>
+  <text x="375" y="73" text-anchor="middle" font-family="serif" font-size="22" font-weight="bold" fill="#fff" letter-spacing="3">하급</text>
+
+  <line x1="295" y1="102" x2="455" y2="102" stroke="url(#egl-monster-3a)" stroke-width="1.5"/>
+  <circle cx="375" cy="102" r="4" fill="#27ae60"/>
+
+  <!-- CARD NAME (large, only one language) -->
+  <text x="375" y="970" text-anchor="middle" font-family="serif" font-size="34" font-weight="bold" fill="#27ae60" letter-spacing="3">악취 구더기</text>
+
+  <!-- ILLUSTRATION AREA -->
+  <g transform="translate(375, 500)">
+    <circle cx="0" cy="0" r="130" fill="none" stroke="#27ae60" stroke-width="2"/>
+    <circle cx="0" cy="0" r="110" fill="none" stroke="#27ae60" stroke-width="1"/>
+    <circle cx="0" cy="0" r="85" fill="url(#eglow-monster-3a)"/>
+
+    <!-- POWER NUMBER (large) -->
+    <text x="0" y="12" text-anchor="middle" font-family="serif" font-size="90" font-weight="bold" fill="url(#egl-monster-3a)">5</text>
+    <text x="0" y="-50" text-anchor="middle" font-family="serif" font-size="18" fill="#50d080" letter-spacing="4">전투력</text>
+
+    <text x="0" y="-110" text-anchor="middle" font-size="70">☠️</text>
+
+    <!-- ABILITY BOX -->
+    <rect x="-220" y="55" width="440" height="80" rx="10" fill="#081208" stroke="#27ae60" stroke-width="1.5"/>
+    <text x="0" y="80" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#50d080" letter-spacing="2">특수 능력</text>
+    <text x="0" y="102" text-anchor="middle" font-family="serif" font-size="16" fill="#50d080">독 안개: 전투 후 2턴 HP-2</text>
+
+    <!-- REWARD / PENALTY -->
+    <rect x="-220" y="148" width="215" height="40" rx="6" fill="#0a2a0a" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="-112" y="174" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#4ade80">승리: HP +undefined</text>
+
+    <rect x="5" y="148" width="215" height="40" rx="6" fill="#2a0a0a" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="112" y="174" text-anchor="middle" font-family="serif" font-size="14" font-weight="bold" fill="#f87171">패배: HP -undefined</text>
+  </g></svg>
