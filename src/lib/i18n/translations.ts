@@ -79,14 +79,18 @@ const T: TranslationMap = {
   'battle.result.diceDown': { en: 'Grasp: Next D6 -1', ko: '발목 붙잡기: 다음 주사위 -1' },
 
   // ===== Gatekeeper Modal =====
-  'gk.arrive': { en: '👹 Gatekeeper "{name}" blocks your path! Roll D6 to pass!', ko: '👹 수문장 "{name}"이(가) 승천을 막았다! D6로 도전하라!' },
+  'gk.arrive': { en: '👹 Gatekeeper "{name}" blocks your path! Match the timing to pass!', ko: '👹 수문장 "{name}"이(가) 승천을 막았다! 타이밍을 맞춰 돌파하라!' },
   'gk.appeared': { en: '👹 Gatekeeper Appeared!', ko: '👹 수문장 등장!' },
   'gk.target': { en: '🎯 D6 Target: {n}+', ko: '🎯 D6 목표: {n} 이상' },
-  'gk.challenge': { en: '🎲 Challenge!', ko: '🎲 D6 도전!' },
+  'gk.challenge': { en: '🎯 Time your tap!', ko: '🎯 타이밍을 맞춰 탭하라!' },
+  'gk.tapPrompt': { en: '👆 TAP TO START', ko: '👆 탭하여 시작' },
   'gk.victoryLabel': { en: '✅ Victory: HP+{hp} + Guardian Card', ko: '✅ 승리: HP+{hp} + 수호카드' },
   'gk.defeatLabel': { en: '❌ Defeat: HP-{hp} + Pushback {n} tiles', ko: '❌ 패배: HP-{hp} + {n}칸 후퇴' },
   'gk.result.victory': { en: '⚔✨ Victory! D6={roll} ≥ {power} — "{name}" defeated! Ascending to {circle}! (+{hp} HP)', ko: '⚔✨ 승리! D6={roll} ≥ {power} — "{name}" 처치! {circle} 승천! (+{hp} HP)' },
   'gk.result.defeat': { en: '💀 Defeat! D6={roll} < {power} — "{name}" repelled you! -{hp} HP + {push} tile pushback', ko: '💀 패배! D6={roll} < {power} — "{name}"에게 격퇴! -{hp} HP + {push}칸 후퇴' },
+  'gk.gimmick': { en: '⚡ UNIQUE GIMMICK', ko: '⚡ 고유 기믹' },
+  'gk.guardianBonus': { en: '✨ Guardians: Green zone +{n}%p', ko: '✨ 수호카드: 녹색 존 +{n}%p' },
+  'gk.preDamage': { en: '🩸 Blood Sentinel: -2 HP pre-damage!', ko: '🩸 피의 파수꾼: 선제 -2 HP 피해!' },
 
   // ===== Guardian Reward =====
   'guardian.acquired': { en: '✨ Guardian Card Acquired!', ko: '✨ 수호카드 획득!' },

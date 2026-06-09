@@ -31,7 +31,8 @@ export default function BattleModal() {
   }, [resolveBattleAction]);
 
   const handleQuickRoll = useCallback(() => {
-    setBattleRoll(4);
+    // Quick roll = D6=5 (normal victory without timing)
+    setBattleRoll(5);
     setBattleResolved(true);
     setSliderResult('victory');
   }, [setBattleRoll]);
@@ -89,7 +90,7 @@ export default function BattleModal() {
               <TimingSlider greenWidth={greenWidth} yellowWidth={yellowWidth} speed={speed} onResult={handleSliderResult} />
               <div className="mt-2">
                 <Button variant="ghost" size="sm" onClick={handleQuickRoll} className="w-full text-[11px]">
-                  {locale === 'en' ? '🎲 Quick Roll (D6=4)' : '🎲 빠른 주사위 (D6=4)'}
+                  {locale === 'en' ? '🎲 Quick Roll (D6=5)' : '🎲 빠른 주사위 (D6=5)'}
                 </Button>
               </div>
             </div>

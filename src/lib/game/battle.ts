@@ -2,6 +2,7 @@ import type { Player, MonsterCard, LogEntry } from '@/types/game';
 import { rollD6 } from './dice';
 import type { RNG } from '@/lib/utils/random';
 import { t, getActiveLocale } from '@/lib/i18n/translations';
+import { getGuardianDiceBonus } from './guardian';
 
 export interface BattleResult {
   victory: boolean;
@@ -31,11 +32,7 @@ export function resolveMonsterBattle(
   }
 
   // Calculate combat bonuses from guardian cards
-  let diceBonus = 0;
-  for (const g of p.guardianCards) {
-    if (g.id === 'guardian-5') diceBonus += 1;
-    if (g.id === 'guardian-7' && p.hp <= p.maxHp * 0.3) diceBonus += 1;
-  }
+  const diceBonus = getGuardianDiceBonus(p.guardianCards, p.hp, p.maxHp);
 
   const roll = forcedRoll ?? rollD6(rng);
   const total = roll + diceBonus;

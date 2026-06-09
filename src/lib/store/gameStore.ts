@@ -192,7 +192,7 @@ export const useGameStore = create<GameStore>((set, get) => {
 
         if (result.victory) {
           set({
-            phase: 'rolling', activeMonster: null,
+            phase: 'rolling', activeMonster: null, battleRoll: null,
             totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
             dice: null, isDouble: false, doubleCount: 0, log: newLog,
           });
@@ -200,10 +200,10 @@ export const useGameStore = create<GameStore>((set, get) => {
           // Check for rematch
           if (state.activeMonster.specialEffect === 'rematch' && result.updatedPlayer.hp > 0) {
             const stronger = { ...state.activeMonster, power: state.activeMonster.power + 2 };
-            set({ phase: 'battle', activeMonster: stronger, log: newLog });
+            set({ phase: 'battle', activeMonster: stronger, log: newLog, battleRoll: null });
           } else {
             set({
-              phase: 'rolling', activeMonster: null,
+              phase: 'rolling', activeMonster: null, battleRoll: null,
               totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
               dice: null, isDouble: false, doubleCount: 0, log: newLog,
             });
@@ -239,12 +239,20 @@ export const useGameStore = create<GameStore>((set, get) => {
       const p = { ...state.player };
       const gkName = loc() === 'en' ? gk.nameEn : gk.name;
       const guardianDiceBonus = getGuardianDiceBonus(p.guardianCards, p.hp, p.maxHp);
+
+      // GK-1 special: bonus from guardian cards held
       let extraBonus = 0;
       if (gk.id === 'gk-1') extraBonus = p.guardianCards.length;
 
-      // Use precision tap result, fallback to random D6
+      // Use timing slider result, fallback to random D6
       const roll = state.battleRoll ?? _rng.nextInt(1, 6);
-      const total = roll + guardianDiceBonus + extraBonus;
+      // GK-3 Cerberus Collar: if guardian-3 is owned, roll twice and take better
+      let finalRoll = roll;
+      if (p.guardianCards.some((g) => g.id === 'guardian-3')) {
+        const secondRoll = _rng.nextInt(1, 6);
+        finalRoll = Math.max(roll, secondRoll);
+      }
+      const total = finalRoll + guardianDiceBonus + extraBonus;
 
       if (total >= gk.power) {
         const newCircleId = (p.currentCircleId - 1) as 1|2|3|4|5|6|7|8|9;
@@ -267,12 +275,18 @@ export const useGameStore = create<GameStore>((set, get) => {
         const dmgReduction = getGuardianDamageReduction(p.guardianCards);
         const dmg = Math.max(1, gk.penaltyHp - dmgReduction);
         p.hp = Math.max(1, p.hp - dmg);
+
+        // Pushback: move player back on the board
         for (let i = 0; i < gk.pushback; i++) {
           const cur = state.board.find((t) => t.id === p.currentTileId);
           if (!cur || cur.index === 0) break;
           const prev = state.board.find((t) => t.circleId === p.currentCircleId && t.index === cur.index - 1);
           if (prev) p.currentTileId = prev.id;
         }
+
+        // Reset battle streak on gatekeeper defeat
+        p.battleStreak = 0;
+
         set({
           player: p, phase: 'rolling', activeGatekeeper: null,
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
@@ -282,6 +296,8 @@ export const useGameStore = create<GameStore>((set, get) => {
         setTimeout(() => set({ shakeScreen: false }), 600);
       }
       setTimeout(() => set({ showSparkles: false }), 2000);
+      // Reset battleRoll after use
+      set({ battleRoll: null });
     },
 
     skipBattleAction: () => {

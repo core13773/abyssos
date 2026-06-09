@@ -5,11 +5,16 @@ import type { GuardianCard } from '@/types/game';
  */
 export function getGuardianDiceBonus(guardians: GuardianCard[], hp: number, maxHp: number): number {
   let bonus = 0;
-  for (const g of guardians) {
-    if (g.id === 'guardian-5') bonus += 1;                           // 분노의 투구
-    if (g.id === 'guardian-7' && hp <= maxHp * 0.3) bonus += 1;      // 피의 축복 (low HP)
-    if (g.id === 'guardian-1') bonus += Math.floor(bonus * 0.5);     // 지팡이: 50% boost
+
+  // Accumulate base bonuses first
+  if (guardians.some((g) => g.id === 'guardian-5')) bonus += 1;  // 분노의 투구
+  if (guardians.some((g) => g.id === 'guardian-7') && hp <= maxHp * 0.3) bonus += 1; // 피의 축복 (low HP)
+
+  // Staff of Virgil: 50% boost applied AFTER other bonuses
+  if (guardians.some((g) => g.id === 'guardian-1')) {
+    bonus = Math.floor(bonus * 1.5);
   }
+
   return bonus;
 }
 
