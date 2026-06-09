@@ -254,7 +254,7 @@ export default function GatekeeperModal() {
           {/* Header: card image + name + power */}
           <div className="flex gap-3 items-start mb-3">
             <div className="shrink-0 w-[100px] aspect-[750/1050] rounded-lg overflow-hidden border border-purple-700/50 shadow-lg">
-              <object data={imgPath} type="image/svg+xml" className="w-full h-full">
+              <object data={imgPath} type="image/svg+xml" className="w-full h-full" aria-label={`${name} — ${title}`} role="img">
                 <div className="w-full h-full bg-stone-800 flex items-center justify-center text-3xl">👹</div>
               </object>
             </div>

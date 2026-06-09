@@ -12,21 +12,25 @@ import GuardianRewardModal from '@/components/guardian/GuardianRewardModal';
 export default function GameLayout() {
   return (
     <div className="flex flex-col gap-3 w-full max-w-md mx-auto p-2 min-h-screen">
-      {/* Zone 1: Status bar */}
-      <PlayerPanel />
+      {/* Status bar */}
+      <section aria-label="Player Status">
+        <PlayerPanel />
+      </section>
 
-      {/* Zone 2: Linear Board */}
-      <div className="flex-1 min-h-0">
+      {/* Linear Board */}
+      <section className="flex-1 min-h-0" aria-label="Game Board">
         <LinearBoard />
-      </div>
+      </section>
 
-      {/* Zone 3: Dice */}
-      <DicePanel />
+      {/* Dice */}
+      <section aria-label="Dice Roller">
+        <DicePanel />
+      </section>
 
-      {/* Zone 4: Guardians + log */}
-      <div className="pb-4">
+      {/* Guardians + log */}
+      <section className="pb-4" aria-label="Guardian Cards">
         <GuardianPanel />
-      </div>
+      </section>
 
       {/* Tutorial (first visit only) */}
       <TutorialModal />
