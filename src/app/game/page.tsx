@@ -1,38 +1,144 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useGameStore } from '@/lib/store/gameStore';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import GameLayout from '@/components/layout/GameLayout';
 import Button from '@/components/ui/Button';
+import { createNewGameV4 } from '@/lib/game/engine';
+import { createPurgatorioGame } from '@/lib/game/purgatorio-engine';
+import { createParadisoGame } from '@/lib/game/paradiso-engine';
+import { GUARDIANS } from '@/lib/data/guardians';
+import { PURIFICATION_CARDS } from '@/lib/data/purgatorio';
+import type { Player } from '@/types/game';
+
+function createDefaultInfernoClearPlayer(): Player {
+  const base = createNewGameV4().player;
+  return {
+    ...base, hp: 80, maxHp: 100,
+    guardianCards: [GUARDIANS[0], GUARDIANS[1], GUARDIANS[2], GUARDIANS[3]],
+    era: 'inferno' as const, purificationCards: [], totalCardCount: 4,
+    grace: 0, celestialRelics: [],
+  };
+}
+
+function createDefaultPurgatorioClearPlayer(): Player {
+  const base = createDefaultInfernoClearPlayer();
+  return {
+    ...base, hp: 90, maxHp: 100,
+    purificationCards: [PURIFICATION_CARDS[0], PURIFICATION_CARDS[1], PURIFICATION_CARDS[2]],
+    era: 'purgatorio' as const, totalCardCount: 7,
+  };
+}
 
 export default function GamePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale((s) => s.locale);
   const toggleLocale = useLocale((s) => s.toggleLocale);
   const initGame = useGameStore((s) => s.initGame);
   const board = useGameStore((s) => s.board);
+  const purgatorioBoard = useGameStore((s) => s.purgatorioBoard);
+  const paradisoBoard = useGameStore((s) => s.paradisoBoard);
   const escaped = useGameStore((s) => s.escaped);
   const player = useGameStore((s) => s.player);
   const totalTurns = useGameStore((s) => s.totalTurns);
 
-  useEffect(() => {
-    if (board.length === 0) initGame();
-  }, []);
+  const isPurgatorio = player.era === 'purgatorio';
+  const isParadiso = player.era === 'paradiso';
 
-  if (board.length === 0) {
+  useEffect(() => {
+    // Check all boards — only init if nothing is loaded
+    if (board.length > 0 || purgatorioBoard.length > 0 || paradisoBoard.length > 0) return;
+
+    const era = searchParams.get('era');
+
+    if (era === 'purgatorio') {
+      const infernoPlayer = createDefaultInfernoClearPlayer();
+      const state = createPurgatorioGame(infernoPlayer);
+      useGameStore.setState(state as any);
+      return;
+    }
+
+    if (era === 'paradiso') {
+      const purgatorioPlayer = createDefaultPurgatorioClearPlayer();
+      const state = createParadisoGame(purgatorioPlayer);
+      useGameStore.setState(state as any);
+      return;
+    }
+
+    initGame();
+  }, [board.length, purgatorioBoard.length, paradisoBoard.length, searchParams, initGame]);
+
+  const isBoardReady = isParadiso ? paradisoBoard.length > 0 : isPurgatorio ? purgatorioBoard.length > 0 : board.length > 0;
+
+  if (!isBoardReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-950">
         <div className="text-center">
-          <p className="text-2xl animate-pulse text-amber-500">🔥</p>
+          <p className="text-2xl animate-pulse text-purple-400">🌅</p>
           <p className="text-stone-400 mt-2">{t('top.loading', locale)}</p>
         </div>
       </div>
     );
   }
 
+  // Purgatorio complete screen
+  if (isPurgatorio && escaped) {
+    const totalCards = player.totalCardCount || (player.guardianCards.length + player.purificationCards.length);
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-stone-950 p-6" aria-labelledby="paradise-title">
+        <section className="text-center max-w-sm">
+          <p className="text-5xl mb-4" aria-hidden="true">🌹</p>
+          <h1 id="paradise-title" className="text-3xl font-bold text-purple-300 font-serif mb-4">
+            {t('purgatorio.earthlyParadise', locale)}
+          </h1>
+          <p className="text-stone-400 mb-2">{t('purgatorio.earthlyParadiseDesc', locale)}</p>
+          <p className="text-stone-500 text-sm mb-6">
+            {locale === 'en'
+              ? `Turns: ${totalTurns} | HP: ${player.hp}/${player.maxHp} | Cards: ${totalCards}/16`
+              : `턴: ${totalTurns} | HP: ${player.hp}/${player.maxHp} | 카드: ${totalCards}/16`}
+          </p>
+          <Button variant="primary" size="lg" onClick={initGame} className="w-full bg-purple-700 hover:bg-purple-600">
+            {locale === 'en' ? '🌅 Journey Again' : '🌅 다시 여정을 시작'}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="w-full mt-2">
+            {t('top.lobby', locale)}
+          </Button>
+        </section>
+      </main>
+    );
+  }
+
+  // Paradiso complete screen
+  if (isParadiso && escaped) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-stone-950 p-6" aria-labelledby="empyrean-title">
+        <section className="text-center max-w-sm">
+          <p className="text-5xl mb-4" aria-hidden="true">☀</p>
+          <h1 id="empyrean-title" className="text-3xl font-bold text-amber-300 font-serif mb-4">
+            {t('paradiso.empyrean', locale)}
+          </h1>
+          <p className="text-stone-400 mb-2">{t('paradiso.empyreanDesc', locale)}</p>
+          <p className="text-stone-500 text-sm mb-6">
+            {locale === 'en'
+              ? `Turns: ${totalTurns} | Grace: ${player.grace} | Relics: ${player.celestialRelics.length}/9`
+              : `턴: ${totalTurns} | 은총: ${player.grace} | 성물: ${player.celestialRelics.length}/9`}
+          </p>
+          <Button variant="primary" size="lg" onClick={initGame} className="w-full bg-amber-600 hover:bg-amber-500">
+            {locale === 'en' ? '☀ Journey Again' : '☀ 다시 여정을 시작'}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="w-full mt-2">
+            {t('top.lobby', locale)}
+          </Button>
+        </section>
+      </main>
+    );
+  }
+
+  // Inferno escape screen (existing)
   if (escaped) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-stone-950 p-6" aria-labelledby="escape-title">

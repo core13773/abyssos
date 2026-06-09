@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocale } from '@/lib/i18n/localeStore';
+import { t } from '@/lib/i18n/translations';
 
 interface Props {
   targetTaps: number;
@@ -9,6 +11,7 @@ interface Props {
 }
 
 export default function RapidTap({ targetTaps, timeLimit, onResult }: Props) {
+  const locale = useLocale((s) => s.locale);
   const [phase, setPhase] = useState<'ready' | 'active' | 'done'>('ready');
   const [tapCount, setTapCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
@@ -57,13 +60,13 @@ export default function RapidTap({ targetTaps, timeLimit, onResult }: Props) {
     <div className="flex flex-col items-center gap-3 select-none" onClick={handleTap}>
       {phase === 'ready' && (
         <div className="text-center">
-          <p className="text-sm text-amber-400 font-bold mb-2">⚡ Tap {targetTaps} times!</p>
-          <p className="text-xs text-stone-400 mb-1">Time limit: {timeLimit}s</p>
+          <p className="text-sm text-amber-400 font-bold mb-2">{t('rapidtap.prompt', locale, { n: targetTaps })}</p>
+          <p className="text-xs text-stone-400 mb-1">{t('rapidtap.timeLimit', locale, { s: timeLimit })}</p>
           <button
             onClick={(e) => { e.stopPropagation(); startGame(); }}
             className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-lg active:scale-95 transition-transform"
           >
-            👆 START!
+            {t('rapidtap.start', locale)}
           </button>
         </div>
       )}
@@ -84,14 +87,14 @@ export default function RapidTap({ targetTaps, timeLimit, onResult }: Props) {
             />
           </div>
           <p className="text-3xl font-bold text-amber-400 font-mono">{tapCount}<span className="text-stone-600 text-lg">/{targetTaps}</span></p>
-          <p className="text-xs text-stone-500 mt-2 animate-pulse">👆 TAP ANYWHERE!</p>
+          <p className="text-xs text-stone-500 mt-2 animate-pulse">{t('rapidtap.tapAnywhere', locale)}</p>
         </div>
       )}
 
       {phase === 'done' && (
         <div className="text-center">
           <p className={`text-2xl font-bold ${tapCount >= targetTaps ? 'text-emerald-400' : 'text-red-400'}`}>
-            {tapCount >= targetTaps ? `✅ Success! ${tapCount}` : `❌ Failed... ${tapCount}/${targetTaps}`}
+            {tapCount >= targetTaps ? t('rapidtap.success', locale, { n: tapCount }) : t('rapidtap.fail', locale, { n: tapCount, target: targetTaps })}
           </p>
         </div>
       )}

@@ -3,14 +3,43 @@
 import { create } from 'zustand';
 import type { GameState } from '@/types/game';
 import { createNewGameV4 } from '@/lib/game/engine';
+import { createPurgatorioGame, checkPurgatorioComplete } from '@/lib/game/purgatorio-engine';
+
+// ── Realm completion tracking ──
+function saveRealmCompletion(realm: 'inferno' | 'purgatorio' | 'paradiso', turns: number) {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = localStorage.getItem('abyssos_realms');
+    const data = raw ? JSON.parse(raw) : { inferno: { completed: false, bestTurns: null }, purgatorio: { completed: false, bestTurns: null }, paradiso: { completed: false } };
+    if (realm === 'inferno' || realm === 'purgatorio') {
+      const prev = data[realm];
+      data[realm] = {
+        completed: true,
+        bestTurns: prev.bestTurns ? Math.min(prev.bestTurns, turns) : turns,
+      };
+    } else {
+      data[realm] = { completed: true };
+    }
+    localStorage.setItem('abyssos_realms', JSON.stringify(data));
+    // Dispatch storage event for same-tab listeners
+    window.dispatchEvent(new Event('storage'));
+  } catch { /* ignore */ }
+}
 import { rollDice } from '@/lib/game/dice';
 import { getNextTileV4, remainingTilesInCircle } from '@/lib/game/board-v4';
+import { buildPurgatorioBoard, getNextPurgatorioTile, remainingTilesInTerrace } from '@/lib/game/purgatorio-board';
 import { resolveMonsterBattle } from '@/lib/game/battle';
 import { resolveEventV4 } from '@/lib/game/events-v4';
+import { resolvePurgatorioEvent } from '@/lib/game/purgatorio-events';
+import { resolveAngelBattle } from '@/lib/game/purgatorio-angel';
 import { getGuardianDiceBonus, getGuardianDamageReduction } from '@/lib/game/guardian';
 import { getMonster } from '@/lib/data/monsters';
 import { getGatekeeper } from '@/lib/data/gatekeepers';
 import { getGuardian } from '@/lib/data/guardians';
+import { getSinProjection, getAngelGuardian, getPurificationCard } from '@/lib/data/purgatorio';
+import { getLightSpirit, getArchangel, getRelic } from '@/lib/data/paradiso';
+import { createParadisoGame, checkParadisoComplete } from '@/lib/game/paradiso-engine';
+import { buildParadisoBoard, getNextParadisoTile, remainingTilesInSphere } from '@/lib/game/paradiso-board';
 import { createRNG, timeSeed } from '@/lib/utils/random';
 import { t, getActiveLocale } from '@/lib/i18n/translations';
 
@@ -26,6 +55,24 @@ interface GameActions {
   useGuardianAction: (guardianId: string) => void;
   nextTurn: () => void;
   clearEffects: () => void;
+
+  // ---- Purgatorio actions ----
+  startPurgatorio: () => void;
+  rollPurgatorioDice: () => void;
+  movePurgatorioPlayer: () => void;
+  resolveSinChoice: (choiceIndex: 0 | 1) => void;
+  resolvePurgatorioEvent: () => void;
+  resolvePurgatorioAngel: () => void;
+  skipPurgatorioBattle: () => void;
+  nextPurgatorioTurn: () => void;
+
+  // ---- Paradiso actions ----
+  startParadiso: () => void;
+  rollParadisoDice: () => void;
+  moveParadisoPlayer: () => void;
+  resolveParadisoBlessing: () => void;
+  resolveParadisoArchangel: () => void;
+  nextParadisoTurn: () => void;
 }
 
 export type GameStore = GameState & GameActions;
@@ -42,6 +89,8 @@ export const useGameStore = create<GameStore>((set, get) => {
       currentTileId: 'c9-t0', currentCircleId: 9,
       guardianCards: [], moveBonus: 0, battleStreak: 0,
       isStunned: false, buffs: [],
+      era: 'inferno', purificationCards: [], totalCardCount: 0,
+      virtue: 0, grace: 0, celestialRelics: [],
     },
     board: [],
     dice: null, isDouble: false, doubleCount: 0,
@@ -50,10 +99,29 @@ export const useGameStore = create<GameStore>((set, get) => {
     pendingEventKind: null, battleRoll: null, defeatGatekeeperOnArrival: null,
     shakeScreen: false, showSparkles: false,
     escaped: false, totalTurns: 0,
+    purgatorioBoard: [],
+    activeSinProjection: null, activeAngelGuardian: null, activePurificationReward: null,
+    purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+    paradisoBoard: [], activeLightSpirit: null, activeArchangel: null, activeCelestialReward: null,
+    paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
 
     initGame: () => {
       _rng = createRNG(timeSeed());
-      set({ ...createNewGameV4(), phase: 'rolling' });
+      const newGame = createNewGameV4();
+      set({
+        ...newGame,
+        phase: 'rolling',
+        purgatorioBoard: [],
+        activeSinProjection: null, activeAngelGuardian: null, activePurificationReward: null,
+        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+        player: {
+          ...newGame.player,
+          era: 'inferno' as const,
+          purificationCards: [],
+          totalCardCount: 0,
+          virtue: 0,
+        },
+      });
     },
 
     rollDiceAction: () => {
@@ -268,6 +336,11 @@ export const useGameStore = create<GameStore>((set, get) => {
         const escaped = gk.id === 'gk-1';
         const circleName = loc() === 'en' ? `Circle ${newCircleId}` : `${newCircleId}층`;
 
+        // Save Inferno completion
+        if (escaped) {
+          saveRealmCompletion('inferno', state.totalTurns);
+        }
+
         set({
           player: p, activeGatekeeper: null, activeGuardianReward: guardian || null, showSparkles: true,
           phase: escaped ? 'gameOver' : 'guardianReward', escaped,
@@ -343,5 +416,471 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     clearEffects: () => set({ shakeScreen: false, showSparkles: false }),
+
+    // ============================================================
+    // Purgatorio Actions
+    // ============================================================
+
+    startPurgatorio: () => {
+      const state = get();
+      const purgatorioState = createPurgatorioGame(state.player);
+      set({ ...purgatorioState } as Partial<GameState>);
+    },
+
+    rollPurgatorioDice: () => {
+      const state = get();
+      if (state.phase !== 'purgatorio_rolling') return;
+      const p = { ...state.player, buffs: [...state.player.buffs] };
+
+      if (p.isStunned) {
+        p.isStunned = false;
+        set({
+          player: p, phase: 'purgatorio_rolling',
+          turnNumber: state.turnNumber + 1, totalTurns: state.totalTurns + 1,
+          log: [...state.log, { turn: state.turnNumber, message: t('system.stunned', loc()), type: 'system' }],
+        });
+        return;
+      }
+
+      // Process buffs
+      p.buffs = p.buffs.map((b) => ({ ...b, remainingTurns: b.remainingTurns - 1 })).filter((b) => b.remainingTurns > 0);
+      const poison = p.buffs.find((b) => b.id === 'poison');
+      if (poison) p.hp = Math.max(0, p.hp + poison.value);
+
+      const result = rollDice(_rng);
+      const totalMove = result.sum + p.moveBonus;
+      const isDouble = result.isDouble;
+      const doubleCount = isDouble ? state.purgatorioDoubleCount + 1 : 0;
+
+      if (result.isSnakeEyes) p.hp = Math.max(0, p.hp - 3);
+
+      const msgs: string[] = [];
+      let showSparkles = false;
+      let shakeScreen = false;
+
+      if (result.isSnakeEyes) {
+        shakeScreen = true;
+        msgs.push(t('dice.snakeEyes', loc(), { d1: result.dice[0], d2: result.dice[1], sum: result.sum }));
+      } else if (result.isBoxcar) {
+        showSparkles = true;
+        msgs.push(t('dice.boxcar', loc(), { d1: result.dice[0], d2: result.dice[1], sum: result.sum }));
+      } else if (isDouble) {
+        msgs.push(t('dice.normal', loc(), { d1: result.dice[0], d2: result.dice[1], raw: result.sum, total: totalMove }));
+        msgs.push(t('dice.double', loc()));
+        // Step of Zeal: double = can move 3 times
+        if (p.purificationCards.some((c) => c.id === 'purification-4')) {
+          msgs.push(t('purgatorio.stepOfZeal', loc()));
+        }
+      } else {
+        msgs.push(t('dice.normal', loc(), { d1: result.dice[0], d2: result.dice[1], raw: result.sum, total: totalMove }));
+      }
+
+      set({
+        player: p, purgatorioDice: result.dice, purgatorioIsDouble: result.isDouble, purgatorioDoubleCount: doubleCount,
+        phase: 'purgatorio_moving', shakeScreen, showSparkles,
+        log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+      });
+      if (showSparkles) setTimeout(() => set({ showSparkles: false }), 2000);
+    },
+
+    movePurgatorioPlayer: () => {
+      const state = get();
+      if (state.phase !== 'purgatorio_moving') return;
+
+      const totalMove = (state.purgatorioDice?.[0] ?? 0) + (state.purgatorioDice?.[1] ?? 0) + state.player.moveBonus;
+      const p = { ...state.player, moveBonus: 0 };
+      const board = state.purgatorioBoard;
+      const remaining = remainingTilesInTerrace(board, p.currentTileId);
+
+      // If overshoot → stop at angel gate
+      if (totalMove >= remaining) {
+        const lastTile = board.find(
+          (t) => t.terraceId === p.currentTerraceId && t.index === 7
+        );
+        if (lastTile) p.currentTileId = lastTile.id;
+
+        const angel = getAngelGuardian(p.currentTerraceId!);
+        const angelName = loc() === 'en' ? (angel?.nameEn || '') : (angel?.name || '');
+
+        set({
+          player: p, phase: 'purgatorio_angel', activeAngelGuardian: angel || null,
+          log: [...state.log, { turn: state.turnNumber, message: t('purgatorio.angelArrive', loc(), { name: angelName }), type: 'critical' }],
+        });
+        return;
+      }
+
+      // Move forward
+      let currentTile = board.find((t) => t.id === p.currentTileId);
+      for (let i = 0; i < totalMove; i++) {
+        if (!currentTile) break;
+        const next = getNextPurgatorioTile(board, currentTile.id);
+        if (!next) break;
+        currentTile = next;
+      }
+      if (currentTile) {
+        p.currentTileId = currentTile.id;
+        p.currentTerraceId = currentTile.terraceId;
+      }
+
+      const tile = board.find((t) => t.id === p.currentTileId);
+
+      if (tile?.type === 'sin' && tile.sinProjectionId) {
+        const sinProj = getSinProjection(tile.sinProjectionId);
+        const sinName = (loc() === 'en' ? sinProj?.nameEn : sinProj?.name) || '';
+
+        set({
+          player: p, phase: 'purgatorio_battle', activeSinProjection: sinProj || null,
+          log: [...state.log, { turn: state.turnNumber, message: t('purgatorio.battleArrive', loc(), { name: sinName }), type: 'battle' }],
+        });
+      } else if (tile?.type === 'event' && tile.eventKind) {
+        set({
+          player: p, phase: 'purgatorio_event', pendingEventKind: tile.eventKind,
+          log: [...state.log, { turn: state.turnNumber, message: t('event.arrive', loc(), { label: tile.label, circle: p.currentTerraceId ?? 1 }), type: 'move' }],
+        });
+      } else {
+        set({
+          player: p, phase: 'purgatorio_rolling',
+          totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+          log: [...state.log, { turn: state.turnNumber, message: t('event.arrive', loc(), { label: tile?.label || '?', circle: p.currentTerraceId ?? 1 }), type: 'move' }],
+        });
+      }
+    },
+
+    resolveSinChoice: (choiceIndex: 0 | 1) => {
+      const state = get();
+      if (state.phase !== 'purgatorio_battle' || !state.activeSinProjection) return;
+
+      const sin = state.activeSinProjection;
+      const p = { ...state.player };
+      const choice = sin.choices[choiceIndex];
+      const outcome = choice.outcome;
+
+      // Apply Eye of Mercy: 50% negate bad outcomes
+      let finalHp = outcome.hp;
+      let finalMove = outcome.move;
+      if (outcome.hp < 0 && p.purificationCards.some((c) => c.id === 'purification-2')) {
+        if (_rng.next() < 0.5) { finalHp = 0; }
+      }
+      // Breath of Gentleness: +50% virtue
+      let virtueGain = outcome.virtue;
+      if (p.purificationCards.some((c) => c.id === 'purification-3') && virtueGain > 0) {
+        virtueGain = Math.floor(virtueGain * 1.5);
+      }
+      // Flame of Purity: double all
+      if (p.purificationCards.some((c) => c.id === 'purification-7')) {
+        finalHp = finalHp > 0 ? finalHp * 2 : finalHp;
+        virtueGain *= 2;
+        finalMove *= 2;
+      }
+      // Hand of Poverty: +50% rewards
+      if (p.purificationCards.some((c) => c.id === 'purification-5') && finalHp > 0) {
+        finalHp = Math.floor(finalHp * 1.5);
+      }
+
+      p.hp = Math.max(0, Math.min(p.maxHp, p.hp + finalHp));
+      p.moveBonus = Math.max(0, (p.moveBonus || 0) + finalMove);
+      p.virtue = Math.max(-10, Math.min(10, (p.virtue || 0) + virtueGain));
+
+      const choiceLabel = loc() === 'en' ? choice.labelEn : choice.label;
+      const sinName = loc() === 'en' ? sin.nameEn : sin.name;
+      const hpMsg = finalHp > 0 ? `+${finalHp} HP` : finalHp < 0 ? `${finalHp} HP` : '';
+      const moveMsg = finalMove !== 0 ? ` 이동 ${finalMove > 0 ? '+' : ''}${finalMove}` : '';
+      const virtueMsg = virtueGain !== 0 ? ` 덕목 ${virtueGain > 0 ? '+' : ''}${virtueGain}` : '';
+
+      set({
+        player: p, phase: 'purgatorio_rolling', activeSinProjection: null,
+        totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+        showSparkles: finalHp > 0, shakeScreen: finalHp < -8,
+        log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `🤔 "${sinName}": Chose "${choiceLabel}" → ${hpMsg}${moveMsg}${virtueMsg}` : `🤔 "${sinName}": "${choiceLabel}" 선택 → ${hpMsg}${moveMsg}${virtueMsg}`, type: finalHp >= 0 ? 'heal' : 'damage' }],
+      });
+      if (finalHp < -8) setTimeout(() => set({ shakeScreen: false }), 600);
+      if (finalHp > 0) setTimeout(() => set({ showSparkles: false }), 2000);
+    },
+
+    resolvePurgatorioEvent: () => {
+      const state = get();
+      if (state.phase !== 'purgatorio_event' || !state.pendingEventKind) return;
+
+      const result = resolvePurgatorioEvent(state.player, state.pendingEventKind, _rng);
+      set({
+        player: result.updatedPlayer, phase: 'purgatorio_rolling', pendingEventKind: null,
+        totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+        shakeScreen: result.shake, showSparkles: result.sparkles,
+        log: [...state.log, ...result.logs.map((l) => ({ ...l, turn: state.turnNumber }))],
+      });
+      if (result.shake) setTimeout(() => set({ shakeScreen: false }), 600);
+      if (result.sparkles) setTimeout(() => set({ showSparkles: false }), 2000);
+    },
+
+    resolvePurgatorioAngel: () => {
+      const state = get();
+      if (state.phase !== 'purgatorio_angel' || !state.activeAngelGuardian) return;
+
+      const angel = state.activeAngelGuardian;
+      const purification = getPurificationCard(angel.purificationId);
+      if (!purification) return;
+
+      // Use shared angel battle resolution
+      const result = resolveAngelBattle(state.player, angel, purification, _rng, state.battleRoll ?? undefined);
+
+      if (result.victory) {
+        const p = result.updatedPlayer;
+        // Move to next terrace
+        const newTerraceId = Math.min(7, (p.currentTerraceId || 1) + 1) as 1|2|3|4|5|6|7;
+        p.currentTerraceId = newTerraceId;
+        p.currentTileId = `t${newTerraceId}-p0`;
+
+        // Check if Purgatorio is complete (Angel-7 defeated)
+        const completed = checkPurgatorioComplete(p);
+
+        // Save Purgatorio completion
+        if (completed) {
+          saveRealmCompletion('purgatorio', state.totalTurns);
+        }
+
+        set({
+          player: p, activeAngelGuardian: null, activePurificationReward: purification,
+          phase: completed ? 'gameOver' : 'purgatorio_purification',
+          escaped: completed ? true : state.escaped,
+          showSparkles: true,
+          log: [...state.log, ...result.logs.map((l) => ({ ...l, turn: state.turnNumber }))],
+        });
+      } else {
+        set({
+          player: result.updatedPlayer,
+          phase: 'purgatorio_rolling', activeAngelGuardian: null,
+          totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+          shakeScreen: result.shake,
+          log: [...state.log, ...result.logs.map((l) => ({ ...l, turn: state.turnNumber }))],
+        });
+        if (result.shake) setTimeout(() => set({ shakeScreen: false }), 600);
+      }
+      setTimeout(() => set({ showSparkles: false }), 2000);
+      set({ battleRoll: null });
+    },
+
+    skipPurgatorioBattle: () => {
+      const state = get();
+      if (state.phase !== 'purgatorio_battle') return;
+      const p = { ...state.player };
+      // Use Angel Feather if available
+      const hasFeather = p.buffs.some((b) => b.id === 'angel_feather');
+      if (!hasFeather) return;
+      p.buffs = p.buffs.filter((b) => b.id !== 'angel_feather');
+      set({
+        player: p, phase: 'purgatorio_rolling', activeSinProjection: null, battleRoll: null,
+        totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+        log: [...state.log, { turn: state.turnNumber, message: t('purgatorio.eventAngelFeather', loc()), type: 'guardian' }],
+      });
+    },
+
+    nextPurgatorioTurn: () => {
+      const state = get();
+      set({
+        phase: 'purgatorio_rolling', turnNumber: state.turnNumber + 1, totalTurns: state.totalTurns + 1,
+        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0, battleRoll: null,
+        activePurificationReward: null,
+      });
+    },
+
+    // ============================================================
+    // Paradiso Actions
+    // ============================================================
+
+    startParadiso: () => {
+      const state = get();
+      const paradisoState = createParadisoGame(state.player);
+      set({ ...paradisoState } as Partial<GameState>);
+    },
+
+    rollParadisoDice: () => {
+      const state = get();
+      if (state.phase !== 'paradiso_rolling') return;
+      const p = { ...state.player, buffs: [...state.player.buffs] };
+
+      // 3D4 dice for Paradiso
+      const d1 = _rng.nextInt(1, 4);
+      const d2 = _rng.nextInt(1, 4);
+      const d3 = _rng.nextInt(1, 4);
+      const dice: [number, number] = [d1 + d2, d3];
+      const sum = d1 + d2 + d3;
+      const isTriple = d1 === d2 && d2 === d3;
+      const isDouble = (d1 === d2) || (d2 === d3) || (d1 === d3);
+
+      const totalMove = sum + p.moveBonus;
+      const msgs: string[] = [];
+      let showSparkles = false;
+
+      if (isTriple) {
+        showSparkles = true;
+        p.grace = Math.min(150, (p.grace || 0) + 10);
+        msgs.push(loc() === 'en' ? `💫 TRIPLE! [${d1}][${d2}][${d3}] = ${sum}, +10 Grace!` : `💫 트리플! [${d1}][${d2}][${d3}] = ${sum}, 은총 +10!`);
+      } else if (isDouble) {
+        p.grace = Math.min(150, (p.grace || 0) + 5);
+        msgs.push(loc() === 'en' ? `✨ Double! [${d1}][${d2}][${d3}] = ${sum}, +5 Grace!` : `✨ 더블! [${d1}][${d2}][${d3}] = ${sum}, 은총 +5!`);
+      } else {
+        msgs.push(loc() === 'en' ? `🎲 [${d1}][${d2}][${d3}] = ${sum} → ${totalMove} spaces` : `🎲 [${d1}][${d2}][${d3}] = ${sum} → ${totalMove}칸`);
+      }
+
+      set({
+        player: p, paradisoDice: dice, paradisoIsDouble: isDouble, paradisoDoubleCount: 0,
+        phase: 'paradiso_moving', showSparkles,
+        log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+      });
+      if (showSparkles) setTimeout(() => set({ showSparkles: false }), 2000);
+    },
+
+    moveParadisoPlayer: () => {
+      const state = get();
+      if (state.phase !== 'paradiso_moving') return;
+
+      const dice = state.paradisoDice;
+      const totalMove = (dice?.[0] ?? 0) + (dice?.[1] ?? 0) + state.player.moveBonus;
+      const p = { ...state.player, moveBonus: 0 };
+      const board = state.paradisoBoard;
+      const remaining = remainingTilesInSphere(board, p.currentTileId);
+
+      // Lunar Chalice: +1 grace per turn
+      if (p.celestialRelics.some((c) => c.id === 'relic-1')) {
+        p.grace = Math.min(150, (p.grace || 0) + 1);
+      }
+
+      if (totalMove >= remaining) {
+        const lastTile = board.find((t) => t.sphereId === p.currentSphereId && t.index === 9);
+        if (lastTile) p.currentTileId = lastTile.id;
+
+        const archangel = getArchangel(p.currentSphereId!);
+        const archName = loc() === 'en' ? (archangel?.nameEn || '') : (archangel?.name || '');
+
+        set({
+          player: p, phase: 'paradiso_archangel', activeArchangel: archangel || null,
+          log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `👼 Archangel "${archName}" appears!` : `👼 대천사 "${archName}" 등장!`, type: 'critical' }],
+        });
+        return;
+      }
+
+      let currentTile = board.find((t) => t.id === p.currentTileId);
+      for (let i = 0; i < totalMove; i++) {
+        if (!currentTile) break;
+        const next = getNextParadisoTile(board, currentTile.id);
+        if (!next) break;
+        currentTile = next;
+      }
+      if (currentTile) {
+        p.currentTileId = currentTile.id;
+        p.currentSphereId = currentTile.sphereId;
+      }
+
+      const tile = board.find((t) => t.id === p.currentTileId);
+
+      if (tile?.type === 'spirit' && tile.spiritId) {
+        const spirit = getLightSpirit(tile.spiritId);
+        const spiritName = (loc() === 'en' ? spirit?.nameEn : spirit?.name) || '';
+
+        set({
+          player: p, phase: 'paradiso_blessing', activeLightSpirit: spirit || null,
+          log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `✨ ${spiritName} appears!` : `✨ ${spiritName} 등장!`, type: 'system' }],
+        });
+      } else if (tile?.type === 'blessing') {
+        // Auto-blessing: small grace boost
+        const bonus = _rng.nextInt(2, 5);
+        p.grace = Math.min(150, (p.grace || 0) + bonus);
+        set({
+          player: p, phase: 'paradiso_rolling',
+          totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+          log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `🌟 Blessing: +${bonus} Grace (${p.grace})` : `🌟 축복: 은총 +${bonus} (${p.grace})`, type: 'heal' }],
+        });
+      } else {
+        set({
+          player: p, phase: 'paradiso_rolling',
+          totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+        });
+      }
+    },
+
+    resolveParadisoBlessing: () => {
+      const state = get();
+      if (state.phase !== 'paradiso_blessing' || !state.activeLightSpirit) return;
+
+      const spirit = state.activeLightSpirit;
+      const p = { ...state.player };
+      let graceGain = spirit.graceGift;
+
+      // Rosary of Love: +50% grace
+      if (p.celestialRelics.some((c) => c.id === 'relic-3')) {
+        graceGain = Math.floor(graceGain * 1.5);
+      }
+
+      p.grace = Math.min(150, (p.grace || 0) + graceGain);
+      const bonusText = loc() === 'en' ? (spirit.bonusGiftEn ? ` + ${spirit.bonusGiftEn}` : '') : (spirit.bonusGift ? ` + ${spirit.bonusGift}` : '');
+      const spiritName = loc() === 'en' ? spirit.nameEn : spirit.name;
+
+      set({
+        player: p, phase: 'paradiso_rolling', activeLightSpirit: null,
+        totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+        paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0, showSparkles: true,
+        log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `✨ ${spiritName} blesses you! +${graceGain} Grace${bonusText} (${p.grace})` : `✨ ${spiritName}의 축복! 은총 +${graceGain}${bonusText} (${p.grace})`, type: 'heal' }],
+      });
+      setTimeout(() => set({ showSparkles: false }), 2000);
+    },
+
+    resolveParadisoArchangel: () => {
+      const state = get();
+      if (state.phase !== 'paradiso_archangel' || !state.activeArchangel) return;
+
+      const archangel = state.activeArchangel;
+      const p = { ...state.player };
+      const roll = state.battleRoll ?? _rng.nextInt(1, 6);
+      // With good roll (4+), pass the trial
+      const success = roll >= 4;
+
+      if (success) {
+        const newSphereId = Math.min(9, (p.currentSphereId || 1) + 1) as 1|2|3|4|5|6|7|8|9;
+        p.currentSphereId = newSphereId;
+        p.currentTileId = `s${newSphereId}-q0`;
+        p.grace = Math.min(150, (p.grace || 0) + archangel.graceBlessing);
+
+        const relic = getRelic(archangel.relicId);
+        if (relic) p.celestialRelics = [...p.celestialRelics, relic];
+
+        const completed = checkParadisoComplete(p);
+        if (completed) saveRealmCompletion('paradiso', state.totalTurns);
+
+        const archName = loc() === 'en' ? archangel.nameEn : archangel.name;
+        set({
+          player: p, activeArchangel: null, activeCelestialReward: relic,
+          phase: completed ? 'gameOver' : 'paradiso_relic', escaped: completed,
+          showSparkles: true,
+          log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `👼✨ ${archName} trial passed! +${archangel.graceBlessing} Grace!` : `👼✨ ${archName}의 시험 통과! 은총 +${archangel.graceBlessing}!`, type: 'critical' }],
+        });
+      } else {
+        p.grace = Math.max(0, (p.grace || 0) - 3);
+        const archName = loc() === 'en' ? archangel.nameEn : archangel.name;
+        set({
+          player: p, phase: 'paradiso_rolling', activeArchangel: null,
+          totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+          log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `💫 ${archName} gazes calmly. Grace -3. Try again.` : `💫 ${archName}이 조용히 바라본다. 은총 -3. 다시 시도하세요.`, type: 'system' }],
+        });
+      }
+      setTimeout(() => set({ showSparkles: false }), 2000);
+      set({ battleRoll: null });
+    },
+
+    nextParadisoTurn: () => {
+      const state = get();
+      set({
+        phase: 'paradiso_rolling', turnNumber: state.turnNumber + 1, totalTurns: state.totalTurns + 1,
+        paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0, battleRoll: null,
+        activeCelestialReward: null,
+      });
+    },
   };
 });

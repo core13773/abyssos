@@ -164,6 +164,13 @@ export default function TimingSlider({
     if (!startedRef.current) {
       setStarted(true);
       startedRef.current = true;
+      // Start indicator at random edge position (away from center green zone)
+      // so quick double-tapping can't guarantee a free critical hit
+      const startPos = (Math.random() > 0.5 ? 1 : -1) * (70 + Math.random() * 25); // ±70~95
+      posRef.current = startPos;
+      setPosition(startPos);
+      // Set direction toward center from the edge
+      dirRef.current = startPos > 0 ? -1 : 1;
       return;
     }
 

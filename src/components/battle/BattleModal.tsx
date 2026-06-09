@@ -6,7 +6,7 @@ import { useGameStore } from '@/lib/store/gameStore';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
-import TimingSlider, { type SliderResult } from './TimingSlider';
+import ColorSequence from './ColorSequence';
 import { assetPath } from '@/lib/utils/assetPath';
 
 export default function BattleModal() {
@@ -17,25 +17,21 @@ export default function BattleModal() {
   const resolveBattleAction = useGameStore((s) => s.resolveBattleAction);
   const skipBattleAction = useGameStore((s) => s.skipBattleAction);
   const locale = useLocale((s) => s.locale);
-  const [sliderResult, setSliderResult] = useState<SliderResult | null>(null);
-  const [battleResolved, setBattleResolved] = useState(false);
+  const [result, setResult] = useState<boolean | null>(null);
+  const [resolved, setResolved] = useState(false);
 
-  const handleSliderResult = useCallback((result: SliderResult) => {
-    setSliderResult(result);
-    setBattleResolved(true);
-    const battleRoll = result === 'critical' ? 6 : result === 'victory' ? 5 : 2;
-    setBattleRoll(battleRoll);
+  const handleResult = useCallback((success: boolean) => {
+    setResult(success);
+    setResolved(true);
+    setBattleRoll(success ? 6 : 2);
   }, [setBattleRoll]);
 
-  const handleContinue = useCallback(() => {
-    resolveBattleAction();
-  }, [resolveBattleAction]);
-
   const handleQuickRoll = useCallback(() => {
-    // Quick roll = D6=5 (normal victory without timing)
-    setBattleRoll(5);
-    setBattleResolved(true);
-    setSliderResult('victory');
+    const roll = Math.floor(Math.random() * 6) + 1;
+    const success = roll >= 5;
+    setResult(success);
+    setResolved(true);
+    setBattleRoll(roll);
   }, [setBattleRoll]);
 
   if (phase !== 'battle' || !monster) return null;
@@ -44,29 +40,13 @@ export default function BattleModal() {
   const ability = locale === 'en' ? monster.abilityEn : monster.ability;
   const canSkip = player.guardianCards.some((g) => g.id === 'guardian-8');
   const tierLabel = monster.tier === 'A' ? (locale==='en'?'MINOR':'하급') : (locale==='en'?'GREATER':'상급');
-
-  let greenWidth = Math.max(8, 40 - monster.power * 3);
-  let yellowWidth = Math.max(8, 25 - monster.power * 2);
-  if (player.guardianCards.some((g) => g.id === 'guardian-3')) greenWidth += 5;
-  if (player.guardianCards.some((g) => g.id === 'guardian-5')) greenWidth += 3;
-  if (player.guardianCards.some((g) => g.id === 'guardian-1')) {
-    greenWidth = Math.floor(greenWidth * 1.5);
-    yellowWidth = Math.floor(yellowWidth * 1.5);
-  }
-  let speed = monster.tier === 'A' ? 2.0 : 1.2;
-  if (player.guardianCards.some((g) => g.id === 'guardian-6')) speed *= 1.2;
+  const seqLen = monster.tier === 'A' ? 3 : 4;
+  const seqSpeed = monster.tier === 'A' ? 800 : 600;
 
   return (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      >
-        <motion.div
-          className="bg-stone-900 border border-stone-700 rounded-2xl p-3 w-full max-w-xs"
-          initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        >
+      <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div className="bg-stone-900 border border-stone-700 rounded-2xl p-3 w-full max-w-xs" initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }}>
           <div className="flex gap-3 items-start mb-3">
             <div className="shrink-0 w-[100px] aspect-[750/1050] rounded-lg overflow-hidden border border-stone-600 shadow-lg">
               <object data={assetPath(`/images/${locale}/monsters/${monster.id}.svg`)} type="image/svg+xml" className="w-full h-full">
@@ -85,32 +65,27 @@ export default function BattleModal() {
             </div>
           </div>
 
-          {/* Timing Slider OR Result + Continue */}
-          {!battleResolved ? (
+          {!resolved ? (
             <div className="mb-2">
-              <TimingSlider greenWidth={greenWidth} yellowWidth={yellowWidth} speed={speed} onResult={handleSliderResult} />
+              <ColorSequence sequenceLength={seqLen} showTime={seqSpeed} label={locale === 'en' ? 'Memorize & repeat the colors!' : '색깔 순서를 기억해 따라하세요!'} onResult={handleResult} />
               <div className="mt-2">
                 <Button variant="ghost" size="sm" onClick={handleQuickRoll} className="w-full text-[11px]">
-                  {locale === 'en' ? '🎲 Quick Roll (D6=5)' : '🎲 빠른 주사위 (D6=5)'}
+                  {locale === 'en' ? '🎲 Random Roll (D6 1~6)' : '🎲 랜덤 주사위 (D6 1~6)'}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="mb-3 text-center">
-              <p className={`text-xl font-bold mb-2 ${
-                sliderResult === 'critical' ? 'text-emerald-400' :
-                sliderResult === 'victory' ? 'text-yellow-400' : 'text-red-400'
-              }`}>
-                {sliderResult === 'critical' ? '🌟 CRITICAL!' :
-                 sliderResult === 'victory' ? '⚔ Victory!' : '💀 Defeat...'}
+              <p className={`text-xl font-bold mb-2 ${result ? 'text-emerald-400' : 'text-red-400'}`}>
+                {result ? '🌟 SUCCESS!' : '💀 Defeat...'}
               </p>
-              <Button variant="primary" size="lg" onClick={handleContinue} className="w-full min-h-[48px]">
+              <Button variant="primary" size="lg" onClick={resolveBattleAction} className="w-full min-h-[48px]">
                 {locale === 'en' ? 'Continue ▶' : '계속 ▶'}
               </Button>
             </div>
           )}
 
-          {canSkip && !battleResolved && (
+          {canSkip && !resolved && (
             <Button variant="ghost" size="sm" onClick={skipBattleAction} className="w-full text-[11px] mt-1">
               {t('battle.skipWithMask', locale)}
             </Button>

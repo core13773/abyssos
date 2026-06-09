@@ -123,6 +123,102 @@ const T: TranslationMap = {
     ko: '주사위를 굴려라. 몬스터를 물리쳐라. 수문장을 넘어서라. 수호카드를 모아 지옥을 탈출하라.',
   },
   'system.escape': { en: '✦✦ ESCAPED HELL! ✦✦', ko: '✦✦ 지옥 탈출 성공! ✦✦' },
+  'system.purgatorioIntro1': {
+    en: 'You emerge from Hell under a sky full of stars. Before you rises Mount Purgatory — seven terraces of purification.',
+    ko: '당신은 별이 가득한 하늘 아래 지옥을 빠져나왔다. 눈앞에 정화의 산, 일곱 겹의 연옥이 솟아 있다.',
+  },
+  'system.purgatorioIntro2': {
+    en: 'Climb the mountain. Overcome your sin projections. Pass the trials of the angels. Reach the Earthly Paradise.',
+    ko: '산을 올라라. 죄의 투영을 극복하라. 천사의 시험을 통과하라. 지상낙원에 도달하라.',
+  },
+  'system.purgatorioComplete': {
+    en: '🌹 You have reached the Earthly Paradise! Beatrice awaits...',
+    ko: '🌹 지상낙원에 도달했습니다! 베아트리체가 기다리고 있습니다...',
+  },
+
+  // ===== Purgatorio: Continue from Inferno =====
+  'purgatorio.continue': {
+    en: '🌅 Continue to Purgatory',
+    ko: '🌅 연옥으로 계속하기',
+  },
+  'purgatorio.continueDesc': {
+    en: 'You escaped Hell with {hp} HP and {cards} guardian cards. The mountain of purification awaits.',
+    ko: '{hp} HP와 {cards}장의 수호카드를 가지고 지옥을 탈출했습니다. 정화의 산이 기다립니다.',
+  },
+
+  // ===== Purgatorio: Board =====
+  'purgatorio.terracePrefix': { en: 'Terrace {n}', ko: '제{n} 테라스' },
+  'purgatorio.sin': { en: 'Sin', ko: '죄의 투영' },
+  'purgatorio.angel': { en: 'Angel', ko: '수호천사' },
+  'purgatorio.angelAppeared': { en: '😇 Angel Guardian Appeared!', ko: '😇 수호천사 등장!' },
+  'purgatorio.angelArrive': { en: '😇 Angel "{name}" guards the purification gate!', ko: '😇 수호천사 "{name}"이(가) 정화의 문을 지킨다!' },
+  'purgatorio.battleArrive': { en: '👤 Sin projection "{name}" emerges!', ko: '👤 죄의 투영 "{name}"이 나타났다!' },
+
+  // ===== Purgatorio: Angel Battle =====
+  'purgatorio.angelPower': { en: 'PURIFICATION', ko: '정화력' },
+  'purgatorio.angelMechanic': { en: '⚡ TRIAL', ko: '⚡ 시험 방식' },
+  'purgatorio.angelVictory': {
+    en: '✅ Trial passed! HP+{hp} + Purification Card',
+    ko: '✅ 시험 통과! HP+{hp} + 정화카드',
+  },
+  'purgatorio.angelDefeat': {
+    en: '💫 The angel gazes mercifully. You may try again.',
+    ko: '💫 천사가 자비롭게 바라본다. 다시 시도할 수 있습니다.',
+  },
+  'purgatorio.angelResultVictory': {
+    en: '😇✨ Trial passed! D6={roll} ≥ {power} — "{name}" acknowledges your growth! (+{hp} HP)',
+    ko: '😇✨ 시험 통과! D6={roll} ≥ {power} — "{name}"이 그대의 성장을 인정한다! (+{hp} HP)',
+  },
+  'purgatorio.angelResultDefeat': {
+    en: '💫 Trial incomplete. D6={roll} < {power} — "{name}" waits patiently.',
+    ko: '💫 시험 미완료. D6={roll} < {power} — "{name}"이 인내심을 가지고 기다린다.',
+  },
+
+  // ===== Purgatorio: Purification Card =====
+  'purgatorio.purificationAcquired': {
+    en: '✨ Purification Card Acquired!',
+    ko: '✨ 정화카드 획득!',
+  },
+  'purgatorio.purificationContinue': {
+    en: 'Continue Climbing',
+    ko: '계속 등반',
+  },
+  'purgatorio.purificationBonus': {
+    en: '🌟 PURIFICATION BONUS',
+    ko: '🌟 정화 보너스',
+  },
+
+  // ===== Purgatorio: Events =====
+  'purgatorio.eventPrayer': {
+    en: '✧ Prayer: +{hp} HP restored',
+    ko: '✧ 기도: +{hp} HP 회복',
+  },
+  'purgatorio.eventFeather': {
+    en: '🕊 Angel Feather: Next battle can be skipped!',
+    ko: '🕊 천사의 깃털: 다음 전투를 건너뛸 수 있습니다!',
+  },
+  'purgatorio.eventSinWeight': {
+    en: '⚖ Weight of Sin: -{hp} HP',
+    ko: '⚖ 죄의 무게: -{hp} HP',
+  },
+  'purgatorio.eventStarlight': {
+    en: '✨ Starlight Vision: All enemies this terrace -1 power!',
+    ko: '✨ 별빛 환영: 이번 층 모든 적 전투력 -1!',
+  },
+  'purgatorio.eventBeatriceWhisper': {
+    en: '🌹 Beatrice whispers: Full HP restored + Move +3!',
+    ko: '🌹 베아트리체의 속삭임: HP 완전 회복 + 이동력 +3!',
+  },
+
+  // ===== Purgatorio: Escape transition =====
+  'purgatorio.earthlyParadise': {
+    en: '🌹 EARTHLY PARADISE',
+    ko: '🌹 지상낙원',
+  },
+  'purgatorio.earthlyParadiseDesc': {
+    en: 'Beatrice appears. Virgil smiles and fades. A new journey beyond the stars awaits.',
+    ko: '베아트리체가 나타났다. 베르길리우스는 미소 지으며 사라진다. 별 너머의 새로운 여정이 기다린다.',
+  },
 
   // ===== Guardian Panel =====
   'guardian.owned': { en: '✨ {n}/9', ko: '✨ {n}/9' },
@@ -130,11 +226,82 @@ const T: TranslationMap = {
   // ===== Golden Wings =====
   'guardian.wingsUsed': { en: '💰 Golden Wings: Flew 3 tiles! (3-turn cooldown)', ko: '💰 황금의 날개: 3칸 비행! (3턴 쿨다운)' },
 
+  // ===== Paradiso Translations =====
+  'system.paradisoIntro1': {
+    en: 'You rise beyond the Earthly Paradise into the celestial realm. Nine spheres of light await.',
+    ko: '당신은 지상낙원 너머 천상의 영역으로 솟아올랐다. 아홉 개의 빛의 천구가 기다린다.',
+  },
+  'system.paradisoIntro2': {
+    en: 'Collect grace from light spirits. Pass the trials of archangels. Gather celestial relics. Reach the Empyrean.',
+    ko: '빛의 정령에게서 은총을 모아라. 대천사의 시험을 통과하라. 성물을 모아 엠피리오에 도달하라.',
+  },
+  'paradiso.spherePrefix': { en: 'Sphere {n}', ko: '제{n}천' },
+  'paradiso.grace': { en: 'Grace', ko: '은총' },
+  'paradiso.spirit': { en: 'Spirit', ko: '정령' },
+  'paradiso.archangel': { en: 'Archangel', ko: '대천사' },
+  'paradiso.relic': { en: 'Relic', ko: '성물' },
+  'paradiso.blessing': { en: 'Blessing', ko: '축복' },
+  'paradiso.archangelAppeared': { en: '👼 Archangel Appeared!', ko: '👼 대천사 등장!' },
+  'paradiso.trial': { en: 'TRIAL', ko: '시험' },
+  'paradiso.reward': { en: 'REWARD', ko: '보상' },
+  'paradiso.relicAcquired': { en: '💠 Celestial Relic Acquired!', ko: '💠 성물 획득!' },
+  'paradiso.continue': { en: 'Continue Ascending', ko: '계속 승천' },
+  'paradiso.spiritBless': { en: '✨ {name} blesses you! +{n} Grace', ko: '✨ {name}의 축복! 은총 +{n}' },
+  'paradiso.empyrean': { en: '☀ EMPYREAN', ko: '☀ 엠피리오' },
+  'paradiso.empyreanDesc': { en: 'You have reached the source of all light. The journey is complete.', ko: '당신은 모든 빛의 근원에 도달했다. 여정이 완성되었다.' },
+
   // ===== Misc =====
   'generic.card': { en: 'card', ko: '장' },
   'generic.turn': { en: 'turn', ko: '턴' },
   'generic.empty': { en: '—', ko: '—' },
   'lang.label': { en: 'KO', ko: 'EN' },
+
+  // ===== ColorSequence Mini-game =====
+  'colorSeq.watch': { en: '👀 Memorize...', ko: '👀 기억하세요...' },
+  'colorSeq.play': { en: '👆 Repeat ({n}/{total})', ko: '👆 따라하기 ({n}/{total})' },
+  'colorSeq.success': { en: '✅ Perfect!', ko: '✅ 완벽!' },
+  'colorSeq.fail': { en: '❌ Failed!', ko: '❌ 실패!' },
+
+  // ===== PatternMemory Mini-game =====
+  'pattern.memorize': { en: '👁 Memorize the pattern...', ko: '👁 패턴을 기억하세요...' },
+  'pattern.recall': { en: '🤔 Which pattern was it?', ko: '🤔 어떤 패턴이었나요?' },
+  'pattern.correct': { en: '✅ Correct!', ko: '✅ 정답!' },
+  'pattern.wrong': { en: '❌ Wrong!', ko: '❌ 틀렸습니다!' },
+  'pattern.answer': { en: 'Answer: {answer}', ko: '정답: {answer}' },
+
+  // ===== RapidTap Mini-game =====
+  'rapidtap.prompt': { en: '⚡ Tap {n} times!', ko: '⚡ {n}회 탭하세요!' },
+  'rapidtap.timeLimit': { en: 'Time limit: {s}s', ko: '제한시간: {s}초' },
+  'rapidtap.start': { en: '👆 START!', ko: '👆 시작!' },
+  'rapidtap.tapAnywhere': { en: '👆 TAP ANYWHERE!', ko: '👆 아무데나 탭하세요!' },
+  'rapidtap.success': { en: '✅ Success! {n}', ko: '✅ 성공! {n}' },
+  'rapidtap.fail': { en: '❌ Failed... {n}/{target}', ko: '❌ 실패... {n}/{target}' },
+
+  // ===== Event: Choice =====
+  'event.choice.greatSuccess': { en: '🤔 Crossroads: Great success! +{hp} HP, Move +{move}', ko: '🤔 선택의 기로: 대성공! +{hp} HP, 이동력 +{move}' },
+  'event.choice.fail': { en: '🤔 Crossroads: Failed... -{hp} HP', ko: '🤔 선택의 기로: 실패... -{hp} HP' },
+
+  // ===== Purgatorio Events (detailed) =====
+  'purgatorio.eventPrayerDetailed': { en: '✧ Prayer: +{hp} HP restored (HP: {curr}/{max})', ko: '✧ 기도: +{hp} HP 회복 (HP: {curr}/{max})' },
+  'purgatorio.eventCrossroadsSuccess': { en: '🤔 Crossroads: Great success! +{hp} HP, Move +{move}', ko: '🤔 선택의 갈림길: 대성공! +{hp} HP, 이동력 +{move}' },
+  'purgatorio.eventCrossroadsFail': { en: '🤔 Crossroads: Failed... -{hp} HP', ko: '🤔 선택의 갈림길: 실패... -{hp} HP' },
+  'purgatorio.eventStarlightDetailed': { en: '✨ Starlight Vision: All enemies this terrace -1 power!', ko: '✨ 별빛 환영: 이번 층 모든 적 전투력 -1!' },
+  'purgatorio.eventEyeOfMercy': { en: '👁 Eye of Mercy: Trap damage negated!', ko: '👁 자비의 눈: 함정 피해 무효화!' },
+  'purgatorio.eventSinWeightDetailed': { en: '⚖ Weight of Sin: -{hp} HP (HP: {curr}/{max})', ko: '⚖ 죄의 무게: -{hp} HP (HP: {curr}/{max})' },
+  'purgatorio.eventAngelFeather': { en: '🕊 Angel Feather: Next battle can be skipped!', ko: '🕊 천사의 깃털: 다음 전투를 건너뛸 수 있습니다!' },
+
+  // ===== Purgatorio: Purification messages =====
+  'purgatorio.purificationAcquiredDetailed': { en: '✨ Purification Card acquired: {name}!', ko: '✨ 정화카드 획득: {name}!' },
+  'purgatorio.angelMercy': { en: '💫 The angel gazes mercifully. -{hp} HP. You may try again.', ko: '💫 천사가 자비롭게 바라본다. -{hp} HP. 다시 시도할 수 있습니다.' },
+
+  // ===== Game Store: Step of Zeal =====
+  'purgatorio.stepOfZeal': { en: '⚡ Step of Zeal: Can move up to 3 times!', ko: '⚡ 열정의 발걸음: 최대 3회 연속 이동 가능!' },
+
+  // ===== Sin Choice: Skip =====
+  'sinChoice.skipWithFeather': { en: '🕊 Use Angel Feather (skip)', ko: '🕊 천사의 깃털 사용 (건너뛰기)' },
+
+  // ===== Gatekeeper GK-7 pre-damage =====
+  'gk.preDamageBlood': { en: '🩸 Blood Sentinel: -2 HP pre-damage!', ko: '🩸 피의 파수꾼: 선제 -2 HP 피해!' },
 } as const;
 
 export function t(key: string, locale: Locale, params?: Record<string, string | number>): string {

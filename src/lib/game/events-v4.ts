@@ -30,11 +30,11 @@ function resolveChoiceEvent(player: Player, rng: RNG): EventResult {
     const heal = rng.nextInt(12, 25);
     p.hp = Math.min(p.maxHp, p.hp + heal);
     p.moveBonus = (p.moveBonus || 0) + rng.nextInt(1, 3);
-    return { updatedPlayer: p, logs: [{ turn: 0, message: `🤔 선택의 기로: 대성공! +${heal} HP, 이동력 +${p.moveBonus}`, type: 'heal' }], shake: false, sparkles: true };
+    return { updatedPlayer: p, logs: [{ turn: 0, message: t('event.choice.greatSuccess', loc, { hp: heal, move: p.moveBonus }), type: 'heal' }], shake: false, sparkles: true };
   }
   const dmg = rng.nextInt(5, 12);
   p.hp = Math.max(0, p.hp - dmg);
-  return { updatedPlayer: p, logs: [{ turn: 0, message: `🤔 선택의 기로: 실패... -${dmg} HP`, type: 'damage' }], shake: true, sparkles: false };
+  return { updatedPlayer: p, logs: [{ turn: 0, message: t('event.choice.fail', loc, { hp: dmg }), type: 'damage' }], shake: true, sparkles: false };
 }
 
 function resolveTreasure(player: Player, rng: RNG): EventResult {

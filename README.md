@@ -1,17 +1,33 @@
-# 🔥 Abyssos: 9 Circles of Hell
+# 🔥 Abyssos: The Divine Comedy Trilogy
 
-> **"지옥의 가장 깊은 곳에서 깨어나라. 주사위로 이동하고, 타이밍으로 몬스터를 처치하고, 기억력으로 수문장을 넘어서라."**
+> **"지옥을 통과하고, 연옥에서 정화되며, 천국에 도달하라."**
+> *"Pass through Hell, be purified in Purgatory, and reach Paradise."*
 
-A mobile-first action roguelike card battle game through Dante's 9 circles of Hell.
+A mobile-first action roguelike card battle game through Dante's **Divine Comedy** — all three canticles: Inferno, Purgatorio, and Paradiso.
+
+| Part | Status | Chapters | Theme |
+|------|--------|----------|-------|
+| 🔥 **Inferno** (지옥) | ✅ Complete | 9 Circles → Escape | Fear & Survival |
+| 🌅 **Purgatorio** (연옥) | 🆕 Designed | 7 Terraces → Purification | Hope & Cleansing |
+| ✨ **Paradiso** (천국) | 🆕 Designed | 9 Spheres → Union | Wonder & Transcendence |
+
+📖 Full design document: [PRODUCT_PLAN.md](./PRODUCT_PLAN.md)
 
 ## 🎮 How to Play
 
-### Core Loop
+### The Complete Journey
+```
+INFERNO (9 circles) → PURGATORIO (7 terraces) → PARADISO (9 spheres)
+     ↓                       ↓                          ↓
+  Escape Hell           Reunite with Beatrice      Reach the Empyrean
+```
+
+### Core Loop (Inferno — Current)
 1. **🎲 Roll Dice** — Two D6 decide how far you move on the linear board
 2. **🎯 Timing Slider** — Fight monsters by tapping at the right moment on the timing bar
-3. **🃏 Card Match** — Defeat gatekeepers by finding the correct card among shuffled cards
-4. **✨ Collect Guardians** — Earn permanent guardian cards that give you abilities
-5. **🏆 Escape** — Clear all 9 circles to win
+3. **🃏 Unique Boss Fights** — Each gatekeeper has a different mini-game (timing, cards, tap, quiz, choice)
+4. **✨ Collect Guardians** — Earn permanent guardian cards that give you stacking abilities
+5. **🏆 Escape** — Clear all 9 circles, then continue to Purgatory and Paradise
 
 ### Game Mechanics
 
@@ -19,8 +35,8 @@ A mobile-first action roguelike card battle game through Dante's 9 circles of He
 |--------|----------|-----|
 | Movement | Dice (D6 × 2) | Roll and move right on the board |
 | Monster Battle | Timing Slider | Tap when indicator is in the green zone |
-| Gatekeeper | Card Match | Remember and find the correct card |
-| Events | Auto-resolve | Random rest, trap, blessing, or curse |
+| Gatekeeper | 9 Unique Mini-games | Timing, Card Match, Rapid Tap, Quiz, Choice, Multi-tap, Final |
+| Events | Auto-resolve | Random rest, trap, blessing, curse, treasure, choice |
 | Choices | 50/50 Gamble | Risk it all for big rewards |
 
 ### Board Tiles (per circle)
@@ -33,7 +49,7 @@ A - B - Choice - A - B - Rest - Elite - B - Choice - A - B - Treasure → Gateke
 - **5 streak**: +30% rewards, "UNSTOPPABLE!"
 - **7 streak**: +50% rewards, "GODLIKE!"
 
-### Guardian Cards (9 total)
+### Guardian Cards (Inferno — 9 total)
 Defeat each circle's gatekeeper to earn a guardian card with permanent effects:
 - ❄️ Ice Heart: Damage reduction
 - 🎭 Mask Secret: Skip 1 battle
@@ -44,6 +60,11 @@ Defeat each circle's gatekeeper to earn a guardian card with permanent effects:
 - ☠️ Cerberus Collar: Roll D6 twice
 - 🌪 Storm Grace: Min dice +1
 - ✨ Staff of Virgil: All effects +50%
+
+### Full Trilogy Cards (25 total)
+- 🔥 **Inferno**: 9 Guardian Cards
+- 🌅 **Purgatorio**: 7 Purification Cards (designed, coming soon)
+- ✨ **Paradiso**: 9 Celestial Relics (designed, coming soon)
 
 ## 🚀 Getting Started
 

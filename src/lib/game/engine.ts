@@ -16,6 +16,12 @@ export function createPlayerV4(): Player {
     battleStreak: 0,
     isStunned: false,
     buffs: [],
+    era: 'inferno',
+    purificationCards: [],
+    totalCardCount: 0,
+    virtue: 0,
+    grace: 0,
+    celestialRelics: [],
   };
 }
 
@@ -46,6 +52,20 @@ export function createNewGameV4(): GameState {
     showSparkles: false,
     escaped: false,
     totalTurns: 0,
+    purgatorioBoard: [],
+    activeSinProjection: null,
+    activeAngelGuardian: null,
+    activePurificationReward: null,
+    purgatorioDice: null,
+    purgatorioIsDouble: false,
+    purgatorioDoubleCount: 0,
+    paradisoBoard: [],
+    activeLightSpirit: null,
+    activeArchangel: null,
+    activeCelestialReward: null,
+    paradisoDice: null,
+    paradisoIsDouble: false,
+    paradisoDoubleCount: 0,
   };
 }
 
