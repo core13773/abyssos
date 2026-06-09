@@ -55,7 +55,24 @@ export default function GamePage() {
 
     const era = searchParams.get('era');
 
+    // Gate check: read realm completion from localStorage
+    const getRealmCompleted = (realm: string): boolean => {
+      if (typeof window === 'undefined') return false;
+      try {
+        const raw = localStorage.getItem('abyssos_realms');
+        if (raw) {
+          const data = JSON.parse(raw);
+          return data[realm]?.completed === true;
+        }
+      } catch { /* ignore */ }
+      return false;
+    };
+
     if (era === 'purgatorio') {
+      if (!getRealmCompleted('inferno')) {
+        router.replace('/');
+        return;
+      }
       const infernoPlayer = createDefaultInfernoClearPlayer();
       const state = createPurgatorioGame(infernoPlayer);
       useGameStore.setState(state as any);
@@ -63,6 +80,10 @@ export default function GamePage() {
     }
 
     if (era === 'paradiso') {
+      if (!getRealmCompleted('purgatorio')) {
+        router.replace('/');
+        return;
+      }
       const purgatorioPlayer = createDefaultPurgatorioClearPlayer();
       const state = createParadisoGame(purgatorioPlayer);
       useGameStore.setState(state as any);
@@ -70,7 +91,7 @@ export default function GamePage() {
     }
 
     initGame();
-  }, [board.length, purgatorioBoard.length, paradisoBoard.length, searchParams, initGame]);
+  }, [board.length, purgatorioBoard.length, paradisoBoard.length, searchParams, initGame, router]);
 
   const isBoardReady = isParadiso ? paradisoBoard.length > 0 : isPurgatorio ? purgatorioBoard.length > 0 : board.length > 0;
 

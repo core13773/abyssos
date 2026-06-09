@@ -16,13 +16,27 @@ interface RealmState {
   paradiso: { completed: boolean };
 }
 
+const DEFAULT_REALM_STATE: RealmState = {
+  inferno: { completed: false, bestTurns: null },
+  purgatorio: { completed: false, bestTurns: null },
+  paradiso: { completed: false },
+};
+
 function loadRealmState(): RealmState {
-  if (typeof window === 'undefined') return { inferno: { completed: false, bestTurns: null }, purgatorio: { completed: false, bestTurns: null }, paradiso: { completed: false } };
+  if (typeof window === 'undefined') return DEFAULT_REALM_STATE;
   try {
     const raw = localStorage.getItem('abyssos_realms');
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Merge with defaults — old localStorage data may lack purgatorio/paradiso keys
+      return {
+        inferno: { ...DEFAULT_REALM_STATE.inferno, ...(parsed.inferno || {}) },
+        purgatorio: { ...DEFAULT_REALM_STATE.purgatorio, ...(parsed.purgatorio || {}) },
+        paradiso: { ...DEFAULT_REALM_STATE.paradiso, ...(parsed.paradiso || {}) },
+      };
+    }
   } catch { /* ignore */ }
-  return { inferno: { completed: false, bestTurns: null }, purgatorio: { completed: false, bestTurns: null }, paradiso: { completed: false } };
+  return DEFAULT_REALM_STATE;
 }
 
 // ── Helper for pseudo-random particles ──
@@ -92,6 +106,8 @@ const REALMS: RealmCardData[] = [
     chapters: '7 Terraces',
     cardCount: '7 Purifications',
     bossType: 'Angels',
+    lockedReasonKo: '지옥을 먼저 탈출하세요',
+    lockedReasonEn: 'Escape Hell first',
   },
   {
     id: 'paradiso',
@@ -111,6 +127,8 @@ const REALMS: RealmCardData[] = [
     chapters: '9 Spheres',
     cardCount: '9 Relics',
     bossType: 'Archangels',
+    lockedReasonKo: '연옥을 먼저 정화하세요',
+    lockedReasonEn: 'Purify Purgatory first',
   },
 ];
 
@@ -270,16 +288,20 @@ export default function HomePage() {
     };
   }, []);
 
-  // Determine status per realm
+  // Determine status per realm — with progressive gating
   const getStatus = (realmId: string): RealmStatus => {
     if (realmId === 'inferno') {
       return realmState.inferno.completed ? 'completed' : 'available';
     }
     if (realmId === 'purgatorio') {
-      return realmState.purgatorio.completed ? 'completed' : 'available';
+      if (realmState.purgatorio.completed) return 'completed';
+      if (!realmState.inferno.completed) return 'locked';
+      return 'available';
     }
     if (realmId === 'paradiso') {
-      return realmState.paradiso.completed ? 'completed' : 'available';
+      if (realmState.paradiso.completed) return 'completed';
+      if (!realmState.purgatorio.completed) return 'locked';
+      return 'available';
     }
     return 'available';
   };
