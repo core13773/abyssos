@@ -28,9 +28,6 @@ jobs:
 
       # Override next.config.ts for GitHub Pages static export
       - run: |
-          echo "NEXT_PUBLIC_BASE_PATH=/abyssos" >> $GITHUB_ENV
-
-      - run: |
           cat > next.config.ts << 'NEXTCONF'
           import type { NextConfig } from "next";
           const nextConfig: NextConfig = {
@@ -43,6 +40,8 @@ jobs:
           NEXTCONF
 
       - run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /abyssos
 
       - uses: actions/configure-pages@v4
 
