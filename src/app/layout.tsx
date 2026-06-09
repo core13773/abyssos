@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import LocaleSync from '@/components/layout/LocaleSync';
+import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
 
 const siteUrl = process.env.NEXT_PUBLIC_BASE_PATH
   ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
@@ -100,6 +101,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="min-h-full bg-stone-950 text-stone-200 antialiased">
+        <GoogleAnalytics />
         <LocaleSync />
         {children}
       </body>
