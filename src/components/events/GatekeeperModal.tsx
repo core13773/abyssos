@@ -110,7 +110,7 @@ export default function GatekeeperModal() {
       greenWidth: Math.min(40, base.greenWidth + guardianBonusPct),
       yellowWidth: Math.min(35, base.yellowWidth + guardianBonusPct),
     };
-  }, [gk, player.guardianCards.length, guardianBonusPct]);
+  }, [gk?.id, player.guardianCards.length, guardianBonusPct]);
 
   const handleSliderResult = useCallback((result: SliderResult) => {
     setSliderResult(result);
@@ -147,7 +147,7 @@ export default function GatekeeperModal() {
 
   // Zone labels per gatekeeper
   const zoneLabels = useMemo(() => {
-    if (gk.id === 'gk-3') {
+    if (gk?.id === 'gk-3') {
       return {
         miss: locale === 'en' ? 'FAIL' : '실패',
         hit: locale === 'en' ? 'PASS' : '통과',
@@ -155,7 +155,7 @@ export default function GatekeeperModal() {
       };
     }
     return undefined;
-  }, [gk.id, locale]);
+  }, [gk?.id, locale]);
 
   return (
     <AnimatePresence>

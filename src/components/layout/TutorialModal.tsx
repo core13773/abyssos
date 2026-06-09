@@ -22,9 +22,9 @@ const STEPS_KO = [
     icon: '🎯',
   },
   {
-    title: '🃏 Step 3: 수문장 돌파하기',
-    body: '각 층의 끝에는 수문장이 기다립니다.\n카드 찾기 게임으로 수문장을 물리치세요!\n정답 카드를 기억했다가, 섞인 후에 찾아내면 됩니다.\n승리하면 ✨ 수호카드를 획득합니다.',
-    icon: '🃏',
+    title: '👹 Step 3: 수문장 돌파하기',
+    body: '각 층의 끝에는 수문장이 기다립니다.\n타이밍 슬라이더로 수문장에게 도전하세요!\n수문장마다 고유한 기믹이 있습니다.\n(빙결, 가면, 폭풍, 분노 등)\n승리하면 ✨ 수호카드를 획득합니다.',
+    icon: '👹',
   },
   {
     title: '🤔 Step 4: 선택의 기로',
@@ -60,9 +60,9 @@ const STEPS_EN = [
     icon: '🎯',
   },
   {
-    title: '🃏 Step 3: Gatekeeper Challenge',
-    body: 'At the end of each circle, a gatekeeper awaits.\nUse the card matching game to defeat them!\nRemember the correct card, then find it after shuffling.\nVictory earns you a ✨ Guardian Card.',
-    icon: '🃏',
+    title: '👹 Step 3: Gatekeeper Challenge',
+    body: 'At the end of each circle, a gatekeeper awaits.\nUse the timing slider to defeat them!\nEach gatekeeper has a unique gimmick.\n(Ice flicker, Mask shift, Storm gusts, etc.)\nVictory earns you a ✨ Guardian Card.',
+    icon: '👹',
   },
   {
     title: '🤔 Step 4: Crossroads of Fate',
