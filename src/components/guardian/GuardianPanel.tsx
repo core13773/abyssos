@@ -3,6 +3,7 @@
 import { useGameStore } from '@/lib/store/gameStore';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
+import { assetPath } from '@/lib/utils/assetPath';
 
 export default function GuardianPanel() {
   const player = useGameStore((s) => s.player);
@@ -26,7 +27,7 @@ export default function GuardianPanel() {
               className="shrink-0 w-8 h-8 rounded-full border border-amber-700/50 bg-stone-800 flex items-center justify-center text-xs"
               title={locale === 'en' ? g.nameEn : g.name}
             >
-              <object data={`/images/${locale}/guardians/${g.id}.svg`} type="image/svg+xml" className="w-6 h-6 rounded-full">
+              <object data={assetPath(`/images/${locale}/guardians/${g.id}.svg`)} type="image/svg+xml" className="w-6 h-6 rounded-full">
                 ✨
               </object>
             </div>

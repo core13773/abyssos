@@ -7,6 +7,7 @@ import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
 import TimingSlider, { type SliderResult } from './TimingSlider';
+import { assetPath } from '@/lib/utils/assetPath';
 
 export default function BattleModal() {
   const phase = useGameStore((s) => s.phase);
@@ -68,7 +69,7 @@ export default function BattleModal() {
         >
           <div className="flex gap-3 items-start mb-3">
             <div className="shrink-0 w-[100px] aspect-[750/1050] rounded-lg overflow-hidden border border-stone-600 shadow-lg">
-              <object data={`/images/${locale}/monsters/${monster.id}.svg`} type="image/svg+xml" className="w-full h-full">
+              <object data={assetPath(`/images/${locale}/monsters/${monster.id}.svg`)} type="image/svg+xml" className="w-full h-full">
                 <div className="w-full h-full bg-stone-800 flex items-center justify-center text-3xl">👾</div>
               </object>
             </div>

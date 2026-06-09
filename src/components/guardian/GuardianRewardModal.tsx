@@ -5,6 +5,7 @@ import { useGameStore } from '@/lib/store/gameStore';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
+import { assetPath } from '@/lib/utils/assetPath';
 
 export default function GuardianRewardModal() {
   const phase = useGameStore((s) => s.phase);
@@ -37,7 +38,7 @@ export default function GuardianRewardModal() {
           {/* Card + Info */}
           <div className="flex gap-3 items-start mb-3">
             <div className="shrink-0 w-[120px] aspect-[750/1050] rounded-lg overflow-hidden border border-amber-500/50 shadow-lg">
-              <object data={`/images/${locale}/guardians/${guardian.id}.svg`} type="image/svg+xml" className="w-full h-full">
+              <object data={assetPath(`/images/${locale}/guardians/${guardian.id}.svg`)} type="image/svg+xml" className="w-full h-full">
                 <div className="w-full h-full bg-stone-800 flex items-center justify-center text-4xl">✨</div>
               </object>
             </div>
