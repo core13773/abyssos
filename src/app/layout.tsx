@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import LocaleSync from '@/components/layout/LocaleSync';
 import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
+import GoogleAdSense from '@/components/layout/GoogleAdSense';
 
 const siteUrl = process.env.NEXT_PUBLIC_BASE_PATH
   ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
@@ -102,6 +103,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-stone-950 text-stone-200 antialiased">
         <GoogleAnalytics />
+        <GoogleAdSense />
         <LocaleSync />
         {children}
       </body>

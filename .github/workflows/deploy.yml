@@ -43,6 +43,7 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /abyssos
           NEXT_PUBLIC_GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+          NEXT_PUBLIC_ADSENSE_ID: ${{ secrets.ADSENSE_PUBLISHER_ID }}
 
       - uses: actions/configure-pages@v4
 
