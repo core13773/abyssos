@@ -132,6 +132,13 @@ const REALMS: RealmCardData[] = [
   },
 ];
 
+// ── Color palette per realm for inline style fallback ──
+const REALM_COLORS: Record<string, { bg: string; border: string; text: string; glow: string }> = {
+  inferno:    { bg: '#3b1108', border: '#991b1b', text: '#f87171', glow: '#ef444433' },
+  purgatorio: { bg: '#1e1035', border: '#7e22ce', text: '#c084fc', glow: '#a855f733' },
+  paradiso:   { bg: '#291d0c', border: '#d97706', text: '#fcd34d', glow: '#f59e0b33' },
+};
+
 // ── Individual Realm Card ──
 function RealmCard({
   realm,
@@ -153,6 +160,7 @@ function RealmCard({
   const title = locale === 'en' ? realm.titleEn : realm.titleKo;
   const subtitle = locale === 'en' ? realm.subtitleEn : realm.subtitleKo;
   const desc = locale === 'en' ? realm.descEn : realm.descKo;
+  const colors = REALM_COLORS[realm.id] || REALM_COLORS.inferno;
 
   // Particles for background
   const particles = useMemo(
@@ -172,16 +180,16 @@ function RealmCard({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.7, delay: 0.15 * index, ease: [0.25, 0.46, 0.45, 0.94] }}
       whileHover={!isLocked ? { scale: 1.02, y: -4 } : {}}
-      className={`
-        relative rounded-2xl border ${realm.borderColor} overflow-hidden
-        ${isLocked ? 'opacity-50 saturate-50 cursor-not-allowed' : 'cursor-pointer'}
-        transition-all duration-500
-      `}
+      style={{
+        background: `linear-gradient(to bottom, #0c0a09, ${colors.glow}, #0c0a09)`,
+        borderColor: colors.border,
+        opacity: isLocked ? 0.55 : 1,
+        filter: isLocked ? 'saturate(0.5)' : undefined,
+        cursor: isLocked ? 'not-allowed' : 'pointer',
+      }}
+      className="relative rounded-2xl border overflow-hidden transition-all duration-500"
       onClick={() => !isLocked && onSelect(realm)}
     >
-      {/* Animated gradient bg */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${realm.gradient}`} />
-
       {/* Floating particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         {particles.map((p, i) => (
@@ -199,7 +207,7 @@ function RealmCard({
       <div className="relative z-10 p-4 sm:p-5">
         {/* Status badge */}
         <div className="flex items-center justify-between mb-2">
-          <div className={`flex items-center gap-1.5 ${realm.textAccent}`}>
+          <div className="flex items-center gap-1.5" style={{ color: colors.text }}>
             <span className="text-xl" aria-hidden="true">{realm.icon}</span>
             {isCompleted && (
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-900/60 text-emerald-400 border border-emerald-700/40">
@@ -220,7 +228,7 @@ function RealmCard({
         </div>
 
         {/* Title */}
-        <h2 className={`text-xl sm:text-2xl font-bold font-serif ${realm.textAccent}`}>
+        <h2 className="text-xl sm:text-2xl font-bold font-serif" style={{ color: colors.text }}>
           {title}
         </h2>
         <p className="text-xs text-stone-400 font-serif italic mt-0.5 mb-2">
@@ -228,19 +236,20 @@ function RealmCard({
         </p>
 
         {/* Description */}
-        <p className="text-[11px] sm:text-xs text-stone-300 leading-relaxed line-clamp-2 mb-3">
+        <p className="text-[11px] sm:text-xs text-stone-300 leading-relaxed mb-3"
+           style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {desc}
         </p>
 
         {/* Stats row */}
         <div className="flex gap-2 text-[9px] sm:text-[10px]">
-          <span className={`px-2 py-1 rounded-full ${realm.borderColor} bg-stone-900/60`}>
+          <span className="px-2 py-1 rounded-full bg-stone-900/60" style={{ border: `1px solid ${colors.border}` }}>
             📐 {realm.chapters}
           </span>
-          <span className={`px-2 py-1 rounded-full ${realm.borderColor} bg-stone-900/60`}>
+          <span className="px-2 py-1 rounded-full bg-stone-900/60" style={{ border: `1px solid ${colors.border}` }}>
             🃏 {realm.cardCount}
           </span>
-          <span className={`px-2 py-1 rounded-full ${realm.borderColor} bg-stone-900/60`}>
+          <span className="px-2 py-1 rounded-full bg-stone-900/60" style={{ border: `1px solid ${colors.border}` }}>
             {realm.icon} {realm.bossType}
           </span>
         </div>
@@ -248,7 +257,7 @@ function RealmCard({
         {/* Locked overlay */}
         {isLocked && (
           <div className="mt-3 text-center">
-            <p className="text-[10px] text-stone-600 italic">
+            <p className="text-[10px] text-stone-500 italic">
               🔒 {locale === 'en' ? realm.lockedReasonEn : realm.lockedReasonKo}
             </p>
           </div>
@@ -425,17 +434,20 @@ export default function HomePage() {
       {/* Realm Selection Cards */}
       <section className="w-full max-w-md z-10 flex flex-col gap-3 sm:gap-4 pb-8" aria-label={locale === 'ko' ? '세계 선택' : 'Realm Selection'}>
         <h2 className="sr-only">{locale === 'ko' ? '여정을 선택하세요' : 'Choose your journey'}</h2>
-        {REALMS.map((realm, i) => (
-          <RealmCard
-            key={realm.id}
-            realm={realm}
-            status={getStatus(realm.id)}
-            bestTurns={getBestTurns(realm.id)}
-            index={i}
-            onSelect={handleSelect}
-            locale={locale}
-          />
-        ))}
+        {REALMS.map((realm, i) => {
+          const status = getStatus(realm.id);
+          return (
+            <RealmCard
+              key={realm.id}
+              realm={realm}
+              status={status}
+              bestTurns={getBestTurns(realm.id)}
+              index={i}
+              onSelect={handleSelect}
+              locale={locale}
+            />
+          );
+        })}
       </section>
 
       {/* Footer */}
