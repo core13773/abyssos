@@ -7,47 +7,23 @@ import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
 import TimingSlider, { type SliderResult } from '@/components/battle/TimingSlider';
+import CardMatch from '@/components/battle/CardMatch';
+import RapidTap from '@/components/battle/RapidTap';
+import QuizChallenge from '@/components/battle/QuizChallenge';
 import { assetPath } from '@/lib/utils/assetPath';
+import type { GatekeeperBattleType } from '@/types/game';
 
-// ── Per-gatekeeper timing slider config ──
-interface GkSliderConfig {
-  greenWidth: number;
-  yellowWidth: number;
-  speed: number;
-  flickerInterval?: number;
-  zoneShift?: boolean;
-  jitter?: boolean;
-  speedVariance?: number;
-  speedRamp?: number;
-  multiTap?: number;
-  reverseDirection?: boolean;
-  preDamage?: number;
-}
-
-function getGkConfig(gkId: string, guardianCount: number): GkSliderConfig {
+// ── Timing slider config per gatekeeper ──
+function getTimingConfig(gkId: string, guardianCount: number) {
   switch (gkId) {
-    case 'gk-9': // Ice Goliath — flicker
-      return { greenWidth: 8, yellowWidth: 12, speed: 1.2, flickerInterval: 500 };
-    case 'gk-8': // Lord of Masks — shifting zones
-      return { greenWidth: 10, yellowWidth: 14, speed: 1.1, zoneShift: true };
-    case 'gk-7': // Blood Sentinel — fast + pre-damage
-      return { greenWidth: 10, yellowWidth: 12, speed: 0.8, preDamage: 2 };
-    case 'gk-6': // Flame Inquisitor — jitter
-      return { greenWidth: 9, yellowWidth: 12, speed: 1.0, jitter: true };
-    case 'gk-5': // Avatar of Wrath — speed ramp
+    case 'gk-9': // Ice — narrow + flicker
+      return { greenWidth: 8, yellowWidth: 12, speed: 1.2, flicker: 500 as const };
+    case 'gk-5': // Wrath — speed ramp
       return { greenWidth: 9, yellowWidth: 13, speed: 1.0, speedRamp: 0.15 };
-    case 'gk-4': // Golden Golem — shrinks per guardian
-      return {
-        greenWidth: Math.max(3, 12 - guardianCount),
-        yellowWidth: Math.max(5, 15 - guardianCount),
-        speed: 1.0,
-      };
-    case 'gk-3': // Cerberus — triple tap
-      return { greenWidth: 12, yellowWidth: 14, speed: 0.9, multiTap: 3 };
-    case 'gk-2': // Storm Wraith — speed variance
-      return { greenWidth: 9, yellowWidth: 12, speed: 0.9, speedVariance: 0.4 };
-    case 'gk-1': // Shadow of Virgil — ultra hard
-      return { greenWidth: 5, yellowWidth: 10, speed: 0.55, reverseDirection: true };
+    case 'gk-2': // Storm — speed variance
+      return { greenWidth: 9, yellowWidth: 12, speed: 0.9, speedVar: 0.4 };
+    case 'gk-1': // Virgil — ultra hard + reverse
+      return { greenWidth: 5, yellowWidth: 10, speed: 0.55, reverse: true };
     default:
       return { greenWidth: 10, yellowWidth: 14, speed: 1.0 };
   }
@@ -61,87 +37,212 @@ export default function GatekeeperModal() {
   const resolveGatekeeperAction = useGameStore((s) => s.resolveGatekeeperAction);
   const locale = useLocale((s) => s.locale);
 
-  const [sliderResult, setSliderResult] = useState<SliderResult | null>(null);
+  const [result, setResult] = useState<boolean | null>(null);
   const [resolved, setResolved] = useState(false);
 
-  // ── Guardian bonus for green/yellow zone ──
-  const guardianBonusPct = useMemo(() => {
-    try {
-      let bonus = 0;
-      const cards = player?.guardianCards ?? [];
-      if (cards.some((g) => g?.id === 'guardian-3')) bonus += 5;
-      if (cards.some((g) => g?.id === 'guardian-5')) bonus += 3;
-      if (cards.some((g) => g?.id === 'guardian-6')) bonus += 2;
-      if (cards.some((g) => g?.id === 'guardian-1')) bonus = Math.floor(bonus * 1.5);
-      return bonus;
-    } catch { return 0; }
-  }, [player?.guardianCards]);
+  // ── Guardian bonuses ──
+  const guardianCards = player?.guardianCards ?? [];
+  const hasLantern = guardianCards.some((g) => g?.id === 'guardian-6');
+  const bonusPct = useMemo(() => {
+    let b = 0;
+    if (guardianCards.some((g) => g?.id === 'guardian-3')) b += 5;
+    if (guardianCards.some((g) => g?.id === 'guardian-5')) b += 3;
+    if (guardianCards.some((g) => g?.id === 'guardian-6')) b += 2;
+    if (guardianCards.some((g) => g?.id === 'guardian-1')) b = Math.floor(b * 1.5);
+    return b;
+  }, [guardianCards]);
 
-  // ── Slider config ──
-  const sliderConfig = useMemo(() => {
-    if (!gk?.id) return { greenWidth: 10, yellowWidth: 14, speed: 1.0 };
-    const base = getGkConfig(gk.id, player?.guardianCards?.length ?? 0);
-    return {
-      ...base,
-      greenWidth: Math.max(3, Math.min(40, base.greenWidth + guardianBonusPct)),
-      yellowWidth: Math.max(5, Math.min(35, base.yellowWidth + guardianBonusPct)),
-    };
-  }, [gk?.id, player?.guardianCards?.length, guardianBonusPct]);
-
-  // ── Handlers ──
-  const handleSliderResult = useCallback((result: SliderResult) => {
-    try {
-      setSliderResult(result);
-      setResolved(true);
-      const battleRoll = result === 'critical' ? 6 : result === 'victory' ? 5 : 1;
-      setBattleRoll(battleRoll);
-    } catch { /* ignore */ }
+  // ── Resolve helpers ──
+  const resolveWithResult = useCallback((success: boolean, d6val?: number) => {
+    setResult(success);
+    setResolved(true);
+    const roll = d6val ?? (success ? 6 : 1);
+    setBattleRoll(roll);
   }, [setBattleRoll]);
 
   const handleContinue = useCallback(() => {
-    try {
-      resolveGatekeeperAction();
-    } catch { /* ignore */ }
+    resolveGatekeeperAction();
   }, [resolveGatekeeperAction]);
 
-  // ── Pre-damage for Blood Sentinel ──
+  // ── Pre-damage for GK-7 ──
   const preDamageDone = useRef(false);
   useEffect(() => {
-    if (!gk?.id || !sliderConfig.preDamage || preDamageDone.current || resolved) return;
+    if (gk?.id !== 'gk-7' || preDamageDone.current || resolved) return;
     preDamageDone.current = true;
     try {
       const state = useGameStore.getState();
       if (state.player) {
         const p = { ...state.player, buffs: [...(state.player.buffs ?? [])] };
-        p.hp = Math.max(0, p.hp - (sliderConfig.preDamage ?? 0));
+        p.hp = Math.max(0, p.hp - 2);
         useGameStore.setState({ player: p });
       }
     } catch { /* ignore */ }
-  }, [gk?.id, sliderConfig.preDamage, resolved]);
+  }, [gk?.id, resolved]);
 
-  // ── Early return after ALL hooks ──
+  // ── Early return ──
   if (phase !== 'gatekeeper' || !gk) return null;
 
-  // ── Derived values (safe: gk is non-null here) ──
+  // ── Safe derived values ──
   const name = locale === 'en' ? gk.nameEn : gk.name;
   const title = locale === 'en' ? gk.titleEn : gk.title;
   const mechanic = locale === 'en' ? gk.mechanicEn : gk.mechanic;
-  const gimmickLabel = locale === 'en' ? '⚡ UNIQUE GIMMICK' : '⚡ 고유 기믹';
-  const targetLabel = locale === 'en' ? 'D6 TARGET' : 'D6 목표';
-  const promptText = locale === 'en'
-    ? 'Time your tap in the green zone!'
-    : '녹색 존에 타이밍을 맞춰 탭하세요!';
-
-  const zoneLabels = gk.id === 'gk-3'
-    ? { miss: locale === 'en' ? 'FAIL' : '실패', hit: locale === 'en' ? 'PASS' : '통과', crit: locale === 'en' ? 'PERF' : '완벽' }
-    : undefined;
-
   const imgPath = assetPath(`/images/${locale}/gatekeepers/${gk.id}.svg`);
+  const battleType: GatekeeperBattleType = gk.battleType;
+
+  // ── Timing slider config (if applicable) ──
+  const timingCfg = (battleType === 'timing' || battleType === 'multitap' || battleType === 'final')
+    ? getTimingConfig(gk.id, guardianCards.length)
+    : null;
+
+  // ── Render battle minigame ──
+  const renderBattle = () => {
+    switch (battleType) {
+      // ── TimingSlider (GK-9 ice, GK-5 wrath, GK-2 storm) ──
+      case 'timing': {
+        if (!timingCfg) return null;
+        const greenW = Math.max(3, Math.min(40, timingCfg.greenWidth + bonusPct));
+        const yellowW = Math.max(5, Math.min(35, timingCfg.yellowWidth + bonusPct));
+        return (
+          <TimingSlider
+            greenWidth={greenW}
+            yellowWidth={yellowW}
+            speed={timingCfg.speed}
+            flickerInterval={timingCfg.flicker}
+            speedRamp={timingCfg.speedRamp}
+            speedVariance={timingCfg.speedVar}
+            reverseDirection={timingCfg.reverse}
+            tapPrompt={t('gk.tapPrompt', locale)}
+            onResult={(r: SliderResult) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 1)}
+          />
+        );
+      }
+
+      // ── Card Match (GK-8 masks) ──
+      case 'cardmatch':
+        return (
+          <CardMatch
+            cardCount={gk.power <= 5 ? 3 : 4}
+            shuffleSpeed={0.3}
+            showHint={hasLantern}
+            removeTrap={false}
+            onResult={(correct: boolean) => resolveWithResult(correct, correct ? 6 : 2)}
+          />
+        );
+
+      // ── Rapid Tap (GK-7 blood) ──
+      case 'rapidtap':
+        return (
+          <RapidTap
+            targetTaps={15 + gk.power * 2}
+            timeLimit={5}
+            onResult={(success) => resolveWithResult(success, success ? 6 : 2)}
+          />
+        );
+
+      // ── Quiz (GK-6 flame) ──
+      case 'quiz':
+        return (
+          <QuizChallenge
+            questionCount={3}
+            requiredCorrect={2}
+            showHint={hasLantern}
+            onResult={(passed, score) => resolveWithResult(passed, passed ? 6 : score >= 1 ? 4 : 1)}
+          />
+        );
+
+      // ── Choice (GK-4 gold) ──
+      case 'choice':
+        return resolved ? null : (
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => {
+                // Safe: 70% success
+                const success = Math.random() < 0.7;
+                resolveWithResult(success, success ? 5 : 2);
+              }}
+              className="w-full py-3 bg-emerald-800 hover:bg-emerald-700 text-emerald-200 font-bold rounded-xl text-sm active:scale-95 transition-transform border border-emerald-600/50"
+            >
+              🛡 {locale === 'en' ? 'Safe Path (70% win)' : '안전한 길 (70% 승리)'}
+            </button>
+            <button
+              onClick={() => {
+                // Gamble: 30% success, 3x reward
+                const success = Math.random() < 0.3;
+                resolveWithResult(success, success ? 6 : 1);
+              }}
+              className="w-full py-3 bg-red-800 hover:bg-red-700 text-red-200 font-bold rounded-xl text-sm active:scale-95 transition-transform border border-red-600/50"
+            >
+              ⚡ {locale === 'en' ? 'Gamble (30% win, 3x HP!)' : '도박 (30% 승리, 3배 HP!)'}
+            </button>
+          </div>
+        );
+
+      // ── MultiTap Timing (GK-3 cerberus) ──
+      case 'multitap': {
+        if (!timingCfg) return null;
+        const greenW = Math.max(5, Math.min(40, (timingCfg.greenWidth || 12) + bonusPct));
+        const yellowW = Math.max(5, Math.min(35, (timingCfg.yellowWidth || 14) + bonusPct));
+        return (
+          <TimingSlider
+            greenWidth={greenW}
+            yellowWidth={yellowW}
+            speed={timingCfg.speed || 0.9}
+            multiTap={3}
+            tapPrompt={t('gk.tapPrompt', locale)}
+            onResult={(r: SliderResult) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 1)}
+          />
+        );
+      }
+
+      // ── Final (GK-1 virgil) - quiz first, then timing ──
+      case 'final': {
+        if (resolved && result !== null) {
+          // Phase 2: timing slider
+          if (!timingCfg) return null;
+          const greenW = Math.max(3, Math.min(40, timingCfg.greenWidth + bonusPct));
+          const yellowW = Math.max(5, Math.min(35, timingCfg.yellowWidth + bonusPct));
+          return (
+            <TimingSlider
+              greenWidth={greenW}
+              yellowWidth={yellowW}
+              speed={timingCfg.speed}
+              reverseDirection={timingCfg.reverse}
+              tapPrompt={t('gk.tapPrompt', locale)}
+              onResult={(r: SliderResult) => {
+                const success = r !== 'defeat';
+                resolveWithResult(success, r === 'critical' ? 6 : r === 'victory' ? 5 : 1);
+              }}
+            />
+          );
+        }
+        // Phase 1: single quiz question
+        return (
+          <QuizChallenge
+            questionCount={1}
+            requiredCorrect={1}
+            showHint={hasLantern}
+            onResult={(passed, score) => {
+              if (passed) {
+                setResult(true);
+                setResolved(true);
+                // Don't call resolveWithResult yet - wait for timing phase
+              } else {
+                resolveWithResult(false, 1);
+              }
+            }}
+          />
+        );
+      }
+
+      default:
+        return <p className="text-center text-stone-400 text-sm">Unknown battle type</p>;
+    }
+  };
 
   return (
     <AnimatePresence>
       <motion.div
-        key="gatekeeper-modal"
+        key="gk-modal"
         className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-3"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       >
@@ -150,7 +251,7 @@ export default function GatekeeperModal() {
           initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 250, damping: 20 }}
         >
-          {/* Card image + name + power */}
+          {/* Header: card image + name + power */}
           <div className="flex gap-3 items-start mb-3">
             <div className="shrink-0 w-[100px] aspect-[750/1050] rounded-lg overflow-hidden border border-purple-700/50 shadow-lg">
               <object data={imgPath} type="image/svg+xml" className="w-full h-full">
@@ -163,57 +264,47 @@ export default function GatekeeperModal() {
               </span>
               <h2 className="text-base font-bold text-amber-300 font-serif truncate">{name}</h2>
               <p className="text-[11px] text-stone-400 italic">{title}</p>
-              <p className="text-amber-400 font-bold text-xl font-serif mt-1">
-                <span className="text-[9px] text-stone-500 block">{targetLabel}</span>
-                {gk.power}
-              </p>
+              <div className="flex gap-2 mt-1">
+                <p className="text-amber-400 font-bold text-xl font-serif">
+                  <span className="text-[9px] text-stone-500 block">{locale === 'en' ? 'POWER' : '파워'}</span>
+                  {gk.power}
+                </p>
+                <span className="text-[9px] bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded-full self-start mt-1">
+                  {battleType === 'timing' ? '🎯 Timing' :
+                   battleType === 'cardmatch' ? '🃏 Cards' :
+                   battleType === 'rapidtap' ? '⚡ Speed' :
+                   battleType === 'quiz' ? '📜 Quiz' :
+                   battleType === 'choice' ? '🎲 Choice' :
+                   battleType === 'multitap' ? '👆 Multi' :
+                   battleType === 'final' ? '👑 Final' : '???'}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Mechanic + Gimmick */}
+          {/* Mechanic description */}
           <div className="bg-stone-800/70 rounded-lg p-2.5 mb-2 border border-stone-700">
-            <p className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">{gimmickLabel}</p>
+            <p className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">
+              {locale === 'en' ? '⚡ MECHANIC' : '⚡ 전투 방식'}
+            </p>
             <p className="text-[11px] text-stone-300 leading-relaxed">{mechanic}</p>
-            {guardianBonusPct > 0 && (
+            {bonusPct > 0 && (battleType === 'timing' || battleType === 'multitap' || battleType === 'final') && (
               <p className="text-[10px] text-emerald-400 mt-1 font-bold">
-                ✨ {t('gk.guardianBonus', locale, { n: guardianBonusPct })}
-              </p>
-            )}
-            {sliderConfig.preDamage && !resolved && (
-              <p className="text-[10px] text-red-400 mt-1 font-bold animate-pulse">
-                {t('gk.preDamage', locale)}
+                ✨ {t('gk.guardianBonus', locale, { n: bonusPct })}
               </p>
             )}
           </div>
 
-          {/* Timing Slider or Result */}
-          {!resolved ? (
-            <div className="mb-3">
-              <p className="text-center text-xs text-stone-400 mb-2">{promptText}</p>
-              <TimingSlider
-                greenWidth={sliderConfig.greenWidth}
-                yellowWidth={sliderConfig.yellowWidth}
-                speed={sliderConfig.speed}
-                flickerInterval={sliderConfig.flickerInterval}
-                zoneShift={sliderConfig.zoneShift}
-                jitter={sliderConfig.jitter}
-                speedVariance={sliderConfig.speedVariance}
-                speedRamp={sliderConfig.speedRamp}
-                multiTap={sliderConfig.multiTap}
-                reverseDirection={sliderConfig.reverseDirection}
-                tapPrompt={t('gk.tapPrompt', locale)}
-                zoneLabels={zoneLabels}
-                onResult={handleSliderResult}
-              />
-            </div>
-          ) : (
+          {/* Battle area */}
+          <div className="mb-3">
+            {renderBattle()}
+          </div>
+
+          {/* Continue button (after result) */}
+          {resolved && result !== null && battleType !== 'final' && (
             <div className="mb-3 text-center">
-              <p className={`text-xl font-bold mb-1 ${
-                sliderResult === 'critical' ? 'text-emerald-400' :
-                sliderResult === 'victory' ? 'text-yellow-400' : 'text-red-400'
-              }`}>
-                {sliderResult === 'critical' ? '🌟 CRITICAL! D6=6' :
-                 sliderResult === 'victory' ? '⚔ Hit! D6=5' : '💀 Miss! D6=1'}
+              <p className={`text-xl font-bold mb-1 ${result ? 'text-emerald-400' : 'text-red-400'}`}>
+                {result ? (locale === 'en' ? '✅ SUCCESS!' : '✅ 성공!') : (locale === 'en' ? '❌ FAILED!' : '❌ 실패!')}
               </p>
               <Button variant="primary" size="lg" onClick={handleContinue} className="w-full min-h-[48px]">
                 {locale === 'en' ? 'Resolve ▶' : '결과 확인 ▶'}
@@ -221,7 +312,19 @@ export default function GatekeeperModal() {
             </div>
           )}
 
-          {/* Reward / Penalty summary */}
+          {/* For GK-1: show continue after BOTH phases complete */}
+          {resolved && result !== null && battleType === 'final' && (
+            <div className="mb-3 text-center">
+              <p className={`text-xl font-bold mb-1 ${result ? 'text-emerald-400' : 'text-red-400'}`}>
+                {result ? (locale === 'en' ? '✅ ESCAPE!' : '✅ 탈출!') : (locale === 'en' ? '❌ FAILED!' : '❌ 실패!')}
+              </p>
+              <Button variant="primary" size="lg" onClick={handleContinue} className="w-full min-h-[48px]">
+                {locale === 'en' ? 'Resolve ▶' : '결과 확인 ▶'}
+              </Button>
+            </div>
+          )}
+
+          {/* Reward/Penalty summary */}
           <div className="flex gap-2 text-[10px] justify-center mt-2">
             <span className="text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded-full">
               ✅ HP+{gk.rewardHp} + 🃏

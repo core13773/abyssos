@@ -1,126 +1,99 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
 
 interface Props {
-  duration: number;  // seconds
-  onResult: (taps: number) => void;
+  targetTaps: number;
+  timeLimit: number;
+  onResult: (success: boolean, count: number) => void;
 }
 
-export default function RapidTap({ duration, onResult }: Props) {
+export default function RapidTap({ targetTaps, timeLimit, onResult }: Props) {
   const [phase, setPhase] = useState<'ready' | 'active' | 'done'>('ready');
-  const [taps, setTaps] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(duration);
-  const tapAreaRef = useRef<HTMLDivElement>(null);
-  const tapsRef = useRef(0);
+  const [tapCount, setTapCount] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(timeLimit);
+  const tapRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+  const onResultRef = useRef(onResult);
+  onResultRef.current = onResult;
 
-  useEffect(() => {
-    if (phase !== 'active') return;
-
-    const startTime = performance.now();
-
-    const timer = setInterval(() => {
-      const elapsed = (performance.now() - startTime) / 1000;
-      const remaining = Math.max(0, duration - elapsed);
+  const startGame = useCallback(() => {
+    setPhase('active');
+    tapRef.current = 0;
+    setTapCount(0);
+    setTimeLeft(timeLimit);
+    const startTime = Date.now();
+    timerRef.current = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      const remaining = Math.max(0, timeLimit - elapsed);
       setTimeLeft(remaining);
-
       if (remaining <= 0) {
-        clearInterval(timer);
+        clearInterval(timerRef.current);
         setPhase('done');
-        setTimeout(() => onResult(tapsRef.current), 500);
+        onResultRef.current(tapRef.current >= targetTaps, tapRef.current);
       }
     }, 50);
+  }, [timeLimit, targetTaps]);
 
-    return () => clearInterval(timer);
-  }, [phase, duration, onResult]);
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
-  const handleTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (phase === 'ready') {
-      setPhase('active');
-      tapsRef.current = 1;
-      setTaps(1);
-      return;
+  const handleTap = useCallback(() => {
+    if (phase !== 'active') return;
+    tapRef.current += 1;
+    setTapCount(tapRef.current);
+    if (tapRef.current >= targetTaps) {
+      clearInterval(timerRef.current);
+      setPhase('done');
+      setTimeout(() => onResultRef.current(true, tapRef.current), 300);
     }
+  }, [phase, targetTaps]);
 
-    if (phase === 'active') {
-      tapsRef.current += 1;
-      setTaps(tapsRef.current);
-    }
-  }, [phase]);
-
-  const pct = (timeLeft / duration) * 100;
-
-  const getGrade = (t: number) => {
-    if (t >= 40) return { label: 'S', color: 'text-yellow-300', bg: 'bg-yellow-500' };
-    if (t >= 30) return { label: 'A', color: 'text-emerald-400', bg: 'bg-emerald-500' };
-    if (t >= 20) return { label: 'B', color: 'text-blue-400', bg: 'bg-blue-500' };
-    if (t >= 10) return { label: 'C', color: 'text-orange-400', bg: 'bg-orange-500' };
-    return { label: 'D', color: 'text-red-400', bg: 'bg-red-500' };
-  };
-
-  const grade = getGrade(taps);
+  const pct = Math.min(100, (tapCount / targetTaps) * 100);
+  const timePct = (timeLeft / timeLimit) * 100;
 
   return (
-    <div className="flex flex-col items-center gap-3 select-none">
-      {phase !== 'done' && (
-        <>
-          {/* Timer bar */}
-          <div className="w-full h-3 bg-stone-800 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-amber-500 rounded-full"
-              style={{ width: `${pct}%` }}
-              animate={{ width: `${pct}%` }}
-              transition={{ duration: 0.05 }}
+    <div className="flex flex-col items-center gap-3 select-none" onClick={handleTap}>
+      {phase === 'ready' && (
+        <div className="text-center">
+          <p className="text-sm text-amber-400 font-bold mb-2">⚡ Tap {targetTaps} times!</p>
+          <p className="text-xs text-stone-400 mb-1">Time limit: {timeLimit}s</p>
+          <button
+            onClick={(e) => { e.stopPropagation(); startGame(); }}
+            className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-lg active:scale-95 transition-transform"
+          >
+            👆 START!
+          </button>
+        </div>
+      )}
+
+      {phase === 'active' && (
+        <div className="w-full text-center">
+          <div className="h-2 bg-stone-800 rounded-full overflow-hidden mb-2">
+            <div
+              className={`h-full rounded-full ${timePct > 30 ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`}
+              style={{ width: `${timePct}%`, transition: 'width 0.05s linear' }}
             />
           </div>
-
-          {/* Tap area */}
-          <div
-            ref={tapAreaRef}
-            className="w-full h-32 rounded-xl flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-            style={{ background: 'rgba(217,119,6,0.15)' }}
-            onClick={handleTap}
-            onTouchStart={handleTap}
-          >
-            <div className="text-center">
-              {phase === 'ready' && (
-                <span className="text-white/70 text-xl font-bold animate-pulse">TAP TO START!</span>
-              )}
-              {phase === 'active' && (
-                <>
-                  <motion.span
-                    key={taps}
-                    className="text-4xl font-bold text-amber-400 block"
-                    initial={{ scale: 1.4 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.1 }}
-                  >
-                    {taps}
-                  </motion.span>
-                  <span className="text-sm text-amber-400/60">TAP RAPIDLY!</span>
-                </>
-              )}
-            </div>
+          <p className="text-[10px] text-stone-500 mb-1">{timeLeft.toFixed(1)}s</p>
+          <div className="h-3 bg-stone-800 rounded-full overflow-hidden mb-3">
+            <div
+              className="h-full bg-amber-500 rounded-full"
+              style={{ width: `${pct}%`, transition: 'width 0.05s linear' }}
+            />
           </div>
-        </>
+          <p className="text-3xl font-bold text-amber-400 font-mono">{tapCount}<span className="text-stone-600 text-lg">/{targetTaps}</span></p>
+          <p className="text-xs text-stone-500 mt-2 animate-pulse">👆 TAP ANYWHERE!</p>
+        </div>
       )}
 
       {phase === 'done' && (
-        <motion.div
-          className="text-center py-4"
-          initial={{ scale: 0.5 }}
-          animate={{ scale: 1 }}
-        >
-          <p className="text-4xl font-bold text-amber-400">{taps}</p>
-          <p className="text-sm text-stone-400">taps in {duration}s</p>
-          <p className={`text-2xl font-bold mt-2 ${grade.color}`}>
-            Grade {grade.label}
+        <div className="text-center">
+          <p className={`text-2xl font-bold ${tapCount >= targetTaps ? 'text-emerald-400' : 'text-red-400'}`}>
+            {tapCount >= targetTaps ? `✅ Success! ${tapCount}` : `❌ Failed... ${tapCount}/${targetTaps}`}
           </p>
-        </motion.div>
+        </div>
       )}
     </div>
   );

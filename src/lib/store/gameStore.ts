@@ -257,7 +257,9 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (total >= gk.power) {
         const newCircleId = (p.currentCircleId - 1) as 1|2|3|4|5|6|7|8|9;
         if (newCircleId >= 1) { p.currentCircleId = newCircleId; p.currentTileId = `c${newCircleId}-t0`; }
-        p.hp = Math.min(p.maxHp, p.hp + gk.rewardHp);
+        // GK-4 Golden Golem: gamble win (D6=6) = 3x reward
+        const rewardMult = (gk.id === 'gk-4' && state.battleRoll === 6) ? 3 : 1;
+        p.hp = Math.min(p.maxHp, p.hp + gk.rewardHp * rewardMult);
         p.moveBonus = (p.moveBonus || 0) + gk.rewardMove;
 
         const guardian = getGuardian(gk.guardianId);

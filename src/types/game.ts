@@ -30,6 +30,15 @@ export type GamePhase =
   | 'guardianReward'
   | 'gameOver';
 
+export type GatekeeperBattleType =
+  | 'timing'     // TimingSlider with gimmick (GK-9, GK-5, GK-2)
+  | 'cardmatch'  // Card memory match (GK-8)
+  | 'rapidtap'   // Rapid tap speed test (GK-7)
+  | 'quiz'       // Lore quiz (GK-6)
+  | 'choice'     // Risk-reward choice (GK-4)
+  | 'multitap'   // Multi-tap timing (GK-3)
+  | 'final';     // Combined quiz + timing (GK-1)
+
 // ---- Monster Card (18 types: 2 per circle) ----
 
 export interface MonsterCard {
@@ -58,6 +67,7 @@ export interface GatekeeperCard {
   titleEn: string;
   element: ElementType;
   power: number;         // D6 + bonus >= power → 승리
+  battleType: GatekeeperBattleType; // 고유 전투 타입
   mechanic: string;      // 고유 기믹 설명
   mechanicEn: string;
   rewardHp: number;
