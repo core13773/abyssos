@@ -90,51 +90,27 @@ export default function PurgatorioDicePanel() {
               </div>
               <span className="text-[10px] text-amber-400 font-mono font-bold">{sum}</span>
             </div>
-            {/* VS */}
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-bold text-red-600 animate-pulse">VS</span>
-            </div>
-            {/* Demon dice */}
-            {demonDice ? (
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[9px] text-stone-600 font-bold uppercase tracking-wider">{locale === 'en' ? 'DEMON' : '악마'}</span>
-                <div className="flex gap-1.5">
-                  <DiceFace value={demonDice[0]} size={42} fillColor="#991b1b" dotColor="#fca5a5" />
-                  <DiceFace value={demonDice[1]} size={42} fillColor="#991b1b" dotColor="#fca5a5" />
+            {/* VS + Demon dice (only if demonDice available) */}
+            {demonDice && demonDice.length >= 2 ? (
+              <>
+                <div className="flex flex-col items-center">
+                  <span className="text-lg font-bold text-red-600 animate-pulse">VS</span>
                 </div>
-                <span className="text-[10px] text-red-400 font-mono font-bold">{demonSum}</span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-0.5 opacity-30">
-                <span className="text-[9px] text-stone-600 font-bold uppercase tracking-wider">{locale === 'en' ? 'DEMON' : '악마'}</span>
-                <div className="flex gap-1.5">
-                  <DiceFace value={1} size={42} rolling={isRolling} fillColor="#991b1b" dotColor="#fca5a5" />
-                  <DiceFace value={6} size={42} rolling={isRolling} fillColor="#991b1b" dotColor="#fca5a5" />
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-[9px] text-stone-600 font-bold uppercase tracking-wider">{locale === 'en' ? 'DEMON' : '악마'}</span>
+                  <div className="flex gap-1.5">
+                    <DiceFace value={demonDice[0]} size={42} fillColor="#991b1b" dotColor="#fca5a5" />
+                    <DiceFace value={demonDice[1]} size={42} fillColor="#991b1b" dotColor="#fca5a5" />
+                  </div>
+                  <span className="text-[10px] text-red-400 font-mono font-bold">{demonSum}</span>
                 </div>
-                <span className="text-[10px] text-stone-700 font-mono">?</span>
-              </div>
-            )}
+              </>
+            ) : null}
           </>
         ) : (
           <>
-            {/* Idle - both player and demon placeholder */}
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] text-stone-600 font-bold uppercase tracking-wider">{locale === 'en' ? 'YOU' : '당신'}</span>
-              <div className="flex gap-1.5">
-                <DiceFace value={1} size={42} rolling={isRolling} />
-                <DiceFace value={isParadiso ? 4 : 6} size={42} rolling={isRolling} />
-              </div>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-bold text-red-600">VS</span>
-            </div>
-            <div className="flex flex-col items-center gap-0.5 opacity-40">
-              <span className="text-[9px] text-stone-600 font-bold uppercase tracking-wider">{locale === 'en' ? 'DEMON' : '악마'}</span>
-              <div className="flex gap-1.5">
-                <DiceFace value={4} size={42} rolling={isRolling} fillColor="#991b1b" dotColor="#fca5a5" />
-                <DiceFace value={3} size={42} rolling={isRolling} fillColor="#991b1b" dotColor="#fca5a5" />
-              </div>
-            </div>
+            <DiceFace value={1} size={50} rolling={isRolling} />
+            <DiceFace value={isParadiso ? 4 : 6} size={50} rolling={isRolling} />
           </>
         )}
       </div>

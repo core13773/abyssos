@@ -182,39 +182,51 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (poison) p.hp = Math.max(0, p.hp + poison.value);
 
       // ── Demon vs User Dice Duel ──
-      const playerRoll = rollDice(_rng);
-      const demonRoll = rollDice(_rng);
-      const demonBonus = getDemonBonus(p.currentCircleId);
-      const duel = resolveDiceDuel(playerRoll, demonRoll, demonBonus);
+      let duelResult: ReturnType<typeof resolveDiceDuel>;
+      try {
+        const playerRoll = rollDice(_rng);
+        const demonRoll = rollDice(_rng);
+        const demonBonus = getDemonBonus(p.currentCircleId);
+        duelResult = resolveDiceDuel(playerRoll, demonRoll, demonBonus);
+      } catch {
+        // Fallback: if duel fails for any reason, use simple roll
+        const simpleRoll = rollDice(_rng);
+        set({
+          player: p, dice: simpleRoll.dice, demonDice: null, isDouble: simpleRoll.isDouble, doubleCount: 0,
+          phase: 'moving', shakeScreen: false, showSparkles: false,
+          log: [...state.log, { turn: state.turnNumber, message: `🎲 [${simpleRoll.dice[0]}][${simpleRoll.dice[1]}] = ${simpleRoll.sum} spaces`, type: 'roll' }],
+        });
+        return;
+      }
 
       const msgs: string[] = [];
       let showSparkles = false;
       let shakeScreen = false;
 
-      if (duel.outcome === 'player_crit' || duel.outcome === 'player_win') {
+      if (duelResult.outcome === 'player_crit' || duelResult.outcome === 'player_win') {
         // Player wins the duel — can move
-        showSparkles = duel.outcome === 'player_crit';
-        msgs.push(loc() === 'en' ? duel.message : duel.messageKo);
+        showSparkles = duelResult.outcome === 'player_crit';
+        msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
         p.moveBonus = (p.moveBonus || 0); // preserve existing move bonus
 
-        const isDouble = playerRoll.isDouble;
+        const isDouble = duelResult.playerRoll.isDouble;
         const doubleCount = isDouble ? state.doubleCount + 1 : 0;
 
         set({
-          player: p, dice: playerRoll.dice, demonDice: demonRoll.dice, isDouble, doubleCount,
+          player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice, isDouble, doubleCount,
           phase: 'moving', shakeScreen, showSparkles,
           log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
         });
       } else {
         // Demon wins — take damage, can't move, turn passes
         shakeScreen = true;
-        const dmg = duel.outcome === 'demon_crit' ? 5 : 3;
+        const dmg = duelResult.outcome === 'demon_crit' ? 5 : 3;
         p.hp = Math.max(0, p.hp - dmg);
-        msgs.push(loc() === 'en' ? duel.message : duel.messageKo);
+        msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
         msgs.push(loc() === 'en' ? `-${dmg} HP! Turn lost.` : `-${dmg} HP! 턴 소실.`);
 
         set({
-          player: p, dice: playerRoll.dice, demonDice: demonRoll.dice,
+          player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice,
           phase: 'rolling', // stay in rolling — player must roll again
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
           isDouble: false, doubleCount: 0,
