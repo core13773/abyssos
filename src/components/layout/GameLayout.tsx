@@ -17,6 +17,7 @@ import PurificationRewardModal from '@/components/guardian/PurificationRewardMod
 import CelestialRewardModal from '@/components/guardian/CelestialRewardModal';
 import PurgatorioContinueModal from '@/components/events/PurgatorioContinueModal';
 
+import DemonDuel from '@/components/battle/DemonDuel';
 import SinChoiceModal from '@/components/events/SinChoiceModal';
 
 export default function GameLayout() {
@@ -53,6 +54,7 @@ export default function GameLayout() {
       </section>
 
       <TutorialModal />
+      <DemonDuel />
       {/* Inferno modals */}
       {isInferno && <BattleModal />}
       {isInferno && <GatekeeperModal />}

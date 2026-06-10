@@ -24,6 +24,7 @@ export type ElementType =
 export type GamePhase =
   | 'rolling'
   | 'moving'
+  | 'demon_duel'
   | 'battle'
   | 'event'
   | 'gatekeeper'

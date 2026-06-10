@@ -63,7 +63,7 @@ function saveCollectedCards(realm: 'inferno' | 'purgatorio' | 'paradiso', cardId
   } catch { /* ignore */ }
 }
 
-import { rollDice, resolveDiceDuel, getDemonBonus } from '@/lib/game/dice';
+import { rollDice } from '@/lib/game/dice';
 import { getNextTileV4, remainingTilesInCircle } from '@/lib/game/board-v4';
 import { buildPurgatorioBoard, getNextPurgatorioTile, remainingTilesInTerrace } from '@/lib/game/purgatorio-board';
 import { resolveMonsterBattle } from '@/lib/game/battle';
@@ -181,46 +181,19 @@ export const useGameStore = create<GameStore>((set, get) => {
       const poison = p.buffs.find((b) => b.id === 'poison');
       if (poison) p.hp = Math.max(0, p.hp + poison.value);
 
-      // ── Demon vs User Dice Duel ──
+      // ── Roll movement dice, then Demon Duel mini-game ──
       const playerRoll = rollDice(_rng);
-      const demonRoll = rollDice(_rng);
-      const demonBonus = getDemonBonus(p.currentCircleId);
-      const duelResult = resolveDiceDuel(playerRoll, demonRoll, demonBonus);
+      const isDouble = playerRoll.isDouble;
+      const doubleCount = isDouble ? state.doubleCount + 1 : 0;
 
-      const msgs: string[] = [];
-      let showSparkles = false;
-      let shakeScreen = false;
-
-      const msg = loc() === 'en' ? duelResult.message : duelResult.messageKo;
-
-      if (duelResult.outcome === 'player_crit' || duelResult.outcome === 'player_win') {
-        const isDouble = duelResult.playerRoll.isDouble;
-        const doubleCount = isDouble ? state.doubleCount + 1 : 0;
-
-        set({
-          player: p,
-          dice: [duelResult.playerRoll.dice[0], duelResult.playerRoll.dice[1]],
-          demonDice: null,
-          isDouble, doubleCount,
-          phase: 'moving', shakeScreen: false,
-          showSparkles: duelResult.outcome === 'player_crit',
-          log: [...state.log, { turn: state.turnNumber, message: msg, type: 'roll' }],
-        });
-      } else {
-        shakeScreen = true;
-        const dmg = duelResult.outcome === 'demon_crit' ? 5 : 3;
-        p.hp = Math.max(0, p.hp - dmg);
-        set({
-          player: p,
-          dice: [duelResult.playerRoll.dice[0], duelResult.playerRoll.dice[1]],
-          demonDice: null,
-          phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          isDouble: false, doubleCount: 0, shakeScreen, showSparkles: false,
-          log: [...state.log, { turn: state.turnNumber, message: msg, type: 'roll' }],
-        });
-      }
-      if (showSparkles) setTimeout(() => set({ showSparkles: false }), 2000);
-      if (shakeScreen) setTimeout(() => set({ shakeScreen: false }), 600);
+      set({
+        player: p,
+        dice: [playerRoll.dice[0], playerRoll.dice[1]],
+        demonDice: null,
+        isDouble, doubleCount,
+        phase: 'demon_duel',
+        log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? '👹 The demon challenges you!' : '👹 악마가 도전한다!', type: 'roll' }],
+      });
     },
 
     movePlayerAction: () => {
@@ -513,48 +486,20 @@ export const useGameStore = create<GameStore>((set, get) => {
       const poison = p.buffs.find((b) => b.id === 'poison');
       if (poison) p.hp = Math.max(0, p.hp + poison.value);
 
-      // ── Demon vs User Dice Duel (Purgatorio) + Auto-Move ──
+      // ── Roll movement dice (Purgatorio) ──
       const playerRoll = rollDice(_rng);
-      const demonRoll = rollDice(_rng);
-      const demonBonus = getDemonBonus(p.currentTerraceId ?? 7);
-      const duel = resolveDiceDuel(playerRoll, demonRoll, demonBonus);
+      const isDouble = playerRoll.isDouble;
+      const doubleCount = isDouble ? state.purgatorioDoubleCount + 1 : 0;
 
-      const msgs: string[] = [];
-      let showSparkles = false;
-      let shakeScreen = false;
-
-      if (duel.outcome === 'player_crit' || duel.outcome === 'player_win') {
-        showSparkles = duel.outcome === 'player_crit';
-        msgs.push(loc() === 'en' ? duel.message : duel.messageKo);
-        if (playerRoll.isDouble && p.purificationCards.some((c) => c.id === 'purification-4')) {
-          msgs.push(t('purgatorio.stepOfZeal', loc()));
-        }
-
-        const isDouble = playerRoll.isDouble;
-        const doubleCount = isDouble ? state.purgatorioDoubleCount + 1 : 0;
-        if (isDouble && p.purificationCards.some((c) => c.id === 'purification-4')) {
-          msgs.push(t('purgatorio.stepOfZeal', loc()));
-        }
-
-        set({
-          player: p, purgatorioDice: playerRoll.dice, demonDice: demonRoll.dice, purgatorioIsDouble: isDouble, purgatorioDoubleCount: doubleCount,
-          phase: 'purgatorio_moving', shakeScreen: false, showSparkles,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-        });
-      } else {
-        shakeScreen = true;
-        const dmg = duel.outcome === 'demon_crit' ? 5 : 3;
-        p.hp = Math.max(0, p.hp - dmg);
-        msgs.push(loc() === 'en' ? duel.message : duel.messageKo);
-        set({
-          player: p, purgatorioDice: playerRoll.dice, demonDice: demonRoll.dice,
-          phase: 'purgatorio_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          purgatorioIsDouble: false, purgatorioDoubleCount: 0, shakeScreen, showSparkles,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-        });
+      if (isDouble && p.purificationCards.some((c) => c.id === 'purification-4')) {
+        // Step of Zeal bonus message handled in move
       }
-      if (showSparkles) setTimeout(() => set({ showSparkles: false }), 2000);
-      if (shakeScreen) setTimeout(() => set({ shakeScreen: false }), 600);
+
+      set({
+        player: p, purgatorioDice: playerRoll.dice, demonDice: null, purgatorioIsDouble: isDouble, purgatorioDoubleCount: doubleCount,
+        phase: 'purgatorio_moving',
+        log: [...state.log, { turn: state.turnNumber, message: `🎲 [${playerRoll.dice[0]}][${playerRoll.dice[1]}] = ${playerRoll.sum}`, type: 'roll' }],
+      });
     },
 
     movePurgatorioPlayer: () => {
@@ -787,43 +732,16 @@ export const useGameStore = create<GameStore>((set, get) => {
       const isTriple = d1 === d2 && d2 === d3;
       const isDouble = (d1 === d2) || (d2 === d3) || (d1 === d3);
 
-      const dd1 = _rng.nextInt(1, 4);
-      const dd2 = _rng.nextInt(1, 4);
-      const dd3 = _rng.nextInt(1, 4);
-      const demonSum = dd1 + dd2 + dd3;
-      const demonBonus = getDemonBonus(p.currentSphereId ?? 9);
+      // Simple roll for Paradiso
+      if (isTriple) { p.grace = Math.min(150, (p.grace || 0) + 10); }
+      else if (isDouble) { p.grace = Math.min(150, (p.grace || 0) + 5); }
 
-      const playerWins = isTriple || (!(dd1 === dd2 && dd2 === dd3) && (isDouble || sum > demonSum + demonBonus));
-
-      const msgs: string[] = [];
-      let showSparkles = false;
-
-      if (playerWins) {
-        if (isTriple) { showSparkles = true; p.grace = Math.min(150, (p.grace || 0) + 10); }
-        else if (isDouble) p.grace = Math.min(150, (p.grace || 0) + 5);
-        msgs.push(loc() === 'en'
-          ? `⚔ You win! [${d1}][${d2}][${d3}] = ${sum} vs Demon ${demonSum}+${demonBonus} = ${demonSum + demonBonus}`
-          : `⚔ 승리! [${d1}][${d2}][${d3}] = ${sum} vs 악마 ${demonSum}+${demonBonus} = ${demonSum + demonBonus}`);
-
-        set({
-          player: p, paradisoDice: dice, paradisoIsDouble: isDouble, paradisoDoubleCount: 0,
-          phase: 'paradiso_moving', showSparkles,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-        });
-      } else {
-        const graceLoss = 3;
-        p.grace = Math.max(0, (p.grace || 0) - graceLoss);
-        msgs.push(loc() === 'en'
-          ? `💀 Demon wins! [${dd1}][${dd2}][${dd3}]+${demonBonus} = ${demonSum + demonBonus} beats your ${sum}. -${graceLoss} Grace!`
-          : `💀 악마 승리! [${dd1}][${dd2}][${dd3}]+${demonBonus} = ${demonSum + demonBonus}이 ${sum}를 이겼다. 은총 -${graceLoss}!`);
-        set({
-          player: p, paradisoDice: dice, demonDice: null,
-          phase: 'paradiso_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          paradisoIsDouble: false, paradisoDoubleCount: 0,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-        });
-      }
-      if (showSparkles) setTimeout(() => set({ showSparkles: false }), 2000);
+      set({
+        player: p, paradisoDice: dice, demonDice: null, paradisoIsDouble: isDouble, paradisoDoubleCount: 0,
+        phase: 'paradiso_moving',
+        showSparkles: isTriple,
+        log: [...state.log, { turn: state.turnNumber, message: `🎲 [${d1}][${d2}][${d3}] = ${sum}`, type: 'roll' }],
+      });
     },
 
     moveParadisoPlayer: () => {

@@ -36,6 +36,7 @@ export default function PurgatorioDicePanel() {
   const isRollPhase = isParadiso ? phase === 'paradiso_rolling'
     : isPurgatorio ? phase === 'purgatorio_rolling'
     : phase === 'rolling';
+  const isDuelPhase = phase === 'demon_duel';
   const isMovePhase = isParadiso ? phase === 'paradiso_moving'
     : isPurgatorio ? phase === 'purgatorio_moving'
     : phase === 'moving';
@@ -98,6 +99,13 @@ export default function PurgatorioDicePanel() {
             <Button onClick={handleRoll} variant="primary" size="lg" className={`w-full min-h-[44px] ${summonColor}`} disabled={isRolling}>
               🎲 {t('dice.roll', locale)}
             </Button>
+          </motion.div>
+        )}
+        {isDuelPhase && (
+          <motion.div key="duel" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="w-full text-center">
+            <p className="text-sm text-red-400 animate-pulse font-bold">
+              👹 {locale === 'en' ? 'Fight the demon!' : '악마와 대결하라!'}
+            </p>
           </motion.div>
         )}
         {isMovePhase && dice && (
