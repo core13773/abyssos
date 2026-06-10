@@ -22,6 +22,9 @@ export default function PurgatorioDicePanel() {
   const resolvePurgatorioEvent = useGameStore((s) => s.resolvePurgatorioEvent);
   const rollParadisoDice = useGameStore((s) => s.rollParadisoDice);
   const resolveParadisoBlessing = useGameStore((s) => s.resolveParadisoBlessing);
+  const movePlayerAction = useGameStore((s) => s.movePlayerAction);
+  const movePurgatorioPlayer = useGameStore((s) => s.movePurgatorioPlayer);
+  const moveParadisoPlayer = useGameStore((s) => s.moveParadisoPlayer);
   const [isRolling, setIsRolling] = useState(false);
 
   if (!player) return null;
@@ -36,6 +39,9 @@ export default function PurgatorioDicePanel() {
   const isRollPhase = isParadiso ? phase === 'paradiso_rolling'
     : isPurgatorio ? phase === 'purgatorio_rolling'
     : phase === 'rolling';
+  const isMovePhase = isParadiso ? phase === 'paradiso_moving'
+    : isPurgatorio ? phase === 'purgatorio_moving'
+    : phase === 'moving';
   const isEventPhase = isParadiso ? phase === 'paradiso_blessing'
     : isPurgatorio ? phase === 'purgatorio_event'
     : phase === 'event';
@@ -52,6 +58,12 @@ export default function PurgatorioDicePanel() {
       else rollDiceAction();
       setIsRolling(false);
     }, 500);
+  };
+
+  const handleMove = () => {
+    if (isParadiso) moveParadisoPlayer();
+    else if (isPurgatorio) movePurgatorioPlayer();
+    else movePlayerAction();
   };
 
   const handleResolve = () => {
@@ -113,6 +125,13 @@ export default function PurgatorioDicePanel() {
           <motion.div key="roll" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="w-full text-center">
             <Button onClick={handleRoll} variant="primary" size="lg" className={`w-full min-h-[44px] ${summonColor}`} disabled={isRolling}>
               🎲 {t('dice.roll', locale)}
+            </Button>
+          </motion.div>
+        )}
+        {isMovePhase && dice && (
+          <motion.div key="move" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="w-full text-center">
+            <Button onClick={handleMove} variant="primary" className={`w-full mt-2 min-h-[44px] ${summonColor}`}>
+              {t('dice.move', locale)}
             </Button>
           </motion.div>
         )}

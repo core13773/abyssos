@@ -192,7 +192,6 @@ export const useGameStore = create<GameStore>((set, get) => {
       let shakeScreen = false;
 
       if (duelResult.outcome === 'player_crit' || duelResult.outcome === 'player_win') {
-        // Player wins — auto-move immediately (no separate Move button)
         showSparkles = duelResult.outcome === 'player_crit';
         msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
         p.moveBonus = (p.moveBonus || 0);
@@ -202,56 +201,64 @@ export const useGameStore = create<GameStore>((set, get) => {
         const totalMove = Math.max(1, duelResult.playerRoll.sum + (p.moveBonus || 0));
         p.moveBonus = 0;
 
-        // Execute move directly
-        const remaining = remainingTilesInCircle(state.board, p.currentTileId);
-        const prevTileId = p.currentTileId;
-        if (totalMove >= remaining) {
-          const lastTile = state.board.find((t) => t.circleId === p.currentCircleId && t.index === 11);
-          if (lastTile) p.currentTileId = lastTile.id;
-          const gk = getGatekeeper(p.currentCircleId);
-          set({
-            player: p, phase: 'gatekeeper', activeGatekeeper: gk || null,
-            dice: null, demonDice: null, isDouble: false, doubleCount: 0,
-            log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-          });
-        } else {
-          let currentTile = state.board.find((t) => t.id === p.currentTileId);
-          for (let i = 0; i < totalMove; i++) {
-            if (!currentTile) break;
-            const next = getNextTileV4(state.board, currentTile.id);
-            if (!next) break;
-            currentTile = next;
-          }
-          if (currentTile && currentTile.id !== prevTileId) {
-            p.currentTileId = currentTile.id;
-            p.currentCircleId = currentTile.circleId;
-          } else if (currentTile && currentTile.id === prevTileId) {
-            const forced = getNextTileV4(state.board, prevTileId);
-            if (forced) { p.currentTileId = forced.id; p.currentCircleId = forced.circleId; }
-          }
-          const tile = state.board.find((t) => t.id === p.currentTileId);
-          if (tile?.type === 'monster' && tile.monsterId) {
-            let monster = getMonster(tile.monsterId);
-            if (tile.label === 'elite' && monster) monster = { ...monster, power: monster.power + 2, rewardHp: monster.rewardHp * 3 };
-            const monName = (loc() === 'en' ? monster?.nameEn : monster?.name) || '';
+        try {
+          // Execute auto-move
+          const remaining = remainingTilesInCircle(state.board, p.currentTileId);
+          const prevTileId = p.currentTileId;
+          if (totalMove >= remaining) {
+            const lastTile = state.board.find((t) => t.circleId === p.currentCircleId && t.index === 11);
+            if (lastTile) p.currentTileId = lastTile.id;
+            const gk = getGatekeeper(p.currentCircleId);
             set({
-              player: p, phase: 'battle', activeMonster: monster || null,
-              dice: null, demonDice: null, isDouble: false, doubleCount: 0,
-              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-            });
-          } else if (tile?.type === 'event' && tile.eventKind) {
-            set({
-              player: p, phase: 'event', pendingEventKind: tile.eventKind,
+              player: p, phase: 'gatekeeper', activeGatekeeper: gk || null,
               dice: null, demonDice: null, isDouble: false, doubleCount: 0,
               log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
             });
           } else {
-            set({
-              player: p, phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-              dice: null, demonDice: null, isDouble: false, doubleCount: 0,
-              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-            });
+            let currentTile = state.board.find((t) => t.id === p.currentTileId);
+            for (let i = 0; i < totalMove; i++) {
+              if (!currentTile) break;
+              const next = getNextTileV4(state.board, currentTile.id);
+              if (!next) break;
+              currentTile = next;
+            }
+            if (currentTile && currentTile.id !== prevTileId) {
+              p.currentTileId = currentTile.id;
+              p.currentCircleId = currentTile.circleId;
+            } else if (currentTile) {
+              const forced = getNextTileV4(state.board, prevTileId);
+              if (forced) { p.currentTileId = forced.id; p.currentCircleId = forced.circleId; }
+            }
+            const tile = state.board.find((t) => t.id === p.currentTileId);
+            if (tile?.type === 'monster' && tile.monsterId) {
+              let monster = getMonster(tile.monsterId);
+              if (tile.label === 'elite' && monster) monster = { ...monster, power: monster.power + 2, rewardHp: monster.rewardHp * 3 };
+              set({
+                player: p, phase: 'battle', activeMonster: monster || null,
+                dice: null, demonDice: null, isDouble: false, doubleCount: 0,
+                log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+              });
+            } else if (tile?.type === 'event' && tile.eventKind) {
+              set({
+                player: p, phase: 'event', pendingEventKind: tile.eventKind,
+                dice: null, demonDice: null, isDouble: false, doubleCount: 0,
+                log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+              });
+            } else {
+              set({
+                player: p, phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+                dice: null, demonDice: null, isDouble: false, doubleCount: 0,
+                log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+              });
+            }
           }
+        } catch {
+          // Fallback: set phase to moving with dice visible
+          set({
+            player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice, isDouble, doubleCount,
+            phase: 'moving', shakeScreen: false, showSparkles: true,
+            log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+          });
         }
       } else {
         // Demon wins — take damage, can't move, turn passes
