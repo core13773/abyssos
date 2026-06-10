@@ -16,6 +16,9 @@ import GuardianRewardModal from '@/components/guardian/GuardianRewardModal';
 import PurificationRewardModal from '@/components/guardian/PurificationRewardModal';
 import CelestialRewardModal from '@/components/guardian/CelestialRewardModal';
 import PurgatorioContinueModal from '@/components/events/PurgatorioContinueModal';
+import ShopModal from '@/components/events/ShopModal';
+import StoryEventModal from '@/components/events/StoryEventModal';
+import PerfectClearOverlay from '@/components/effects/PerfectClearOverlay';
 
 import DemonDuel from '@/components/battle/DemonDuel';
 import SinChoiceModal from '@/components/events/SinChoiceModal';
@@ -68,6 +71,10 @@ export default function GameLayout() {
       {/* Paradiso modals */}
       {isParadiso && <ArchangelModal />}
       {isParadiso && <CelestialRewardModal />}
+      {/* Global modals */}
+      <ShopModal />
+      <StoryEventModal />
+      <PerfectClearOverlay />
     </div>
   );
 }

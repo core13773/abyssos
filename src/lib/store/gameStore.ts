@@ -76,6 +76,7 @@ import { getGatekeeper } from '@/lib/data/gatekeepers';
 import { getGuardian } from '@/lib/data/guardians';
 import { getSinProjection, getAngelGuardian, getPurificationCard } from '@/lib/data/purgatorio';
 import { getLightSpirit, getArchangel, getRelic } from '@/lib/data/paradiso';
+import { CONSUMABLES } from '@/lib/data/consumables';
 import { createParadisoGame, checkParadisoComplete } from '@/lib/game/paradiso-engine';
 import { buildParadisoBoard, getNextParadisoTile, remainingTilesInSphere } from '@/lib/game/paradiso-board';
 import { createRNG, timeSeed } from '@/lib/utils/random';
@@ -92,6 +93,10 @@ interface GameActions {
   skipBattleAction: () => void;
   useGuardianAction: (guardianId: string) => void;
   useConsumable: (id: string) => void;
+  openShop: () => void;
+  buyShopItem: (id: string) => void;
+  closeShop: () => void;
+  setStoryEvent: (event: { title: string; body: string; choices: { label: string; effect: string }[] } | null) => void;
   nextTurn: () => void;
   clearEffects: () => void;
 
@@ -335,6 +340,19 @@ export const useGameStore = create<GameStore>((set, get) => {
       const state = get();
       if (state.phase !== 'event' || !state.pendingEventKind) return;
 
+      // Shop event: open interactive shop UI
+      if (state.pendingEventKind === 'shop') {
+        const shuffled = [...CONSUMABLES].sort(() => _rng.next() - 0.5);
+        const items = shuffled.slice(0, 3);
+        set({
+          shopItems: items,
+          showShop: true,
+          pendingEventKind: null,
+          log: [...state.log, { turn: state.turnNumber, message: getActiveLocale() === 'en' ? '🏪 A mysterious merchant appears...' : '🏪 신비한 상인이 나타났다...', type: 'system' }],
+        });
+        return;
+      }
+
       const result = resolveEventV4(state.player, state.pendingEventKind, _rng);
       set({
         player: result.updatedPlayer, phase: 'rolling', pendingEventKind: null,
@@ -346,6 +364,44 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (result.shake) setTimeout(() => set({ shakeScreen: false }), 600);
       if (result.sparkles) setTimeout(() => set({ showSparkles: false }), 2000);
     },
+
+    openShop: () => {
+      const state = get();
+      if (state.phase !== 'event') return;
+      const shuffled = [...CONSUMABLES].sort(() => _rng.next() - 0.5);
+      const items = shuffled.slice(0, 3);
+      set({ shopItems: items, showShop: true });
+    },
+
+    buyShopItem: (id: string) => {
+      const state = get();
+      const item = state.shopItems.find((c) => c.id === id);
+      if (!item) return;
+      const p = { ...state.player, consumables: [...state.player.consumables] };
+      if ((p.soulStones || 0) < item.cost) return;
+      p.soulStones = (p.soulStones || 0) - item.cost;
+      p.consumables = [...p.consumables, item];
+      const l = getActiveLocale();
+      set({
+        player: p,
+        shopItems: state.shopItems.filter((c) => c.id !== id),
+        log: [...state.log, { turn: state.turnNumber, message: l === 'en' ? `🏪 Bought ${item.nameEn} for ${item.cost} stones!` : `🏪 ${item.cost}석으로 ${item.name} 구매!`, type: 'item' }],
+      });
+    },
+
+    closeShop: () => {
+      const state = get();
+      set({
+        showShop: false,
+        shopItems: [],
+        phase: 'rolling',
+        totalTurns: state.totalTurns + 1,
+        turnNumber: state.turnNumber + 1,
+        dice: null, demonDice: null, isDouble: false, doubleCount: 0,
+      });
+    },
+
+    setStoryEvent: (event) => set({ storyEvent: event }),
 
     resolveGatekeeperAction: () => {
       const state = get();

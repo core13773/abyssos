@@ -35,10 +35,20 @@ export default function GuardianPanel() {
         )}
       </div>
 
-      <div className="text-[10px] text-stone-500 space-y-0.5 max-h-14 overflow-hidden">
-        {recentLog.map((entry, i) => (
-          <p key={i} className="truncate">{entry.message}</p>
-        ))}
+      <div className="text-[10px] space-y-0.5 max-h-14 overflow-hidden">
+        {recentLog.map((entry, i) => {
+          const colorClass =
+            entry.type === 'damage' ? 'text-red-400' :
+            entry.type === 'heal' ? 'text-emerald-400' :
+            entry.type === 'critical' ? 'text-amber-400 font-bold' :
+            entry.type === 'guardian' ? 'text-purple-400' :
+            entry.type === 'item' ? 'text-cyan-400' :
+            entry.type === 'battle' ? 'text-stone-300' :
+            'text-stone-500';
+          return (
+            <p key={i} className={`truncate ${colorClass}`}>{entry.message}</p>
+          );
+        })}
       </div>
     </div>
   );

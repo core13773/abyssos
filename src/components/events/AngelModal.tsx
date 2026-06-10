@@ -20,6 +20,7 @@ export default function AngelModal() {
   const player = useGameStore((s) => s.player);
   const setBattleRoll = useGameStore((s) => s.setBattleRoll);
   const resolvePurgatorioAngel = useGameStore((s) => s.resolvePurgatorioAngel);
+  const useConsumable = useGameStore((s) => s.useConsumable);
   const locale = useLocale((s) => s.locale);
 
   const [result, setResult] = useState<boolean | null>(null);
@@ -202,6 +203,27 @@ export default function AngelModal() {
           <div className="mb-3">
             {renderBattle()}
           </div>
+
+          {/* Consumables */}
+          {!resolved && player.consumables.length > 0 && (
+            <div className="mb-3 pt-2 border-t border-stone-700">
+              <p className="text-[10px] text-stone-400 mb-1">
+                {locale === 'en' ? '💼 Consumables:' : '💼 소모품:'}
+              </p>
+              <div className="flex gap-1 flex-wrap">
+                {player.consumables.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => useConsumable(c.id)}
+                    className="text-[10px] bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+                    title={locale === 'en' ? c.effectEn : c.effect}
+                  >
+                    {c.icon} {locale === 'en' ? c.nameEn : c.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Continue button */}
           {resolved && result !== null && (
