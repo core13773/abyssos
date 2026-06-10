@@ -8,7 +8,7 @@ export type CircleId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
 export type TileType = 'monster' | 'event' | 'gatekeeper';
 
-export type EventKind = 'rest' | 'trap' | 'blessing' | 'curse' | 'treasure' | 'choice';
+export type EventKind = 'rest' | 'trap' | 'blessing' | 'curse' | 'treasure' | 'choice' | 'starlight' | 'altar' | 'shop' | 'wheel';
 
 export type ElementType =
   | 'ice'       // ❄️ 9층 배반

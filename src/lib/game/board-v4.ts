@@ -21,6 +21,8 @@ export function buildBoardV4(rng: RNG): BoardTile[] {
   return board;
 }
 
+const RANDOM_EVENTS: EventKind[] = ['choice', 'starlight', 'altar', 'shop', 'wheel'];
+
 function buildCircleTiles(circleId: CircleId, rng: RNG): BoardTile[] {
   const tiles: BoardTile[] = [];
 
@@ -39,19 +41,21 @@ function buildCircleTiles(circleId: CircleId, rng: RNG): BoardTile[] {
     label: type === 'event' ? (opts?.eventKind || 'event') : (opts?.monsterKey === 'E' ? 'elite' : `tile-${index}`),
   });
 
-  // A - B - Choice - A - B - Rest - Elite - B - Choice - A - B - Treasure
+  const pickEvent = (): EventKind => RANDOM_EVENTS[rng.nextInt(0, RANDOM_EVENTS.length - 1)];
+
+  // A - B - [Random Event] - A - B - Rest - Elite - B - [Random Event] - A - B - [Random Event]
   tiles.push(makeTile(0, 'monster', { monsterKey: 'A' }));
   tiles.push(makeTile(1, 'monster', { monsterKey: 'B' }));
-  tiles.push(makeTile(2, 'event', { eventKind: 'choice' }));
+  tiles.push(makeTile(2, 'event', { eventKind: pickEvent() }));
   tiles.push(makeTile(3, 'monster', { monsterKey: 'A' }));
   tiles.push(makeTile(4, 'monster', { monsterKey: 'B' }));
   tiles.push(makeTile(5, 'event', { eventKind: 'rest' }));
   tiles.push(makeTile(6, 'monster', { monsterKey: 'E' })); // ELITE
   tiles.push(makeTile(7, 'monster', { monsterKey: 'B' }));
-  tiles.push(makeTile(8, 'event', { eventKind: 'choice' }));
+  tiles.push(makeTile(8, 'event', { eventKind: pickEvent() }));
   tiles.push(makeTile(9, 'monster', { monsterKey: 'A' }));
   tiles.push(makeTile(10, 'monster', { monsterKey: 'B' }));
-  tiles.push(makeTile(11, 'event', { eventKind: 'treasure' }));
+  tiles.push(makeTile(11, 'event', { eventKind: pickEvent() }));
 
   return tiles;
 }

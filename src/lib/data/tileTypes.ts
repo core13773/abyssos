@@ -40,4 +40,8 @@ export const EVENT_KIND_INFO: Record<EventKind, EventKindInfo> = {
   curse:    { kind: 'curse',    label: '저주', icon: '☠', color: 'text-violet-400' },
   treasure: { kind: 'treasure', label: '보물', icon: '💎', color: 'text-yellow-400' },
   choice:   { kind: 'choice',   label: '선택', icon: '🤔', color: 'text-amber-400' },
+  starlight: { kind: 'starlight', label: '별빛 상자', icon: '✨', color: 'text-amber-300' },
+  altar:    { kind: 'altar',    label: '저주 제단', icon: '💀', color: 'text-red-500' },
+  shop:     { kind: 'shop',     label: '영혼 상인', icon: '🏪', color: 'text-cyan-400' },
+  wheel:    { kind: 'wheel',    label: '욕망의 바퀴', icon: '🎰', color: 'text-purple-400' },
 };

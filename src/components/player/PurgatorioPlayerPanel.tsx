@@ -33,9 +33,29 @@ export default function PurgatorioPlayerPanel() {
             <p className="text-lg font-bold text-stone-200">{turnNumber}</p>
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-[10px] text-stone-500">{t('player.guardians', locale)}</p>
-          <p className="text-lg font-bold text-amber-400">{infernoPlayer.guardianCards.length}/9</p>
+        <div className="text-right flex gap-3">
+          <div>
+            <p className="text-[10px] text-stone-500">{t('player.guardians', locale)}</p>
+            <p className="text-lg font-bold text-amber-400">{infernoPlayer.guardianCards.length}/9</p>
+          </div>
+          {infernoPlayer.curseCards.length > 0 && (
+            <div>
+              <p className="text-[10px] text-red-500">💀</p>
+              <p className="text-lg font-bold text-red-400">{infernoPlayer.curseCards.length}</p>
+            </div>
+          )}
+          {infernoPlayer.consumables.length > 0 && (
+            <div>
+              <p className="text-[10px] text-cyan-500">🎒</p>
+              <p className="text-lg font-bold text-cyan-400">{infernoPlayer.consumables.length}</p>
+            </div>
+          )}
+          {(infernoPlayer.soulStones || 0) > 0 && (
+            <div>
+              <p className="text-[10px] text-purple-500">✨</p>
+              <p className="text-lg font-bold text-purple-400">{infernoPlayer.soulStones}</p>
+            </div>
+          )}
         </div>
         {recentLog && (
           <p className="text-[9px] text-stone-500 truncate max-w-[120px] hidden sm:block">{recentLog.message}</p>
