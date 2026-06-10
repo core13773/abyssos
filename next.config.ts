@@ -7,10 +7,9 @@ import type { NextConfig } from "next";
  *   NEXT_PUBLIC_ADSENSE_ID  — Google AdSense publisher ID (ca-pub-XXXXXXXXXXXXXXX)
  */
 const nextConfig: NextConfig = {
-  // For GitHub Pages deployment, uncomment:
-  // output: 'export',
-  // basePath: '/abyssos',
-  // assetPrefix: '/abyssos',
-  // images: { unoptimized: true },
+  output: 'export',
+  trailingSlash: true,
+  images: { unoptimized: true },
+  // basePath / assetPrefix injected by CI for production deploy
 };
 export default nextConfig;

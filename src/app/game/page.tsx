@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useGameStore } from '@/lib/store/gameStore';
 import { useLocale } from '@/lib/i18n/localeStore';
@@ -46,17 +46,20 @@ export default function GamePage() {
   const escaped = useGameStore((s) => s.escaped);
   const player = useGameStore((s) => s.player);
   const totalTurns = useGameStore((s) => s.totalTurns);
+  const initDoneRef = useRef(false);
 
   const isPurgatorio = player.era === 'purgatorio';
   const isParadiso = player.era === 'paradiso';
 
   useEffect(() => {
-    // Check all boards — only init if nothing is loaded
-    if (board.length > 0 || purgatorioBoard.length > 0 || paradisoBoard.length > 0) return;
+    if (initDoneRef.current) return;
+    if (board.length > 0 || purgatorioBoard.length > 0 || paradisoBoard.length > 0) {
+      initDoneRef.current = true;
+      return;
+    }
 
     const era = eraParam;
 
-    // Gate check: read realm completion from localStorage
     const getRealmCompleted = (realm: string): boolean => {
       if (typeof window === 'undefined') return false;
       try {
@@ -77,6 +80,7 @@ export default function GamePage() {
       const infernoPlayer = createDefaultInfernoClearPlayer();
       const state = createPurgatorioGame(infernoPlayer);
       useGameStore.setState(state as Partial<GameState>);
+      initDoneRef.current = true;
       return;
     }
 
@@ -88,10 +92,12 @@ export default function GamePage() {
       const purgatorioPlayer = createDefaultPurgatorioClearPlayer();
       const state = createParadisoGame(purgatorioPlayer);
       useGameStore.setState(state as Partial<GameState>);
+      initDoneRef.current = true;
       return;
     }
 
     initGame();
+    initDoneRef.current = true;
   }, [board.length, purgatorioBoard.length, paradisoBoard.length, eraParam, initGame, router]);
 
   const isBoardReady = isParadiso ? paradisoBoard.length > 0 : isPurgatorio ? purgatorioBoard.length > 0 : board.length > 0;

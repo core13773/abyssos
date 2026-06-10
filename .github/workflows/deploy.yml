@@ -32,6 +32,7 @@ jobs:
           import type { NextConfig } from "next";
           const nextConfig: NextConfig = {
             output: 'export',
+            trailingSlash: true,
             basePath: '/abyssos',
             assetPrefix: '/abyssos',
             images: { unoptimized: true },
@@ -44,6 +45,20 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /abyssos
           NEXT_PUBLIC_GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           NEXT_PUBLIC_ADSENSE_ID: ${{ secrets.ADSENSE_PUBLISHER_ID }}
+
+      # SPA fallback: inject redirect script into 404.html for GitHub Pages
+      - run: |
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          const htmlPath = path.join('out', '404.html');
+          if (fs.existsSync(htmlPath)) {
+            let html = fs.readFileSync(htmlPath, 'utf8');
+            const script = \`<script>(function(){var r=sessionStorage.getItem('__spa_redirect');if(r){sessionStorage.removeItem('__spa_redirect');window.history.replaceState(null,'',r);return;}var p=window.location.pathname,b='/abyssos',s=window.location.search+window.location.hash;if(p.startsWith(b+'/game/')||p.startsWith(b+'/')){sessionStorage.setItem('__spa_redirect',p.slice(b.length)+s);window.location.replace(b+'/');}})();</script>\`;
+            html = html.replace('</head>', script + '</head>');
+            fs.writeFileSync(htmlPath, html);
+          }
+          "
 
       - uses: actions/configure-pages@v4
 
