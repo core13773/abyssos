@@ -29,7 +29,9 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const gameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
   const spawnedCountRef = useRef(0);
   const isRunningRef = useRef(false);
   const lastWhackTimeRef = useRef(0);

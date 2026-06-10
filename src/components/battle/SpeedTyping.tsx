@@ -20,7 +20,9 @@ export default function SpeedTyping({ wordLength, onResult }: Props) {
   const [startTime, setStartTime] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const pool = locale === 'en' ? WORD_POOL_EN : WORD_POOL_KO;
   const timeLimit = wordLength === 'long' ? 6 : wordLength === 'medium' ? 8 : 10;

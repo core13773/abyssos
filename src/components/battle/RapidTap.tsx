@@ -18,7 +18,9 @@ export default function RapidTap({ targetTaps, timeLimit, onResult }: Props) {
   const tapRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const startGame = useCallback(() => {
     setPhase('active');

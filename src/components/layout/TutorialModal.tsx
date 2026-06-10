@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
 import Button from '@/components/ui/Button';
@@ -84,12 +84,12 @@ const STEPS_EN = [
 export default function TutorialModal() {
   const locale = useLocale((s) => s.locale);
   const [step, setStep] = useState(0);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const seen = localStorage.getItem('abyssos_tutorial');
-    if (!seen) setVisible(true);
-  }, []);
+  const [visible, setVisible] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('abyssos_tutorial');
+    }
+    return false;
+  });
 
   const steps = locale === 'en' ? STEPS_EN : STEPS_KO;
   const s = steps[step];

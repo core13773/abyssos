@@ -50,19 +50,19 @@ export default function SlidingPuzzle({ size, maxMoves, onResult }: Props) {
   const locale = useLocale((s) => s.locale);
   const [phase, setPhase] = useState<'ready' | 'playing' | 'done'>('ready');
   const [board, setBoard] = useState<Tile[]>([]);
-  const [emptyIdx, setEmptyIdx] = useState(0);
   const [moves, setMoves] = useState(0);
   const boardRef = useRef<Tile[]>([]);
   const emptyRef = useRef(0);
   const movesRef = useRef(0);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const startGame = useCallback(() => {
     const { board: newBoard, emptyIdx: newEmpty } = createBoard(size);
     setBoard(newBoard);
     boardRef.current = newBoard;
-    setEmptyIdx(newEmpty);
     emptyRef.current = newEmpty;
     setMoves(0);
     movesRef.current = 0;
@@ -72,7 +72,6 @@ export default function SlidingPuzzle({ size, maxMoves, onResult }: Props) {
   const handleMove = useCallback((idx: number) => {
     if (phase !== 'playing') return;
     const empty = emptyRef.current;
-    const total = size * size;
     const row = Math.floor(idx / size);
     const emptyRow = Math.floor(empty / size);
     const col = idx % size;
@@ -88,7 +87,6 @@ export default function SlidingPuzzle({ size, maxMoves, onResult }: Props) {
     boardRef.current = newBoard;
     emptyRef.current = idx;
     setBoard(newBoard);
-    setEmptyIdx(idx);
     movesRef.current += 1;
     setMoves(movesRef.current);
 
@@ -147,8 +145,8 @@ export default function SlidingPuzzle({ size, maxMoves, onResult }: Props) {
 
       {phase === 'done' && (
         <div className="text-center">
-          <p className={`text-lg font-bold ${isSolved(boardRef.current) ? 'text-emerald-400' : 'text-red-400'}`}>
-            {isSolved(boardRef.current)
+          <p className={`text-lg font-bold ${isSolved(board) ? 'text-emerald-400' : 'text-red-400'}`}>
+            {isSolved(board)
               ? (locale === 'en' ? `✅ Solved in ${moves} moves!` : `✅ ${moves}회만에 완성!`)
               : (locale === 'en' ? `❌ Not solved! (${moves} moves)` : `❌ 실패! (${moves}회)`)}
           </p>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
 
@@ -25,7 +25,9 @@ export default function DiceBet({ requiredWins, totalRounds, onResult }: Props) 
   const [won, setWon] = useState<boolean | null>(null);
   const winsRef = useRef(0);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const startGame = useCallback(() => {
     const first = rollD6();

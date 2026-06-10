@@ -29,7 +29,9 @@ export default function DirectionDodge({ requiredDodges, totalAttacks, speed, on
   const attacksRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const startGame = useCallback(() => {
     setPhase('active');

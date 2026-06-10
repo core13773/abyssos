@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 const AD_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_ID;
 
@@ -12,11 +12,11 @@ const AD_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_ID;
  * Ads are only loaded in production (after first paint) to avoid blocking rendering.
  */
 export default function GoogleAdSense() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   if (!AD_CLIENT) return null;
   // Only load AdSense on the client side after hydration

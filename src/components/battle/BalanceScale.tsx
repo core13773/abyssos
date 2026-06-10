@@ -20,7 +20,9 @@ export default function BalanceScale({ duration, sensitivity, onResult }: Props)
   const animRef = useRef(0);
   const startTimeRef = useRef(0);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
   const gameActiveRef = useRef(false);
 
   const startGame = useCallback(() => {

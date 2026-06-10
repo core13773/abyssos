@@ -20,51 +20,49 @@ function generateNumber(digits: number): string {
 
 const KEYPAD = [1, 2, 3, 4, 5, 6, 7, 8, 9, -1, 0, -2]; // -1 = empty, -2 = delete
 
-export default function NumberMemory({ digits, memorizeTime, onResult }: Props) {
+export default function NumberMemory(props: Props) {
+  return <NumberMemoryInner key={`${props.digits}-${props.memorizeTime}`} {...props} />;
+}
+
+function NumberMemoryInner({ digits, memorizeTime, onResult }: Props) {
   const locale = useLocale((s) => s.locale);
   const [phase, setPhase] = useState<'memorize' | 'input' | 'done'>('memorize');
-  const [number, setNumber] = useState('');
+  const [number] = useState(() => generateNumber(digits));
   const [userInput, setUserInput] = useState('');
   const [revealed, setRevealed] = useState(true);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   useEffect(() => {
-    const num = generateNumber(digits);
-    setNumber(num);
-    setPhase('memorize');
-    setRevealed(true);
-    setUserInput('');
-
     const hideTimer = setTimeout(() => {
       setRevealed(false);
       setPhase('input');
     }, memorizeTime);
-
     return () => clearTimeout(hideTimer);
-  }, [digits, memorizeTime]);
+  }, [memorizeTime]);
 
   const handleDigit = useCallback((d: number) => {
     if (phase !== 'input') return;
     setUserInput((prev) => {
       if (prev.length >= digits) return prev;
-      return prev + d.toString();
+      const next = prev + d.toString();
+      if (next.length === digits) {
+        setTimeout(() => {
+          setPhase('done');
+          const correct = next === number;
+          setTimeout(() => onResultRef.current(correct), 500);
+        }, 0);
+      }
+      return next;
     });
-  }, [phase, digits]);
+  }, [phase, digits, number]);
 
   const handleDelete = useCallback(() => {
     if (phase !== 'input') return;
     setUserInput((prev) => prev.slice(0, -1));
   }, [phase]);
-
-  // Auto-submit when all digits entered
-  useEffect(() => {
-    if (phase === 'input' && userInput.length === digits) {
-      setPhase('done');
-      const correct = userInput === number;
-      setTimeout(() => onResultRef.current(correct), 500);
-    }
-  }, [phase, userInput, digits, number]);
 
   const displayDigits = revealed
     ? number.split('')

@@ -20,7 +20,9 @@ export default function ReflexCatch({ speed, targetZone, onResult }: Props) {
   const yRef = useRef(0);
   const targetBottom = 85; // where the catch zone is
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const startGame = useCallback(() => {
     setPhase('falling');

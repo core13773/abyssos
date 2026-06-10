@@ -21,37 +21,36 @@ interface Props {
 export default function ColorSequence({ sequenceLength, showTime, onResult, label }: Props) {
   const locale = useLocale((s) => s.locale);
   const [phase, setPhase] = useState<'watching' | 'playing' | 'done'>('watching');
-  const [sequence, setSequence] = useState<number[]>([]);
+  const [sequence] = useState<number[]>(() =>
+    Array.from({ length: sequenceLength }, () => Math.floor(Math.random() * 4))
+  );
   const [activeIdx, setActiveIdx] = useState(-1);
   const [playerIdx, setPlayerIdx] = useState(0);
   const [flashing, setFlashing] = useState(false);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
-
-  // Generate random sequence on mount
   useEffect(() => {
-    const seq = Array.from({ length: sequenceLength }, () => Math.floor(Math.random() * 4));
-    setSequence(seq);
+    onResultRef.current = onResult;
+  }, [onResult]);
 
-    // Play the sequence
+  // Play the sequence
+  useEffect(() => {
     let i = 0;
-    setPhase('watching');
     const interval = setInterval(() => {
-      if (i >= seq.length) {
+      if (i >= sequence.length) {
         clearInterval(interval);
         setActiveIdx(-1);
         setPhase('playing');
         setPlayerIdx(0);
         return;
       }
-      setActiveIdx(seq[i]);
+      setActiveIdx(sequence[i]);
       setFlashing(true);
       setTimeout(() => setFlashing(false), showTime * 0.6);
       i++;
     }, showTime);
 
     return () => clearInterval(interval);
-  }, [sequenceLength, showTime]);
+  }, [sequence, showTime]);
 
   const handlePress = useCallback((colorIdx: number) => {
     if (phase !== 'playing') return;

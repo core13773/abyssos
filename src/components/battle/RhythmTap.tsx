@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
 
 interface Props {
@@ -21,34 +21,11 @@ export default function RhythmTap({ beatCount, bpm, tolerance, onResult }: Props
   const tapTimesRef = useRef<number[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const beatInterval = (60 / bpm) * 1000; // ms per beat
-
-  const startGame = useCallback(() => {
-    setPhase('playing');
-    setCurrentBeat(0);
-    setPlayerTapCount(0);
-    setResults([]);
-    beatTimesRef.current = [];
-    tapTimesRef.current = [];
-
-    // Schedule all beats
-    let beat = 0;
-    timerRef.current = setInterval(() => {
-      beatTimesRef.current.push(Date.now());
-      setCurrentBeat(beat);
-      beat++;
-      if (beat >= beatCount) {
-        if (timerRef.current) clearInterval(timerRef.current);
-        // Wait for taps, then evaluate
-        setTimeout(() => {
-          setPhase('done');
-          evaluateResults();
-        }, tolerance * 2);
-      }
-    }, beatInterval);
-  }, [beatCount, beatInterval, tolerance]);
 
   const evaluateResults = useCallback(() => {
     const playerTaps = tapTimesRef.current;
@@ -76,6 +53,31 @@ export default function RhythmTap({ beatCount, bpm, tolerance, onResult }: Props
     const accuracy = Math.round(((perfectCount * 2 + goodCount) / (beatCount * 2)) * 100);
     setTimeout(() => onResultRef.current(success, accuracy), 600);
   }, [beatCount, tolerance]);
+
+  const startGame = useCallback(() => {
+    setPhase('playing');
+    setCurrentBeat(0);
+    setPlayerTapCount(0);
+    setResults([]);
+    beatTimesRef.current = [];
+    tapTimesRef.current = [];
+
+    // Schedule all beats
+    let beat = 0;
+    timerRef.current = setInterval(() => {
+      beatTimesRef.current.push(Date.now());
+      setCurrentBeat(beat);
+      beat++;
+      if (beat >= beatCount) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        // Wait for taps, then evaluate
+        setTimeout(() => {
+          setPhase('done');
+          evaluateResults();
+        }, tolerance * 2);
+      }
+    }, beatInterval);
+  }, [beatCount, beatInterval, tolerance, evaluateResults]);
 
   const handleTap = useCallback(() => {
     if (phase !== 'playing') return;

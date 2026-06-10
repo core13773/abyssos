@@ -12,7 +12,7 @@ import { createPurgatorioGame } from '@/lib/game/purgatorio-engine';
 import { createParadisoGame } from '@/lib/game/paradiso-engine';
 import { GUARDIANS } from '@/lib/data/guardians';
 import { PURIFICATION_CARDS } from '@/lib/data/purgatorio';
-import type { Player } from '@/types/game';
+import type { Player, GameState } from '@/types/game';
 
 function createDefaultInfernoClearPlayer(): Player {
   const base = createNewGameV4().player;
@@ -36,6 +36,7 @@ function createDefaultPurgatorioClearPlayer(): Player {
 export default function GamePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const eraParam = searchParams.get('era');
   const locale = useLocale((s) => s.locale);
   const toggleLocale = useLocale((s) => s.toggleLocale);
   const initGame = useGameStore((s) => s.initGame);
@@ -53,7 +54,7 @@ export default function GamePage() {
     // Check all boards — only init if nothing is loaded
     if (board.length > 0 || purgatorioBoard.length > 0 || paradisoBoard.length > 0) return;
 
-    const era = searchParams.get('era');
+    const era = eraParam;
 
     // Gate check: read realm completion from localStorage
     const getRealmCompleted = (realm: string): boolean => {
@@ -75,7 +76,7 @@ export default function GamePage() {
       }
       const infernoPlayer = createDefaultInfernoClearPlayer();
       const state = createPurgatorioGame(infernoPlayer);
-      useGameStore.setState(state as any);
+      useGameStore.setState(state as Partial<GameState>);
       return;
     }
 
@@ -86,12 +87,12 @@ export default function GamePage() {
       }
       const purgatorioPlayer = createDefaultPurgatorioClearPlayer();
       const state = createParadisoGame(purgatorioPlayer);
-      useGameStore.setState(state as any);
+      useGameStore.setState(state as Partial<GameState>);
       return;
     }
 
     initGame();
-  }, [board.length, purgatorioBoard.length, paradisoBoard.length, searchParams, initGame, router]);
+  }, [board.length, purgatorioBoard.length, paradisoBoard.length, eraParam, initGame, router]);
 
   const isBoardReady = isParadiso ? paradisoBoard.length > 0 : isPurgatorio ? purgatorioBoard.length > 0 : board.length > 0;
 

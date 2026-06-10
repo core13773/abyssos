@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocale } from '@/lib/i18n/localeStore';
 
 interface Props {
@@ -50,27 +50,29 @@ function generateProblem(difficulty: 'easy' | 'medium' | 'hard'): { question: st
   return { question, answer };
 }
 
-export default function MathPuzzle({ difficulty, onResult }: Props) {
+export default function MathPuzzle(props: Props) {
+  return <MathPuzzleInner key={props.difficulty} {...props} />;
+}
+
+function MathPuzzleInner({ difficulty, onResult }: Props) {
   const locale = useLocale((s) => s.locale);
   const [phase, setPhase] = useState<'show' | 'input' | 'done'>('show');
-  const [problem, setProblem] = useState<{ question: string; answer: number } | null>(null);
+  const [problem] = useState(() => generateProblem(difficulty));
   const [userInput, setUserInput] = useState('');
-  const [startTime, setStartTime] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(0);
+  const startTimeRef = useRef(0);
+  const [timeLeft, setTimeLeft] = useState(() => (difficulty === 'hard' ? 6 : difficulty === 'medium' ? 8 : 10));
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
   const timeLimit = difficulty === 'hard' ? 6 : difficulty === 'medium' ? 8 : 10;
 
   useEffect(() => {
-    const p = generateProblem(difficulty);
-    setProblem(p);
-    setStartTime(Date.now());
-    setTimeLeft(timeLimit);
-
+    startTimeRef.current = Date.now();
     timerRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
+      const elapsed = (Date.now() - startTimeRef.current) / 1000;
       const remaining = Math.max(0, timeLimit - elapsed);
       setTimeLeft(remaining);
       if (remaining <= 0) {
@@ -80,14 +82,13 @@ export default function MathPuzzle({ difficulty, onResult }: Props) {
       }
     }, 100);
 
-    // Auto-advance to input after 0.5s
     const showTimer = setTimeout(() => setPhase('input'), 500);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       clearTimeout(showTimer);
     };
-  }, [difficulty, timeLimit]);
+  }, [timeLimit]);
 
   const handleSubmit = useCallback(() => {
     if (phase !== 'input' || !problem) return;

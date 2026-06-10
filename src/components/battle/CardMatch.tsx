@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface Props {
   cardCount: number;    // 3~5 cards
@@ -11,23 +11,22 @@ interface Props {
   onResult: (correct: boolean) => void;
 }
 
-export default function CardMatch({ cardCount, shuffleSpeed, showHint, removeTrap, onResult }: Props) {
-  const actualCount = removeTrap ? Math.max(2, cardCount - 1) : cardCount;
-  const [phase, setPhase] = useState<'reveal' | 'shuffle' | 'pick' | 'done'>('reveal');
-  const [correctIdx, setCorrectIdx] = useState(0);
-  const [positions, setPositions] = useState<number[]>([]);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [flipped, setFlipped] = useState<Set<number>>(new Set());
-  const shuffledRef = useRef(false);
+export default function CardMatch(props: Props) {
+  const actualCount = props.removeTrap ? Math.max(2, props.cardCount - 1) : props.cardCount;
+  return <CardMatchInner key={actualCount} {...props} actualCount={actualCount} />;
+}
 
-  // Initialize correct card position
-  useEffect(() => {
-    setCorrectIdx(Math.floor(Math.random() * actualCount));
-    setPositions(Array.from({ length: actualCount }, (_, i) => i));
-    setFlipped(new Set(Array.from({ length: actualCount }, (_, i) => i))); // all revealed
-    setPhase('reveal');
-    shuffledRef.current = false;
-  }, [actualCount]);
+interface InnerProps extends Props {
+  actualCount: number;
+}
+
+function CardMatchInner({ actualCount, shuffleSpeed, showHint, onResult }: InnerProps) {
+  const [phase, setPhase] = useState<'reveal' | 'shuffle' | 'pick' | 'done'>('reveal');
+  const [correctIdx] = useState(() => Math.floor(Math.random() * actualCount));
+  const [positions, setPositions] = useState(() => Array.from({ length: actualCount }, (_, i) => i));
+  const [selected, setSelected] = useState<number | null>(null);
+  const [flipped, setFlipped] = useState(() => new Set(Array.from({ length: actualCount }, (_, i) => i)));
+  const shuffledRef = useRef(false);
 
   // Reveal phase: show all cards for 1.5s, then shuffle
   useEffect(() => {

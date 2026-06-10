@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 
 const PATTERNS = ['⬆', '⬇', '⬅', '➡', '↗', '↘', '↙', '↖'];
-const NUMBERS = ['1', '2', '3', '4'];
 const ITEMS = ['🌟', '🔥', '💎', '🌙', '⚡', '🌪', '❄️', '🩸'];
 
 function generatePattern(length: number): string[] {
@@ -21,29 +20,30 @@ interface Props {
   label?: string;
 }
 
-export default function PatternMemory({ patternLength, memorizeTime, onResult, label }: Props) {
+export default function PatternMemory(props: Props) {
+  // Force remount when pattern parameters change so state resets naturally
+  return <PatternMemoryInner key={`${props.patternLength}-${props.memorizeTime}`} {...props} />;
+}
+
+function PatternMemoryInner({ patternLength, memorizeTime, onResult, label }: Props) {
   const locale = useLocale((s) => s.locale);
   const [phase, setPhase] = useState<'memorize' | 'recall' | 'done'>('memorize');
-  const [pattern, setPattern] = useState<string[]>([]);
-  const [options, setOptions] = useState<string[][]>([]);
   const [selected, setSelected] = useState<number | null>(null);
-  const onResultRef = useRef(onResult);
-  onResultRef.current = onResult;
-
-  // Generate pattern
-  useEffect(() => {
-    const correct = generatePattern(patternLength);
-    setPattern(correct);
-
-    // Generate 3 wrong options + 1 correct
+  const [pattern] = useState(() => generatePattern(patternLength));
+  const [options] = useState(() => {
     const wrongOptions = Array.from({ length: 3 }, () => generatePattern(patternLength));
-    const allOptions = [correct, ...wrongOptions].sort(() => Math.random() - 0.5);
-    setOptions(allOptions);
+    return [pattern, ...wrongOptions].sort(() => Math.random() - 0.5);
+  });
+  const onResultRef = useRef(onResult);
+  useEffect(() => {
+    onResultRef.current = onResult;
+  }, [onResult]);
 
-    // Timer for memorize phase
+  // Timer for memorize phase
+  useEffect(() => {
     const timer = setTimeout(() => setPhase('recall'), memorizeTime);
     return () => clearTimeout(timer);
-  }, [patternLength, memorizeTime]);
+  }, [memorizeTime]);
 
   const handleSelect = useCallback((idx: number) => {
     if (phase !== 'recall') return;

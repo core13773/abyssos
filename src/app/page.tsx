@@ -325,40 +325,18 @@ function CardThumbnail({
 export default function HomePage() {
   const router = useRouter();
   const locale = useLocale((s) => s.locale);
-  const [realmState, setRealmState] = useState<RealmState>({
-    inferno: { completed: false, bestTurns: null },
-    purgatorio: { completed: false, bestTurns: null },
-    paradiso: { completed: false },
-  });
-  const [collectedCards, setCollectedCards] = useState<CollectedCards>({ inferno: [], purgatorio: [], paradiso: [] });
+  const [realmState, setRealmState] = useState<RealmState>(() => loadRealmState());
+  const [collectedCards, setCollectedCards] = useState<CollectedCards>(() => loadCollectedCards());
   const [activeTab, setActiveTab] = useState<'inferno' | 'purgatorio' | 'paradiso'>('inferno');
 
   useEffect(() => {
-    setRealmState(loadRealmState());
-    setCollectedCards(loadCollectedCards());
-
-    // Listen for storage updates from game page
     const onStorage = () => {
       setRealmState(loadRealmState());
       setCollectedCards(loadCollectedCards());
     };
     window.addEventListener('storage', onStorage);
-    // Also poll for changes (cross-tab sync)
-    const interval = setInterval(() => {
-      const current = loadRealmState();
-      setRealmState((prev) => {
-        if (JSON.stringify(prev) !== JSON.stringify(current)) return current;
-        return prev;
-      });
-      const currentCards = loadCollectedCards();
-      setCollectedCards((prev) => {
-        if (JSON.stringify(prev) !== JSON.stringify(currentCards)) return currentCards;
-        return prev;
-      });
-    }, 2000);
     return () => {
       window.removeEventListener('storage', onStorage);
-      clearInterval(interval);
     };
   }, []);
 
