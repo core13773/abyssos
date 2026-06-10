@@ -33,9 +33,11 @@ export default function GatekeeperModal() {
   const resolveWithResult = useCallback((success: boolean, d6val?: number) => {
     setResult(success);
     setResolved(true);
-    const roll = d6val ?? (success ? 6 : 1);
+    const gkPower = gk?.power ?? 6;
+    // Mini-game success guarantees gatekeeper defeat
+    const roll = d6val ?? (success ? Math.max(6, gkPower) : Math.max(1, gkPower - 3));
     setBattleRoll(roll);
-  }, [setBattleRoll]);
+  }, [setBattleRoll, gk?.power]);
 
   const handleContinue = useCallback(() => {
     resolveGatekeeperAction();

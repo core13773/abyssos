@@ -6,6 +6,8 @@ interface DiceFaceProps {
   value: number;
   size?: number;
   rolling?: boolean;
+  fillColor?: string;
+  dotColor?: string;
 }
 
 // Dot positions for a standard D6 face
@@ -43,8 +45,11 @@ const dotPositions: Record<number, { cx: number; cy: number }[]> = {
   ],
 };
 
-export default function DiceFace({ value, size = 64, rolling = false }: DiceFaceProps) {
+export default function DiceFace({ value, size = 64, rolling = false, fillColor, dotColor }: DiceFaceProps) {
   const dots = dotPositions[Math.min(6, Math.max(1, value))] || dotPositions[1];
+  const bgColor = fillColor || '#1c1917';
+  const strokeColor = fillColor ? '#7f1d1d' : '#57534e';
+  const dotFill = dotColor || '#fbbf24';
 
   return (
     <motion.div
@@ -69,8 +74,8 @@ export default function DiceFace({ value, size = 64, rolling = false }: DiceFace
           height={96}
           rx={16}
           ry={16}
-          fill="#1c1917"
-          stroke="#57534e"
+          fill={bgColor}
+          stroke={strokeColor}
           strokeWidth={3}
         />
 
@@ -81,7 +86,7 @@ export default function DiceFace({ value, size = 64, rolling = false }: DiceFace
             cx={dot.cx}
             cy={dot.cy}
             r={8}
-            fill="#fbbf24"
+            fill={dotFill}
           />
         ))}
       </svg>

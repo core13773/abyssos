@@ -31,7 +31,7 @@ export function createParadisoGame(priorPlayer: Player): Partial<GameState> {
     phase: 'paradiso_rolling',
     player,
     paradisoBoard: board,
-    dice: null, isDouble: false, doubleCount: 0,
+    dice: null, demonDice: null, isDouble: false, doubleCount: 0,
     purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
     paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
     turnNumber: 1, totalTurns: 0,

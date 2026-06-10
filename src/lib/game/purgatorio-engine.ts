@@ -34,7 +34,7 @@ export function createPurgatorioGame(infernoPlayer: Player): Partial<GameState> 
     phase: 'purgatorio_rolling',
     player,
     purgatorioBoard,
-    dice: null,
+    dice: null, demonDice: null,
     isDouble: false,
     doubleCount: 0,
     purgatorioDice: null,

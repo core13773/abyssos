@@ -2,7 +2,7 @@ import type { GatekeeperCard } from '@/types/game';
 
 /**
  * Gatekeeper Cards — 9 bosses, each with a UNIQUE battle mini-game.
- * Based on PRODUCT_PLAN.md v5.0 Section 3.2
+ * Based on PRODUCT_PLAN.md V0.1a Section 3.2
  */
 export const GATEKEEPERS: GatekeeperCard[] = [
   // ── 9층: 타이밍 슬라이더 (빙결) ──

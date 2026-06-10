@@ -641,7 +641,7 @@ export default function HomePage() {
             : '"천국으로 가는 길은 지옥에서 시작된다." — 단테 알리기에리'}
         </p>
         <p className="mt-1 text-stone-800">
-          Abyssos v6.0 — Built with Next.js
+          Abyssos V0.1a — Built with Next.js
         </p>
       </motion.footer>
     </main>

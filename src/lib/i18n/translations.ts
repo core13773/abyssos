@@ -16,7 +16,7 @@ const T: TranslationMap = {
     ko: '9층 지옥을 통과하는 카드 배틀 게임.\n주사위를 굴려 몬스터를 물리치고\n수호카드를 모아 지옥을 탈출하라.',
   },
   'home.enter': { en: '🔥 Enter Hell', ko: '🔥 지옥에 입장하기' },
-  'home.footer': { en: 'Abyssos v4.0 — Built with Next.js', ko: 'Abyssos v4.0 — Built with Next.js' },
+  'home.footer': { en: 'Abyssos V0.1a — Built with Next.js', ko: 'Abyssos V0.1a — Built with Next.js' },
   'home.footerDesc': { en: 'Card battle × Roguelike × Board game', ko: '카드 배틀 × 로그라이크 × 보드게임' },
 
   // ===== Dice Panel =====

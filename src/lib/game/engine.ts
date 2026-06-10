@@ -35,6 +35,7 @@ export function createNewGameV4(): GameState {
     player: createPlayerV4(),
     board,
     dice: null,
+    demonDice: null,
     isDouble: false,
     doubleCount: 0,
     turnNumber: 1,

@@ -11,6 +11,9 @@ import TimingSlider from './TimingSlider';
 import CardMatch from './CardMatch';
 import RapidTap from './RapidTap';
 import PatternMemory from './PatternMemory';
+import MathPuzzle from './MathPuzzle';
+import ReflexCatch from './ReflexCatch';
+import RhythmTap from './RhythmTap';
 import { assetPath } from '@/lib/utils/assetPath';
 import type { ElementType } from '@/types/game';
 
@@ -25,22 +28,26 @@ export default function BattleModal() {
   const [result, setResult] = useState<boolean | null>(null);
   const [resolved, setResolved] = useState(false);
 
+  if (phase !== 'battle' || !monster) return null;
+
+  const monPower = monster.power;
+
   const handleResult = useCallback((success: boolean, d6val?: number) => {
     setResult(success);
     setResolved(true);
-    const roll = d6val ?? (success ? 6 : 2);
+    // Ensure mini-game success always translates to battle victory:
+    // set roll high enough to beat monster power (dice bonus will further help)
+    const roll = d6val ?? (success ? Math.max(6, monPower) : Math.max(1, monPower - 3));
     setBattleRoll(roll);
-  }, [setBattleRoll]);
+  }, [setBattleRoll, monPower]);
 
   const handleQuickRoll = useCallback(() => {
     const roll = Math.floor(Math.random() * 6) + 1;
-    const success = roll >= 5;
+    const success = roll >= monPower - 1; // more generous threshold
     setResult(success);
     setResolved(true);
-    setBattleRoll(roll);
-  }, [setBattleRoll]);
-
-  if (phase !== 'battle' || !monster) return null;
+    setBattleRoll(success ? Math.max(roll, monPower) : roll);
+  }, [setBattleRoll, monPower]);
 
   const monName = locale === 'en' ? monster.nameEn : monster.name;
   const ability = locale === 'en' ? monster.abilityEn : monster.ability;
@@ -87,15 +94,12 @@ export default function BattleModal() {
           />
         );
 
-      // ── 🔥 Fire: TimingSlider (fast) ──
+      // ── 🔥 Fire: MathPuzzle (mental arithmetic) ──
       case 'fire':
         return (
-          <TimingSlider
-            greenWidth={isTierB ? 8 : 10}
-            yellowWidth={isTierB ? 14 : 16}
-            speed={isTierB ? 1.5 : 1.2}
-            tapPrompt={locale === 'en' ? '👆 TAP THROUGH FLAMES' : '👆 불길을 뚫어라'}
-            onResult={(r) => handleResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          <MathPuzzle
+            difficulty={isTierB ? 'hard' : 'medium'}
+            onResult={(success) => handleResult(success, success ? 6 : 2)}
           />
         );
 
@@ -140,28 +144,24 @@ export default function BattleModal() {
           </div>
         );
 
-      // ── 🤢 Poison: ColorSequence ──
+      // ── 🤢 Poison: ReflexCatch (catch the falling soul) ──
       case 'poison':
         return (
-          <ColorSequence
-            sequenceLength={isTierB ? 4 : 3}
-            showTime={isTierB ? 600 : 800}
-            label={locale === 'en' ? 'Toxic fog clouds your mind...' : '독안개가 정신을 흐린다...'}
+          <ReflexCatch
+            speed={isTierB ? 2.2 : 3.0}
+            targetZone={isTierB ? 12 : 16}
             onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
           />
         );
 
-      // ── 🌪 Wind: TimingSlider (speed variance + jitter) ──
+      // ── 🌪 Wind: RhythmTap (tap to the hurricane beat) ──
       case 'wind':
         return (
-          <TimingSlider
-            greenWidth={isTierB ? 8 : 10}
-            yellowWidth={isTierB ? 10 : 12}
-            speed={1.0}
-            speedVariance={isTierB ? 0.4 : 0.3}
-            jitter={isTierB}
-            tapPrompt={locale === 'en' ? '👆 TAP IN THE STORM' : '👆 폭풍 속에서 탭하라'}
-            onResult={(r) => handleResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          <RhythmTap
+            beatCount={isTierB ? 5 : 3}
+            bpm={isTierB ? 140 : 100}
+            tolerance={isTierB ? 180 : 250}
+            onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
           />
         );
 

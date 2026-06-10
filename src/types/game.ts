@@ -1,5 +1,5 @@
 // ============================================================
-// Abyssos v6.0 — Core Game Types (Inferno + Purgatorio + Paradiso)
+// Abyssos V0.1a — Core Game Types (Inferno + Purgatorio + Paradiso)
 // ============================================================
 
 // ---- Enums & IDs ----
@@ -388,6 +388,9 @@ export interface GameState {
   // Game end
   escaped: boolean;
   totalTurns: number;
+
+  // ---- Demon dice (for vs display) ----
+  demonDice: DiceRoll | null;
 
   // ---- Purgatorio state ----
   purgatorioBoard: PurgatorioTile[];
