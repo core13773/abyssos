@@ -230,7 +230,11 @@ export const useGameStore = create<GameStore>((set, get) => {
       const state = get();
       if (state.phase !== 'moving') return;
 
-      const totalMove = (state.dice?.[0] ?? 0) + (state.dice?.[1] ?? 0) + state.player.moveBonus;
+      const moveBonus = state.player.moveBonus || 0;
+      const diceVal0 = state.dice?.[0] ?? 0;
+      const diceVal1 = state.dice?.[1] ?? 0;
+      // Ensure minimum move of 1 tile forward (safety net)
+      const totalMove = Math.max(1, diceVal0 + diceVal1 + moveBonus);
       const p = { ...state.player, moveBonus: 0 };
       const remaining = remainingTilesInCircle(state.board, p.currentTileId);
 
@@ -244,12 +248,13 @@ export const useGameStore = create<GameStore>((set, get) => {
         const gkName = loc() === 'en' ? (gk?.nameEn || '') : (gk?.name || '');
 
         set({
-          player: p, phase: 'gatekeeper', activeGatekeeper: gk || null,
+          player: p, phase: 'gatekeeper', activeGatekeeper: gk || null, dice: null, demonDice: null, isDouble: false, doubleCount: 0,
           log: [...state.log, { turn: state.turnNumber, message: t('gk.arrive', loc(), { name: gkName }), type: 'critical' }],
         });
         return;
       }
 
+      const previousTileId = p.currentTileId;
       let currentTile = state.board.find((t) => t.id === p.currentTileId);
       for (let i = 0; i < totalMove; i++) {
         if (!currentTile) break;
@@ -260,6 +265,14 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (currentTile) {
         p.currentTileId = currentTile.id;
         p.currentCircleId = currentTile.circleId;
+      }
+      // Safety: if no movement occurred, force one tile forward
+      if (p.currentTileId === previousTileId) {
+        const forcedNext = getNextTileV4(state.board, previousTileId);
+        if (forcedNext) {
+          p.currentTileId = forcedNext.id;
+          p.currentCircleId = forcedNext.circleId;
+        }
       }
 
       const tile = state.board.find((t) => t.id === p.currentTileId);

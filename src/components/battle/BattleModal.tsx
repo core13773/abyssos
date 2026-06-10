@@ -7,13 +7,14 @@ import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
 import ColorSequence from './ColorSequence';
-import TimingSlider from './TimingSlider';
 import CardMatch from './CardMatch';
 import RapidTap from './RapidTap';
 import PatternMemory from './PatternMemory';
 import MathPuzzle from './MathPuzzle';
 import ReflexCatch from './ReflexCatch';
 import RhythmTap from './RhythmTap';
+import NumberMemory from './NumberMemory';
+import SpeedTyping from './SpeedTyping';
 import { assetPath } from '@/lib/utils/assetPath';
 import type { ElementType } from '@/types/game';
 
@@ -59,16 +60,13 @@ export default function BattleModal() {
   // ── Render the appropriate mini-game based on monster element ──
   const renderBattle = () => {
     switch (element) {
-      // ── ❄️ Ice: TimingSlider (narrow green, slow, flicker) ──
+      // ── ❄️ Ice: NumberMemory (frozen number recall) ──
       case 'ice':
         return (
-          <TimingSlider
-            greenWidth={isTierB ? 6 : 8}
-            yellowWidth={isTierB ? 10 : 12}
-            speed={isTierB ? 0.7 : 0.85}
-            flickerInterval={isTierB ? 400 : 600}
-            tapPrompt={locale === 'en' ? '👆 TAP THROUGH FROST' : '👆 얼음을 뚫어라'}
-            onResult={(r) => handleResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          <NumberMemory
+            digits={isTierB ? 5 : 3}
+            memorizeTime={isTierB ? 1800 : 2500}
+            onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
           />
         );
 
@@ -103,16 +101,12 @@ export default function BattleModal() {
           />
         );
 
-      // ── 💢 Mud/Wrath: TimingSlider (speed ramp on miss) ──
+      // ── 💢 Mud/Wrath: SpeedTyping (mud-slick typing rush) ──
       case 'mud':
         return (
-          <TimingSlider
-            greenWidth={isTierB ? 8 : 10}
-            yellowWidth={isTierB ? 10 : 12}
-            speed={0.9}
-            speedRamp={isTierB ? 0.18 : 0.12}
-            tapPrompt={locale === 'en' ? '👆 TAP — ANGER GROWS!' : '👆 분노가 쌓인다!'}
-            onResult={(r) => handleResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          <SpeedTyping
+            wordLength={isTierB ? 'long' : 'medium'}
+            onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
           />
         );
 

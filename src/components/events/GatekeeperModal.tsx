@@ -10,7 +10,8 @@ import CardMatch from '@/components/battle/CardMatch';
 import RapidTap from '@/components/battle/RapidTap';
 import ColorSequence from '@/components/battle/ColorSequence';
 import PatternMemory from '@/components/battle/PatternMemory';
-import TimingSlider from '@/components/battle/TimingSlider';
+import NumberMemory from '@/components/battle/NumberMemory';
+import RhythmTap from '@/components/battle/RhythmTap';
 import { assetPath } from '@/lib/utils/assetPath';
 import type { GatekeeperBattleType } from '@/types/game';
 
@@ -72,42 +73,35 @@ export default function GatekeeperModal() {
   // ── Render battle minigame ──
   const renderBattle = () => {
     switch (battleType) {
-      // ── Varied timing mini-games (GK-9, GK-5, GK-2) based on GK gimmick ──
+      // ── Diverse mini-games for Gatekeepers (NO TimingSlider) ──
       case 'timing': {
         if (gk.id === 'gk-9') {
-          // GK-9 Ice Goliath: Narrow green zone + flickering indicator
+          // GK-9 Ice Goliath: Frozen number memory
           return (
-            <TimingSlider
-              greenWidth={6}
-              yellowWidth={10}
-              speed={1.0}
-              flickerInterval={500}
-              onResult={(r) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+            <NumberMemory
+              digits={5}
+              memorizeTime={2000}
+              onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 2)}
             />
           );
         }
         if (gk.id === 'gk-5') {
-          // GK-5 Avatar of Wrath: Speed ramps up on each miss
+          // GK-5 Avatar of Wrath: Rapid tapping frenzy
           return (
-            <TimingSlider
-              greenWidth={10}
-              yellowWidth={12}
-              speed={0.9}
-              speedRamp={0.15}
-              multiTap={resolved ? undefined : undefined}
-              onResult={(r) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+            <RapidTap
+              targetTaps={22}
+              timeLimit={5}
+              onResult={(success) => resolveWithResult(success, success ? 6 : 2)}
             />
           );
         }
-        // GK-2 Storm Wraith: Speed variance + jitter
+        // GK-2 Storm Wraith: Rhythm game (storm beat)
         return (
-          <TimingSlider
-            greenWidth={9}
-            yellowWidth={12}
-            speed={1.0}
-            speedVariance={0.4}
-            jitter={true}
-            onResult={(r) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          <RhythmTap
+            beatCount={5}
+            bpm={130}
+            tolerance={200}
+            onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 2)}
           />
         );
       }
