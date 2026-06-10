@@ -181,16 +181,13 @@ export const useGameStore = create<GameStore>((set, get) => {
       const poison = p.buffs.find((b) => b.id === 'poison');
       if (poison) p.hp = Math.max(0, p.hp + poison.value);
 
-      // ── Roll movement dice, then Demon Duel mini-game ──
-      const playerRoll = rollDice(_rng);
-      const isDouble = playerRoll.isDouble;
-      const doubleCount = isDouble ? state.doubleCount + 1 : 0;
-
+      // ── Open Demon Duel mini-game (no dice roll) ──
       set({
         player: p,
-        dice: [playerRoll.dice[0], playerRoll.dice[1]],
+        dice: null,
         demonDice: null,
-        isDouble, doubleCount,
+        isDouble: false,
+        doubleCount: 0,
         phase: 'demon_duel',
         log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? '👹 The demon challenges you!' : '👹 악마가 도전한다!', type: 'roll' }],
       });

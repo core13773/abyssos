@@ -79,7 +79,9 @@ export default function PurgatorioDicePanel() {
     <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-stone-900/80 border border-stone-800">
       {/* Dice display */}
       <div className="flex gap-3 items-center">
-        {dice ? (
+        {isDuelPhase ? (
+          <p className="text-2xl animate-bounce">👹</p>
+        ) : dice ? (
           <>
             <DiceFace value={dice[0]} size={50} />
             <DiceFace value={dice[1]} size={50} />

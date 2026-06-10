@@ -32,8 +32,18 @@ export default function DemonDuel() {
     const log = [...s.log];
 
     if (result) {
-      log.push({ turn: s.turnNumber, message: locale === 'en' ? '👹 Demons defeated! Move forward!' : '👹 악마를 물리쳤다! 전진하라!', type: 'critical' });
-      useGameStore.setState({ player: p, phase: 'moving', log });
+      // Mini-game performance determines move distance (not dice)
+      const moveAmt = targetCount === 8 ? 6 : targetCount === 6 ? 5 : 4;
+      log.push({ turn: s.turnNumber, message: locale === 'en' ? `👹 Demons defeated! Move ${moveAmt} spaces!` : `👹 악마를 물리쳤다! ${moveAmt}칸 전진!`, type: 'critical' });
+      useGameStore.setState({
+        player: p,
+        dice: [moveAmt, 0], // moveAmt in first slot, movePlayerAction sums both
+        demonDice: null,
+        isDouble: false,
+        doubleCount: 0,
+        phase: 'moving',
+        log,
+      });
     } else {
       const dmg = circleId >= 7 ? 5 : 3;
       p.hp = Math.max(0, p.hp - dmg);
