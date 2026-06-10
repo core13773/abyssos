@@ -15,7 +15,6 @@ export default function PurgatorioDicePanel() {
   const purgatorioDiceData = useGameStore((s) => s.purgatorioDice);
   const paradisoDiceData = useGameStore((s) => s.paradisoDice);
   const player = useGameStore((s) => s.player);
-  const demonDice = useGameStore((s) => s.demonDice);
   const rollDiceAction = useGameStore((s) => s.rollDiceAction);
   const resolveEventAction = useGameStore((s) => s.resolveEventAction);
   const rollPurgatorioDice = useGameStore((s) => s.rollPurgatorioDice);
@@ -78,18 +77,11 @@ export default function PurgatorioDicePanel() {
   return (
     <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-stone-900/80 border border-stone-800">
       {/* Dice display */}
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-3 items-center">
         {dice ? (
           <>
-            <DiceFace value={dice[0]} size={46} />
-            <DiceFace value={dice[1]} size={46} />
-            {demonDice && demonDice.length >= 2 && (
-              <>
-                <span className="text-xs font-bold text-red-500 mx-0.5">VS</span>
-                <DiceFace value={demonDice[0]} size={46} />
-                <DiceFace value={demonDice[1]} size={46} />
-              </>
-            )}
+            <DiceFace value={dice[0]} size={50} />
+            <DiceFace value={dice[1]} size={50} />
           </>
         ) : (
           <>

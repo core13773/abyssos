@@ -191,15 +191,16 @@ export const useGameStore = create<GameStore>((set, get) => {
       let showSparkles = false;
       let shakeScreen = false;
 
+      const msg = loc() === 'en' ? duelResult.message : duelResult.messageKo;
+
       if (duelResult.outcome === 'player_crit' || duelResult.outcome === 'player_win') {
-        const msg = loc() === 'en' ? duelResult.message : duelResult.messageKo;
         const isDouble = duelResult.playerRoll.isDouble;
         const doubleCount = isDouble ? state.doubleCount + 1 : 0;
 
         set({
           player: p,
           dice: [duelResult.playerRoll.dice[0], duelResult.playerRoll.dice[1]],
-          demonDice: [duelResult.demonRoll.dice[0], duelResult.demonRoll.dice[1]],
+          demonDice: null,
           isDouble, doubleCount,
           phase: 'moving', shakeScreen: false,
           showSparkles: duelResult.outcome === 'player_crit',
@@ -209,11 +210,10 @@ export const useGameStore = create<GameStore>((set, get) => {
         shakeScreen = true;
         const dmg = duelResult.outcome === 'demon_crit' ? 5 : 3;
         p.hp = Math.max(0, p.hp - dmg);
-        const msg = loc() === 'en' ? duelResult.message : duelResult.messageKo;
         set({
           player: p,
           dice: [duelResult.playerRoll.dice[0], duelResult.playerRoll.dice[1]],
-          demonDice: [duelResult.demonRoll.dice[0], duelResult.demonRoll.dice[1]],
+          demonDice: null,
           phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
           isDouble: false, doubleCount: 0, shakeScreen, showSparkles: false,
           log: [...state.log, { turn: state.turnNumber, message: msg, type: 'roll' }],
