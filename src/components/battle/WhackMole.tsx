@@ -32,6 +32,7 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
   onResultRef.current = onResult;
   const spawnedCountRef = useRef(0);
   const isRunningRef = useRef(false);
+  const lastWhackTimeRef = useRef(0);
 
   const startGame = useCallback(() => {
     setPhase('playing');
@@ -86,6 +87,10 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
 
   const handleWhack = useCallback((idx: number) => {
     if (!isRunningRef.current) return;
+    // Debounce to prevent double-firing on touch devices
+    const now = Date.now();
+    if (now - lastWhackTimeRef.current < 150) return;
+    lastWhackTimeRef.current = now;
     if (activeRef.current === idx) {
       activeRef.current = null;
       setActive(null);
@@ -129,8 +134,8 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
             {GRID.map((pos, i) => (
               <button
                 key={i}
-                onPointerDown={(e) => { e.preventDefault(); handleWhack(i); }}
-                className="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 active:scale-90 transition-transform touch-none"
+                onClick={(e) => { e.stopPropagation(); handleWhack(i); }}
+                className="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 active:scale-90 transition-transform select-none"
                 style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
               >
                 <AnimatePresence>
