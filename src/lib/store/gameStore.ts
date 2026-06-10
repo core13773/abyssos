@@ -63,7 +63,7 @@ function saveCollectedCards(realm: 'inferno' | 'purgatorio' | 'paradiso', cardId
   } catch { /* ignore */ }
 }
 
-import { rollDice, resolveDiceDuel, getDemonBonus, rollD6 } from '@/lib/game/dice';
+import { rollDice, resolveDiceDuel, getDemonBonus } from '@/lib/game/dice';
 import { getNextTileV4, remainingTilesInCircle } from '@/lib/game/board-v4';
 import { buildPurgatorioBoard, getNextPurgatorioTile, remainingTilesInTerrace } from '@/lib/game/purgatorio-board';
 import { resolveMonsterBattle } from '@/lib/game/battle';

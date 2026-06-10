@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button';
 import ColorSequence from '@/components/battle/ColorSequence';
 import PatternMemory from '@/components/battle/PatternMemory';
 import RapidTap from '@/components/battle/RapidTap';
-import TimingSlider from '@/components/battle/TimingSlider';
+import RhythmTap from '@/components/battle/RhythmTap';
 
 export default function ArchangelModal() {
   const phase = useGameStore((s) => s.phase);
@@ -43,15 +43,13 @@ export default function ArchangelModal() {
         // Narrative choice: pattern memory representing the story-based choice
         return <PatternMemory patternLength={3} memorizeTime={2000} onResult={(success) => resolveWithResult(success, success ? 6 : 3)} />;
       case 'timing_multi':
-        // Archangel-3 Uriel, Archangel-4 Michael, Archangel-8 Sandalphon: Consecutive timing sliders
-        // Use faster timing slider for multi-hit feel
+        // Archangel-3 Uriel, Archangel-4 Michael, Archangel-8 Sandalphon: Rhythm challenge
         return (
-          <TimingSlider
-            greenWidth={8}
-            yellowWidth={12}
-            speed={1.2}
-            multiTap={2}
-            onResult={(r) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 3)}
+          <RhythmTap
+            beatCount={5}
+            bpm={140}
+            tolerance={180}
+            onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 3)}
           />
         );
       case 'rapid_sequence':

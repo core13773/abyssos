@@ -10,7 +10,8 @@ import CardMatch from '@/components/battle/CardMatch';
 import RapidTap from '@/components/battle/RapidTap';
 import ColorSequence from '@/components/battle/ColorSequence';
 import PatternMemory from '@/components/battle/PatternMemory';
-import TimingSlider from '@/components/battle/TimingSlider';
+import NumberMemory from '@/components/battle/NumberMemory';
+import RhythmTap from '@/components/battle/RhythmTap';
 import type { AngelBattleType } from '@/types/game';
 
 export default function AngelModal() {
@@ -50,28 +51,25 @@ export default function AngelModal() {
   const renderBattle = () => {
     switch (battleType) {
       case 'timing_quiz': {
-        // Angel-1 Humility: Timing slider with green zone bonus if purification bonus active
+        // Angel-1 Humility: Number memory (patience through recollection)
         const hasBonus = purificationCards.some((c) => c?.id === 'purification-1');
         return (
-          <TimingSlider
-            greenWidth={hasBonus ? 14 : 8}
-            yellowWidth={14}
-            speed={1.0}
-            onResult={(r) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          <NumberMemory
+            digits={hasBonus ? 3 : 5}
+            memorizeTime={hasBonus ? 3000 : 2000}
+            onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 2)}
           />
         );
       }
 
       case 'timing_smoke': {
-        // Angel-3 Gentleness: Timing slider with flickering indicator (smoke effect)
+        // Angel-3 Gentleness: Rhythm tap through the smoke
         return (
-          <TimingSlider
-            greenWidth={10}
-            yellowWidth={12}
-            speed={1.1}
-            flickerInterval={400}
-            jitter={true}
-            onResult={(r) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 3)}
+          <RhythmTap
+            beatCount={4}
+            bpm={120}
+            tolerance={200}
+            onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 3)}
           />
         );
       }
@@ -127,15 +125,12 @@ export default function AngelModal() {
         );
 
       case 'purification': {
-        // Angel-7 Purity: Fast timing slider with reverse direction + flicker
+        // Angel-7 Purity: Color sequence (purification through fire)
         return (
-          <TimingSlider
-            greenWidth={7}
-            yellowWidth={10}
-            speed={1.4}
-            flickerInterval={350}
-            reverseDirection={true}
-            onResult={(r) => resolveWithResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 4 : 2)}
+          <ColorSequence
+            sequenceLength={5}
+            showTime={500}
+            onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 2)}
           />
         );
       }
@@ -174,13 +169,13 @@ export default function AngelModal() {
                   {angel.power}
                 </p>
                 <span className="text-[9px] bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded-full self-start mt-1">
-                  {battleType === 'timing_quiz' ? '🎯 Timing' :
-                   battleType === 'timing_smoke' ? '🌫 Smoke' :
+                  {battleType === 'timing_quiz' ? '🔢 Memory' :
+                   battleType === 'timing_smoke' ? '🎵 Rhythm' :
                    battleType === 'cardmatch' ? '🃏 Cards' :
                    battleType === 'rapidtap' ? '⚡ Speed' :
                    battleType === 'choice' ? '🎲 Choice' :
-                   battleType === 'quiz' ? '🌈 Sequence' :
-                   battleType === 'purification' ? '🔥 Purification' : '???'}
+                   battleType === 'quiz' ? '🌈 Pattern' :
+                   battleType === 'purification' ? '🌈 ColorSeq' : '???'}
                 </span>
               </div>
             </div>
