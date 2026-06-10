@@ -25,6 +25,8 @@ export default function BattleModal() {
   const setBattleRoll = useGameStore((s) => s.setBattleRoll);
   const resolveBattleAction = useGameStore((s) => s.resolveBattleAction);
   const skipBattleAction = useGameStore((s) => s.skipBattleAction);
+  const consumables = useGameStore((s) => s.player.consumables);
+  const useConsumable = useGameStore((s) => s.useConsumable);
   const locale = useLocale((s) => s.locale);
   const [result, setResult] = useState<boolean | null>(null);
   const [resolved, setResolved] = useState(false);
@@ -55,8 +57,6 @@ export default function BattleModal() {
   const monName = locale === 'en' ? monster.nameEn : monster.name;
   const ability = locale === 'en' ? monster.abilityEn : monster.ability;
   const canSkip = player.guardianCards.some((g) => g.id === 'guardian-8');
-  const consumables = useGameStore((s) => s.player.consumables);
-  const useConsumable = useGameStore((s) => s.useConsumable);
   const tierLabel = monster.tier === 'A' ? (locale === 'en' ? 'MINOR' : '하급') : (locale === 'en' ? 'GREATER' : '상급');
   const element: ElementType = monster.element;
   const isTierB = monster.tier === 'B';

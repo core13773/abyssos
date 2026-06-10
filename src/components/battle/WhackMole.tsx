@@ -28,6 +28,7 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
   const scoreRef = useRef(0);
   const spawnTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const gameTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutsRef = useRef<number[]>([]);
   const onResultRef = useRef(onResult);
   useEffect(() => {
     onResultRef.current = onResult;
@@ -36,7 +37,24 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
   const isRunningRef = useRef(false);
   const lastWhackTimeRef = useRef(0);
 
+  const clearAllTimeouts = useCallback(() => {
+    timeoutsRef.current.forEach((id) => clearTimeout(id));
+    timeoutsRef.current = [];
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
+      if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+      clearAllTimeouts();
+    };
+  }, [clearAllTimeouts]);
+
   const startGame = useCallback(() => {
+    if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
+    if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+    clearAllTimeouts();
+
     setPhase('playing');
     setScore(0);
     scoreRef.current = 0;
@@ -53,12 +71,13 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
       setActive(pos);
       spawnedCountRef.current++;
 
-      setTimeout(() => {
+      const id = window.setTimeout(() => {
         if (activeRef.current === pos) {
           activeRef.current = null;
           setActive(null);
         }
       }, appearTime);
+      timeoutsRef.current.push(id);
     };
 
     spawnEnemy();
@@ -75,17 +94,11 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
         isRunningRef.current = false;
         setPhase('done');
         const finalScore = scoreRef.current;
-        setTimeout(() => onResultRef.current(finalScore >= targetCount, finalScore), 500);
+        const id = window.setTimeout(() => onResultRef.current(finalScore >= targetCount, finalScore), 500);
+        timeoutsRef.current.push(id);
       }
     }, 100);
-  }, [totalTime, appearTime, spawnInterval, targetCount]);
-
-  useEffect(() => {
-    return () => {
-      if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
-      if (gameTimerRef.current) clearInterval(gameTimerRef.current);
-    };
-  }, []);
+  }, [totalTime, appearTime, spawnInterval, targetCount, clearAllTimeouts]);
 
   const handleWhack = useCallback((idx: number) => {
     if (!isRunningRef.current) return;
@@ -101,12 +114,14 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
       if (scoreRef.current >= targetCount) {
         if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
         if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+        clearAllTimeouts();
         isRunningRef.current = false;
         setPhase('done');
-        setTimeout(() => onResultRef.current(true, scoreRef.current), 400);
+        const id = window.setTimeout(() => onResultRef.current(true, scoreRef.current), 400);
+        timeoutsRef.current.push(id);
       }
     }
-  }, [targetCount]);
+  }, [targetCount, clearAllTimeouts]);
 
   const timePct = (timeLeft / totalTime) * 100;
 
