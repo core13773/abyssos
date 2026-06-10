@@ -15,6 +15,10 @@ import ReflexCatch from './ReflexCatch';
 import RhythmTap from './RhythmTap';
 import NumberMemory from './NumberMemory';
 import SpeedTyping from './SpeedTyping';
+import WhackMole from './WhackMole';
+import DiceBet from './DiceBet';
+import DirectionDodge from './DirectionDodge';
+import BalanceScale from './BalanceScale';
 import { assetPath } from '@/lib/utils/assetPath';
 import type { ElementType } from '@/types/game';
 
@@ -82,12 +86,14 @@ export default function BattleModal() {
           />
         );
 
-      // ── 🩸 Blood: RapidTap ──
+      // ── 🩸 Blood: WhackMole (whack the blood demons) ──
       case 'blood':
         return (
-          <RapidTap
-            targetTaps={isTierB ? 18 : 12}
-            timeLimit={isTierB ? 4.5 : 5}
+          <WhackMole
+            targetCount={isTierB ? 10 : 6}
+            appearTime={isTierB ? 700 : 900}
+            spawnInterval={isTierB ? 700 : 1000}
+            totalTime={isTierB ? 8 : 10}
             onResult={(success) => handleResult(success, success ? 6 : 2)}
           />
         );
@@ -110,32 +116,14 @@ export default function BattleModal() {
           />
         );
 
-      // ── 💰 Gold/Greed: Choice (gamble) ──
+      // ── 💰 Gold/Greed: DiceBet (predict the dice) ──
       case 'gold':
-        return resolved ? null : (
-          <div className="flex flex-col gap-2">
-            <p className="text-[10px] text-amber-400 text-center font-bold mb-1">
-              {locale === 'en' ? '💰 The miser tests your greed...' : '💰 구두쇠가 탐욕을 시험한다...'}
-            </p>
-            <button
-              onClick={() => {
-                const success = Math.random() < 0.7;
-                handleResult(success, success ? 5 : 2);
-              }}
-              className="w-full py-3 bg-emerald-800 hover:bg-emerald-700 text-emerald-200 font-bold rounded-xl text-sm active:scale-95 transition-transform border border-emerald-600/50"
-            >
-              🛡 {locale === 'en' ? 'Safe Path (70% win)' : '안전한 길 (70% 승리)'}
-            </button>
-            <button
-              onClick={() => {
-                const success = Math.random() < 0.3;
-                handleResult(success, success ? 6 : 1);
-              }}
-              className="w-full py-3 bg-red-800 hover:bg-red-700 text-red-200 font-bold rounded-xl text-sm active:scale-95 transition-transform border border-red-600/50"
-            >
-              ⚡ {locale === 'en' ? 'Gamble (30% win, 3x reward!)' : '도박 (30% 승리, 3배 보상!)'}
-            </button>
-          </div>
+        return (
+          <DiceBet
+            requiredWins={isTierB ? 3 : 2}
+            totalRounds={isTierB ? 4 : 3}
+            onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
+          />
         );
 
       // ── 🤢 Poison: ReflexCatch (catch the falling soul) ──
@@ -148,24 +136,23 @@ export default function BattleModal() {
           />
         );
 
-      // ── 🌪 Wind: RhythmTap (tap to the hurricane beat) ──
+      // ── 🌪 Wind: DirectionDodge (dodge the storm attacks) ──
       case 'wind':
         return (
-          <RhythmTap
-            beatCount={isTierB ? 5 : 3}
-            bpm={isTierB ? 140 : 100}
-            tolerance={isTierB ? 180 : 250}
+          <DirectionDodge
+            requiredDodges={isTierB ? 6 : 4}
+            totalAttacks={isTierB ? 10 : 7}
+            speed={isTierB ? 800 : 1000}
             onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
           />
         );
 
-      // ── ✨ Holy: PatternMemory ──
+      // ── ✨ Holy: BalanceScale (divine balance) ──
       case 'holy':
         return (
-          <PatternMemory
-            patternLength={isTierB ? 4 : 3}
-            memorizeTime={isTierB ? 2000 : 2500}
-            label={locale === 'en' ? 'Remember the divine truth!' : '신성한 진리를 기억하라!'}
+          <BalanceScale
+            duration={isTierB ? 5 : 4}
+            sensitivity={isTierB ? 2.5 : 1.8}
             onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
           />
         );

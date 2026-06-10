@@ -12,6 +12,7 @@ import ColorSequence from '@/components/battle/ColorSequence';
 import PatternMemory from '@/components/battle/PatternMemory';
 import NumberMemory from '@/components/battle/NumberMemory';
 import RhythmTap from '@/components/battle/RhythmTap';
+import BalanceScale from '@/components/battle/BalanceScale';
 import type { AngelBattleType } from '@/types/game';
 
 export default function AngelModal() {
@@ -86,11 +87,12 @@ export default function AngelModal() {
         );
 
       case 'rapidtap':
+        // Angel-4 Zeal: Balance scale (maintain zeal without burning out)
         return (
-          <RapidTap
-            targetTaps={30}
-            timeLimit={8}
-            onResult={(success) => resolveWithResult(success, success ? 6 : 2)}
+          <BalanceScale
+            duration={5}
+            sensitivity={2.0}
+            onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 2)}
           />
         );
 

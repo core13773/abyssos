@@ -12,6 +12,9 @@ import ColorSequence from '@/components/battle/ColorSequence';
 import PatternMemory from '@/components/battle/PatternMemory';
 import NumberMemory from '@/components/battle/NumberMemory';
 import RhythmTap from '@/components/battle/RhythmTap';
+import WhackMole from '@/components/battle/WhackMole';
+import DiceBet from '@/components/battle/DiceBet';
+import SlidingPuzzle from '@/components/battle/SlidingPuzzle';
 import { assetPath } from '@/lib/utils/assetPath';
 import type { GatekeeperBattleType } from '@/types/game';
 
@@ -118,12 +121,14 @@ export default function GatekeeperModal() {
           />
         );
 
-      // ── Rapid Tap (GK-7 blood) ──
+      // ── WhackMole (GK-7 blood) ──
       case 'rapidtap':
         return (
-          <RapidTap
-            targetTaps={15 + gk.power * 2}
-            timeLimit={5}
+          <WhackMole
+            targetCount={8}
+            appearTime={650}
+            spawnInterval={750}
+            totalTime={9}
             onResult={(success) => resolveWithResult(success, success ? 6 : 2)}
           />
         );
@@ -139,40 +144,23 @@ export default function GatekeeperModal() {
           />
         );
 
-      // ── Choice (GK-4 gold) ──
+      // ── DiceBet (GK-4 gold) ──
       case 'choice':
-        return resolved ? null : (
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => {
-                // Safe: 70% success
-                const success = Math.random() < 0.7;
-                resolveWithResult(success, success ? 5 : 2);
-              }}
-              className="w-full py-3 bg-emerald-800 hover:bg-emerald-700 text-emerald-200 font-bold rounded-xl text-sm active:scale-95 transition-transform border border-emerald-600/50"
-            >
-              🛡 {locale === 'en' ? 'Safe Path (70% win)' : '안전한 길 (70% 승리)'}
-            </button>
-            <button
-              onClick={() => {
-                // Gamble: 30% success, 3x reward
-                const success = Math.random() < 0.3;
-                resolveWithResult(success, success ? 6 : 1);
-              }}
-              className="w-full py-3 bg-red-800 hover:bg-red-700 text-red-200 font-bold rounded-xl text-sm active:scale-95 transition-transform border border-red-600/50"
-            >
-              ⚡ {locale === 'en' ? 'Gamble (30% win, 3x HP!)' : '도박 (30% 승리, 3배 HP!)'}
-            </button>
-          </div>
+        return (
+          <DiceBet
+            requiredWins={2}
+            totalRounds={3}
+            onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 2)}
+          />
         );
 
-      // ── Rapid Tap (GK-3 cerberus) ──
+      // ── SlidingPuzzle (GK-3 cerberus) ──
       case 'multitap':
         return (
-          <RapidTap
-            targetTaps={25}
-            timeLimit={6}
-            onResult={(s) => resolveWithResult(s, s ? 6 : 2)}
+          <SlidingPuzzle
+            size={3}
+            maxMoves={12}
+            onResult={(success: boolean) => resolveWithResult(success, success ? 6 : 2)}
           />
         );
 
