@@ -7,7 +7,12 @@ import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
 import ColorSequence from './ColorSequence';
+import TimingSlider from './TimingSlider';
+import CardMatch from './CardMatch';
+import RapidTap from './RapidTap';
+import PatternMemory from './PatternMemory';
 import { assetPath } from '@/lib/utils/assetPath';
+import type { ElementType } from '@/types/game';
 
 export default function BattleModal() {
   const phase = useGameStore((s) => s.phase);
@@ -20,10 +25,11 @@ export default function BattleModal() {
   const [result, setResult] = useState<boolean | null>(null);
   const [resolved, setResolved] = useState(false);
 
-  const handleResult = useCallback((success: boolean) => {
+  const handleResult = useCallback((success: boolean, d6val?: number) => {
     setResult(success);
     setResolved(true);
-    setBattleRoll(success ? 6 : 2);
+    const roll = d6val ?? (success ? 6 : 2);
+    setBattleRoll(roll);
   }, [setBattleRoll]);
 
   const handleQuickRoll = useCallback(() => {
@@ -39,9 +45,165 @@ export default function BattleModal() {
   const monName = locale === 'en' ? monster.nameEn : monster.name;
   const ability = locale === 'en' ? monster.abilityEn : monster.ability;
   const canSkip = player.guardianCards.some((g) => g.id === 'guardian-8');
-  const tierLabel = monster.tier === 'A' ? (locale==='en'?'MINOR':'하급') : (locale==='en'?'GREATER':'상급');
-  const seqLen = monster.tier === 'A' ? 3 : 4;
-  const seqSpeed = monster.tier === 'A' ? 800 : 600;
+  const tierLabel = monster.tier === 'A' ? (locale === 'en' ? 'MINOR' : '하급') : (locale === 'en' ? 'GREATER' : '상급');
+  const element: ElementType = monster.element;
+  const isTierB = monster.tier === 'B';
+
+  // ── Render the appropriate mini-game based on monster element ──
+  const renderBattle = () => {
+    switch (element) {
+      // ── ❄️ Ice: TimingSlider (narrow green, slow, flicker) ──
+      case 'ice':
+        return (
+          <TimingSlider
+            greenWidth={isTierB ? 6 : 8}
+            yellowWidth={isTierB ? 10 : 12}
+            speed={isTierB ? 0.7 : 0.85}
+            flickerInterval={isTierB ? 400 : 600}
+            tapPrompt={locale === 'en' ? '👆 TAP THROUGH FROST' : '👆 얼음을 뚫어라'}
+            onResult={(r) => handleResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          />
+        );
+
+      // ── 🎭 Illusion: CardMatch ──
+      case 'illusion':
+        return (
+          <CardMatch
+            cardCount={isTierB ? 4 : 3}
+            shuffleSpeed={0.3}
+            showHint={false}
+            removeTrap={false}
+            onResult={(correct: boolean) => handleResult(correct, correct ? 6 : 2)}
+          />
+        );
+
+      // ── 🩸 Blood: RapidTap ──
+      case 'blood':
+        return (
+          <RapidTap
+            targetTaps={isTierB ? 18 : 12}
+            timeLimit={isTierB ? 4.5 : 5}
+            onResult={(success) => handleResult(success, success ? 6 : 2)}
+          />
+        );
+
+      // ── 🔥 Fire: TimingSlider (fast) ──
+      case 'fire':
+        return (
+          <TimingSlider
+            greenWidth={isTierB ? 8 : 10}
+            yellowWidth={isTierB ? 14 : 16}
+            speed={isTierB ? 1.5 : 1.2}
+            tapPrompt={locale === 'en' ? '👆 TAP THROUGH FLAMES' : '👆 불길을 뚫어라'}
+            onResult={(r) => handleResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          />
+        );
+
+      // ── 💢 Mud/Wrath: TimingSlider (speed ramp on miss) ──
+      case 'mud':
+        return (
+          <TimingSlider
+            greenWidth={isTierB ? 8 : 10}
+            yellowWidth={isTierB ? 10 : 12}
+            speed={0.9}
+            speedRamp={isTierB ? 0.18 : 0.12}
+            tapPrompt={locale === 'en' ? '👆 TAP — ANGER GROWS!' : '👆 분노가 쌓인다!'}
+            onResult={(r) => handleResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          />
+        );
+
+      // ── 💰 Gold/Greed: Choice (gamble) ──
+      case 'gold':
+        return resolved ? null : (
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] text-amber-400 text-center font-bold mb-1">
+              {locale === 'en' ? '💰 The miser tests your greed...' : '💰 구두쇠가 탐욕을 시험한다...'}
+            </p>
+            <button
+              onClick={() => {
+                const success = Math.random() < 0.7;
+                handleResult(success, success ? 5 : 2);
+              }}
+              className="w-full py-3 bg-emerald-800 hover:bg-emerald-700 text-emerald-200 font-bold rounded-xl text-sm active:scale-95 transition-transform border border-emerald-600/50"
+            >
+              🛡 {locale === 'en' ? 'Safe Path (70% win)' : '안전한 길 (70% 승리)'}
+            </button>
+            <button
+              onClick={() => {
+                const success = Math.random() < 0.3;
+                handleResult(success, success ? 6 : 1);
+              }}
+              className="w-full py-3 bg-red-800 hover:bg-red-700 text-red-200 font-bold rounded-xl text-sm active:scale-95 transition-transform border border-red-600/50"
+            >
+              ⚡ {locale === 'en' ? 'Gamble (30% win, 3x reward!)' : '도박 (30% 승리, 3배 보상!)'}
+            </button>
+          </div>
+        );
+
+      // ── 🤢 Poison: ColorSequence ──
+      case 'poison':
+        return (
+          <ColorSequence
+            sequenceLength={isTierB ? 4 : 3}
+            showTime={isTierB ? 600 : 800}
+            label={locale === 'en' ? 'Toxic fog clouds your mind...' : '독안개가 정신을 흐린다...'}
+            onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
+          />
+        );
+
+      // ── 🌪 Wind: TimingSlider (speed variance + jitter) ──
+      case 'wind':
+        return (
+          <TimingSlider
+            greenWidth={isTierB ? 8 : 10}
+            yellowWidth={isTierB ? 10 : 12}
+            speed={1.0}
+            speedVariance={isTierB ? 0.4 : 0.3}
+            jitter={isTierB}
+            tapPrompt={locale === 'en' ? '👆 TAP IN THE STORM' : '👆 폭풍 속에서 탭하라'}
+            onResult={(r) => handleResult(r !== 'defeat', r === 'critical' ? 6 : r === 'victory' ? 5 : 2)}
+          />
+        );
+
+      // ── ✨ Holy: PatternMemory ──
+      case 'holy':
+        return (
+          <PatternMemory
+            patternLength={isTierB ? 4 : 3}
+            memorizeTime={isTierB ? 2000 : 2500}
+            label={locale === 'en' ? 'Remember the divine truth!' : '신성한 진리를 기억하라!'}
+            onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
+          />
+        );
+
+      default:
+        // Fallback: ColorSequence
+        return (
+          <ColorSequence
+            sequenceLength={isTierB ? 4 : 3}
+            showTime={isTierB ? 600 : 800}
+            label={locale === 'en' ? 'Memorize & repeat the colors!' : '색깔 순서를 기억해 따라하세요!'}
+            onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
+          />
+        );
+    }
+  };
+
+  // ── Element badge ──
+  const elementBadge = (() => {
+    switch (element) {
+      case 'ice': return '❄️';
+      case 'illusion': return '🎭';
+      case 'blood': return '🩸';
+      case 'fire': return '🔥';
+      case 'mud': return '💢';
+      case 'gold': return '💰';
+      case 'poison': return '☠️';
+      case 'wind': return '🌪';
+      case 'holy': return '✨';
+      default: return '👾';
+    }
+  })();
 
   return (
     <AnimatePresence>
@@ -50,11 +212,13 @@ export default function BattleModal() {
           <div className="flex gap-3 items-start mb-3">
             <div className="shrink-0 w-[100px] aspect-[750/1050] rounded-lg overflow-hidden border border-stone-600 shadow-lg">
               <object data={assetPath(`/images/${locale}/monsters/${monster.id}.svg`)} type="image/svg+xml" className="w-full h-full">
-                <div className="w-full h-full bg-stone-800 flex items-center justify-center text-3xl">👾</div>
+                <div className="w-full h-full bg-stone-800 flex items-center justify-center text-3xl">{elementBadge}</div>
               </object>
             </div>
             <div className="min-w-0 flex-1">
-              <span className={`text-[10px] font-bold uppercase tracking-wider ${monster.tier==='A'?'text-emerald-400':'text-red-400'}`}>{tierLabel}</span>
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${monster.tier === 'A' ? 'text-emerald-400' : 'text-red-400'}`}>
+                {elementBadge} {tierLabel}
+              </span>
               <h2 className="text-base font-bold text-stone-100 font-serif truncate">{monName}</h2>
               <div className="flex gap-3 text-[10px] mt-1">
                 <span className="text-amber-400 font-bold">⚔{monster.power}</span>
@@ -67,8 +231,8 @@ export default function BattleModal() {
 
           {!resolved ? (
             <div className="mb-2">
-              <ColorSequence sequenceLength={seqLen} showTime={seqSpeed} label={locale === 'en' ? 'Memorize & repeat the colors!' : '색깔 순서를 기억해 따라하세요!'} onResult={handleResult} />
-              <div className="mt-2">
+              {renderBattle()}
+              <div className="mt-2 pt-2 border-t border-stone-800">
                 <Button variant="ghost" size="sm" onClick={handleQuickRoll} className="w-full text-[11px]">
                   {locale === 'en' ? '🎲 Random Roll (D6 1~6)' : '🎲 랜덤 주사위 (D6 1~6)'}
                 </Button>
@@ -77,7 +241,7 @@ export default function BattleModal() {
           ) : (
             <div className="mb-3 text-center">
               <p className={`text-xl font-bold mb-2 ${result ? 'text-emerald-400' : 'text-red-400'}`}>
-                {result ? '🌟 SUCCESS!' : '💀 Defeat...'}
+                {result ? (locale === 'en' ? '🌟 VICTORY!' : '🌟 승리!') : (locale === 'en' ? '💀 DEFEAT...' : '💀 패배...')}
               </p>
               <Button variant="primary" size="lg" onClick={resolveBattleAction} className="w-full min-h-[48px]">
                 {locale === 'en' ? 'Continue ▶' : '계속 ▶'}

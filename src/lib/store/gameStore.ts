@@ -25,6 +25,44 @@ function saveRealmCompletion(realm: 'inferno' | 'purgatorio' | 'paradiso', turns
     window.dispatchEvent(new Event('storage'));
   } catch { /* ignore */ }
 }
+
+// ── Card collection persistence ──
+export interface CollectedCards {
+  inferno: string[];      // guardian IDs
+  purgatorio: string[];   // purification IDs
+  paradiso: string[];     // relic IDs
+}
+
+const DEFAULT_COLLECTED: CollectedCards = { inferno: [], purgatorio: [], paradiso: [] };
+
+export function loadCollectedCards(): CollectedCards {
+  if (typeof window === 'undefined') return DEFAULT_COLLECTED;
+  try {
+    const raw = localStorage.getItem('abyssos_cards');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        inferno: parsed.inferno || [],
+        purgatorio: parsed.purgatorio || [],
+        paradiso: parsed.paradiso || [],
+      };
+    }
+  } catch { /* ignore */ }
+  return DEFAULT_COLLECTED;
+}
+
+function saveCollectedCards(realm: 'inferno' | 'purgatorio' | 'paradiso', cardIds: string[]) {
+  if (typeof window === 'undefined') return;
+  try {
+    const current = loadCollectedCards();
+    // Merge: keep existing cards + add new ones (deduplicate)
+    const merged = [...new Set([...current[realm], ...cardIds])];
+    current[realm] = merged;
+    localStorage.setItem('abyssos_cards', JSON.stringify(current));
+    window.dispatchEvent(new Event('storage'));
+  } catch { /* ignore */ }
+}
+
 import { rollDice } from '@/lib/game/dice';
 import { getNextTileV4, remainingTilesInCircle } from '@/lib/game/board-v4';
 import { buildPurgatorioBoard, getNextPurgatorioTile, remainingTilesInTerrace } from '@/lib/game/purgatorio-board';
@@ -339,6 +377,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         // Save Inferno completion
         if (escaped) {
           saveRealmCompletion('inferno', state.totalTurns);
+          saveCollectedCards('inferno', p.guardianCards.map((g) => g.id));
         }
 
         set({
@@ -639,6 +678,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         // Save Purgatorio completion
         if (completed) {
           saveRealmCompletion('purgatorio', state.totalTurns);
+          saveCollectedCards('purgatorio', p.purificationCards.map((c) => c.id));
         }
 
         set({
@@ -851,7 +891,10 @@ export const useGameStore = create<GameStore>((set, get) => {
         if (relic) p.celestialRelics = [...p.celestialRelics, relic];
 
         const completed = checkParadisoComplete(p);
-        if (completed) saveRealmCompletion('paradiso', state.totalTurns);
+        if (completed) {
+          saveRealmCompletion('paradiso', state.totalTurns);
+          saveCollectedCards('paradiso', p.celestialRelics.map((r) => r.id));
+        }
 
         const archName = loc() === 'en' ? archangel.nameEn : archangel.name;
         set({

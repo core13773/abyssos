@@ -6,6 +6,24 @@ import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
+import { loadCollectedCards } from '@/lib/store/gameStore';
+import type { CollectedCards } from '@/lib/store/gameStore';
+import { GUARDIANS } from '@/lib/data/guardians';
+import { PURIFICATION_CARDS } from '@/lib/data/purgatorio';
+import { CELESTIAL_RELICS } from '@/lib/data/paradiso';
+
+// ── Card mini-display helpers ──
+const ELEMENT_EMOJI: Record<string, string> = {
+  ice: '❄️', illusion: '🎭', blood: '🩸', fire: '🔥', mud: '💢', gold: '💰', poison: '☠️', wind: '🌪', holy: '✨',
+  earth: '🪨', sight: '👁', smoke: '🌫', lightning: '⚡', crystal: '💎', wood: '🌳', purgefire: '🔥',
+  lunar: '🌙', mercurial: '☿', venusian: '♀', solar: '☀', martial: '♂', jovian: '♃', saturnine: '♄', stellar: '⭐', prime: '💫',
+};
+
+const REALM_TABS = [
+  { id: 'inferno' as const, icon: '🔥', labelKo: '지옥 — 수호카드', labelEn: 'Inferno — Guardians', total: 9 },
+  { id: 'purgatorio' as const, icon: '🌅', labelKo: '연옥 — 정화카드', labelEn: 'Purgatorio — Purifications', total: 7 },
+  { id: 'paradiso' as const, icon: '✨', labelKo: '천국 — 성물', labelEn: 'Paradiso — Relics', total: 9 },
+];
 
 // ── Completion tracking ──
 type RealmStatus = 'locked' | 'available' | 'completed';
@@ -267,6 +285,44 @@ function RealmCard({
   );
 }
 
+// ── Card Thumbnail (collection gallery) ──
+function CardThumbnail({
+  id, name, effect, element, isCollected, locale,
+}: {
+  id: string; name: string; effect: string; element: string; isCollected: boolean; locale: 'en' | 'ko';
+}) {
+  const emoji = ELEMENT_EMOJI[element] || '🃏';
+  return (
+    <motion.div
+      whileHover={isCollected ? { scale: 1.05 } : {}}
+      className={`rounded-xl border p-2 flex flex-col items-center text-center transition-all ${
+        isCollected
+          ? 'bg-stone-800/80 border-amber-700/40 cursor-default'
+          : 'bg-stone-900/30 border-stone-800/30 opacity-40'
+      }`}
+      title={isCollected ? `${name}: ${effect}` : (locale === 'en' ? 'Not yet collected' : '아직 획득하지 못한 카드')}
+    >
+      {/* Element emoji */}
+      <span className="text-lg mb-0.5">{isCollected ? emoji : '❓'}</span>
+
+      {/* Card name */}
+      <span className={`text-[9px] font-bold leading-tight line-clamp-1 ${isCollected ? 'text-stone-200' : 'text-stone-600'}`}>
+        {name}
+      </span>
+
+      {/* Effect */}
+      <span className={`text-[8px] leading-tight mt-0.5 line-clamp-2 ${isCollected ? 'text-stone-400' : 'text-stone-700'}`}>
+        {effect}
+      </span>
+
+      {/* Collected indicator */}
+      {isCollected && (
+        <span className="text-[8px] text-emerald-600 mt-0.5">✓</span>
+      )}
+    </motion.div>
+  );
+}
+
 // ── Main Page ──
 export default function HomePage() {
   const router = useRouter();
@@ -276,18 +332,29 @@ export default function HomePage() {
     purgatorio: { completed: false, bestTurns: null },
     paradiso: { completed: false },
   });
+  const [collectedCards, setCollectedCards] = useState<CollectedCards>({ inferno: [], purgatorio: [], paradiso: [] });
+  const [activeTab, setActiveTab] = useState<'inferno' | 'purgatorio' | 'paradiso'>('inferno');
 
   useEffect(() => {
     setRealmState(loadRealmState());
+    setCollectedCards(loadCollectedCards());
 
     // Listen for storage updates from game page
-    const onStorage = () => setRealmState(loadRealmState());
+    const onStorage = () => {
+      setRealmState(loadRealmState());
+      setCollectedCards(loadCollectedCards());
+    };
     window.addEventListener('storage', onStorage);
     // Also poll for changes (cross-tab sync)
     const interval = setInterval(() => {
       const current = loadRealmState();
       setRealmState((prev) => {
         if (JSON.stringify(prev) !== JSON.stringify(current)) return current;
+        return prev;
+      });
+      const currentCards = loadCollectedCards();
+      setCollectedCards((prev) => {
+        if (JSON.stringify(prev) !== JSON.stringify(currentCards)) return currentCards;
         return prev;
       });
     }, 2000);
@@ -449,6 +516,118 @@ export default function HomePage() {
           );
         })}
       </section>
+
+      {/* ── Card Collection Section ── */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        className="w-full max-w-md z-10 mb-6"
+        aria-label={locale === 'ko' ? '카드 컬렉션' : 'Card Collection'}
+      >
+        {/* Section header */}
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm">🃏</span>
+          <h2 className="text-xs font-bold text-stone-400 uppercase tracking-wider">
+            {locale === 'en' ? 'Card Collection' : '카드 컬렉션'}
+          </h2>
+          <span className="text-[10px] text-stone-600 ml-auto">
+            {collectedCards.inferno.length + collectedCards.purgatorio.length + collectedCards.paradiso.length}/25
+          </span>
+        </div>
+
+        {/* Realm Tabs */}
+        <div className="flex gap-1 mb-3">
+          {REALM_TABS.map((tab) => {
+            const collected = collectedCards[tab.id]?.length ?? 0;
+            const isActive = activeTab === tab.id;
+            const realmCompleted = tab.id === 'inferno' ? realmState.inferno.completed
+              : tab.id === 'purgatorio' ? realmState.purgatorio.completed
+              : realmState.paradiso.completed;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold transition-all border ${
+                  isActive
+                    ? 'bg-stone-800 border-amber-700/50 text-amber-400'
+                    : 'bg-stone-900/50 border-stone-800 text-stone-500 hover:text-stone-300'
+                }`}
+              >
+                <span className="block text-center">
+                  {tab.icon} {locale === 'en' ? tab.labelEn.split(' — ')[0] : tab.labelKo.split(' — ')[0]}
+                </span>
+                <span className={`text-[9px] ${collected > 0 ? 'text-emerald-500' : 'text-stone-600'}`}>
+                  {collected}/{tab.total}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Card Grid */}
+        <div className="grid grid-cols-3 gap-2">
+          {activeTab === 'inferno' && GUARDIANS.map((card) => {
+            const isCollected = collectedCards.inferno.includes(card.id);
+            return (
+              <CardThumbnail
+                key={card.id}
+                id={card.id}
+                name={locale === 'en' ? card.nameEn : card.name}
+                effect={locale === 'en' ? card.mainEffectEn : card.mainEffect}
+                element={card.element}
+                isCollected={isCollected}
+                locale={locale}
+              />
+            );
+          })}
+          {activeTab === 'purgatorio' && PURIFICATION_CARDS.map((card) => {
+            const isCollected = collectedCards.purgatorio.includes(card.id);
+            return (
+              <CardThumbnail
+                key={card.id}
+                id={card.id}
+                name={locale === 'en' ? card.nameEn : card.name}
+                effect={locale === 'en' ? card.mainEffectEn : card.mainEffect}
+                element={card.element}
+                isCollected={isCollected}
+                locale={locale}
+              />
+            );
+          })}
+          {activeTab === 'paradiso' && CELESTIAL_RELICS.map((card) => {
+            const isCollected = collectedCards.paradiso.includes(card.id);
+            return (
+              <CardThumbnail
+                key={card.id}
+                id={card.id}
+                name={locale === 'en' ? card.nameEn : card.name}
+                effect={locale === 'en' ? card.effectEn : card.effect}
+                element={card.element}
+                isCollected={isCollected}
+                locale={locale}
+              />
+            );
+          })}
+        </div>
+
+        {/* Empty state */}
+        {activeTab === 'inferno' && collectedCards.inferno.length === 0 && !realmState.inferno.completed && (
+          <p className="text-[10px] text-stone-600 text-center mt-2 italic">
+            {locale === 'en' ? 'Play Inferno to collect Guardian cards!' : '지옥편을 플레이하여 수호카드를 모아보세요!'}
+          </p>
+        )}
+        {activeTab === 'purgatorio' && collectedCards.purgatorio.length === 0 && !realmState.purgatorio.completed && (
+          <p className="text-[10px] text-stone-600 text-center mt-2 italic">
+            {locale === 'en' ? 'Complete Inferno, then play Purgatorio!' : '지옥편을 클리어하고 연옥편에서 모아보세요!'}
+          </p>
+        )}
+        {activeTab === 'paradiso' && collectedCards.paradiso.length === 0 && !realmState.paradiso.completed && (
+          <p className="text-[10px] text-stone-600 text-center mt-2 italic">
+            {locale === 'en' ? 'Complete Purgatorio, then play Paradiso!' : '연옥편을 클리어하고 천국편에서 모아보세요!'}
+          </p>
+        )}
+      </motion.section>
 
       {/* Footer */}
       <motion.footer
