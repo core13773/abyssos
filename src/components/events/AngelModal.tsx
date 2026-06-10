@@ -7,7 +7,6 @@ import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
 import CardMatch from '@/components/battle/CardMatch';
-import RapidTap from '@/components/battle/RapidTap';
 import ColorSequence from '@/components/battle/ColorSequence';
 import PatternMemory from '@/components/battle/PatternMemory';
 import NumberMemory from '@/components/battle/NumberMemory';

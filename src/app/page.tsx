@@ -4,8 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
-import { t } from '@/lib/i18n/translations';
-import Button from '@/components/ui/Button';
 import { loadCollectedCards } from '@/lib/store/gameStore';
 import type { CollectedCards } from '@/lib/store/gameStore';
 import { GUARDIANS } from '@/lib/data/guardians';
@@ -287,7 +285,7 @@ function RealmCard({
 
 // ── Card Thumbnail (collection gallery) ──
 function CardThumbnail({
-  id, name, effect, element, isCollected, locale,
+  name, effect, element, isCollected, locale,
 }: {
   id: string; name: string; effect: string; element: string; isCollected: boolean; locale: 'en' | 'ko';
 }) {
@@ -541,9 +539,6 @@ export default function HomePage() {
           {REALM_TABS.map((tab) => {
             const collected = collectedCards[tab.id]?.length ?? 0;
             const isActive = activeTab === tab.id;
-            const realmCompleted = tab.id === 'inferno' ? realmState.inferno.completed
-              : tab.id === 'purgatorio' ? realmState.purgatorio.completed
-              : realmState.paradiso.completed;
             return (
               <button
                 key={tab.id}

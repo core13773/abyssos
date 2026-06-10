@@ -6,13 +6,9 @@ import { useGameStore } from '@/lib/store/gameStore';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import Button from '@/components/ui/Button';
-import ColorSequence from './ColorSequence';
 import CardMatch from './CardMatch';
-import RapidTap from './RapidTap';
-import PatternMemory from './PatternMemory';
 import MathPuzzle from './MathPuzzle';
 import ReflexCatch from './ReflexCatch';
-import RhythmTap from './RhythmTap';
 import NumberMemory from './NumberMemory';
 import SpeedTyping from './SpeedTyping';
 import WhackMole from './WhackMole';
@@ -158,12 +154,11 @@ export default function BattleModal() {
         );
 
       default:
-        // Fallback: ColorSequence
+        // Fallback: NumberMemory
         return (
-          <ColorSequence
-            sequenceLength={isTierB ? 4 : 3}
-            showTime={isTierB ? 600 : 800}
-            label={locale === 'en' ? 'Memorize & repeat the colors!' : '색깔 순서를 기억해 따라하세요!'}
+          <NumberMemory
+            digits={isTierB ? 4 : 3}
+            memorizeTime={isTierB ? 2000 : 2500}
             onResult={(success: boolean) => handleResult(success, success ? 6 : 2)}
           />
         );
