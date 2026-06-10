@@ -33,8 +33,6 @@ export default function PurgatorioDicePanel() {
   const isParadiso = player.era === 'paradiso';
 
   const dice = isParadiso ? paradisoDiceData : isPurgatorio ? purgatorioDiceData : infernoDice;
-  const sum = dice ? dice[0] + dice[1] : 0;
-  const demonSum = demonDice ? demonDice[0] + demonDice[1] : 0;
 
   const isRollPhase = isParadiso ? phase === 'paradiso_rolling'
     : isPurgatorio ? phase === 'purgatorio_rolling'
@@ -80,34 +78,16 @@ export default function PurgatorioDicePanel() {
   return (
     <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-stone-900/80 border border-stone-800">
       {/* Dice display */}
-      <div className="flex gap-3 items-center min-h-[60px]">
+      <div className="flex gap-3 items-center">
         {dice ? (
           <>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-[9px] text-stone-600 font-bold uppercase tracking-wider">
-                {locale === 'en' ? 'YOU' : '당신'}
-              </span>
-              <div className="flex gap-1.5">
-                <DiceFace value={dice[0]} size={42} />
-                <DiceFace value={dice[1]} size={42} />
-              </div>
-              <span className="text-[10px] text-amber-400 font-mono font-bold">{sum}</span>
-            </div>
+            <DiceFace value={dice[0]} size={50} />
+            <DiceFace value={dice[1]} size={50} />
             {demonDice && demonDice.length >= 2 && (
               <>
-                <div className="flex flex-col items-center">
-                  <span className="text-lg font-bold text-red-600 animate-pulse">VS</span>
-                </div>
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-[9px] text-stone-600 font-bold uppercase tracking-wider">
-                    {locale === 'en' ? 'DEMON' : '악마'}
-                  </span>
-                  <div className="flex gap-1.5">
-                    <DiceFace value={demonDice[0]} size={42} fillColor="#991b1b" dotColor="#fca5a5" />
-                    <DiceFace value={demonDice[1]} size={42} fillColor="#991b1b" dotColor="#fca5a5" />
-                  </div>
-                  <span className="text-[10px] text-red-400 font-mono font-bold">{demonSum}</span>
-                </div>
+                <span className="text-lg font-bold text-red-600">VS</span>
+                <DiceFace value={demonDice[0]} size={50} />
+                <DiceFace value={demonDice[1]} size={50} />
               </>
             )}
           </>
