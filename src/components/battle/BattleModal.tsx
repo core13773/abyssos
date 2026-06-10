@@ -55,6 +55,8 @@ export default function BattleModal() {
   const monName = locale === 'en' ? monster.nameEn : monster.name;
   const ability = locale === 'en' ? monster.abilityEn : monster.ability;
   const canSkip = player.guardianCards.some((g) => g.id === 'guardian-8');
+  const consumables = useGameStore((s) => s.player.consumables);
+  const useConsumable = useGameStore((s) => s.useConsumable);
   const tierLabel = monster.tier === 'A' ? (locale === 'en' ? 'MINOR' : '하급') : (locale === 'en' ? 'GREATER' : '상급');
   const element: ElementType = monster.element;
   const isTierB = monster.tier === 'B';
@@ -215,6 +217,25 @@ export default function BattleModal() {
                   {locale === 'en' ? '🎲 Random Roll (D6 1~6)' : '🎲 랜덤 주사위 (D6 1~6)'}
                 </Button>
               </div>
+              {consumables.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-stone-800">
+                  <p className="text-[10px] text-stone-400 mb-1">
+                    {locale === 'en' ? '💼 Consumables:' : '💼 소모품:'}
+                  </p>
+                  <div className="flex gap-1 flex-wrap">
+                    {consumables.map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => useConsumable(c.id)}
+                        className="text-[10px] bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+                        title={locale === 'en' ? c.effectEn : c.effect}
+                      >
+                        {c.icon} {locale === 'en' ? c.nameEn : c.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="mb-3 text-center">

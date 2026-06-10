@@ -262,7 +262,7 @@ export type DiceRoll = [number, number];
 export interface LogEntry {
   turn: number;
   message: string;
-  type: 'roll' | 'move' | 'battle' | 'damage' | 'heal' | 'system' | 'critical' | 'guardian';
+  type: 'roll' | 'move' | 'battle' | 'damage' | 'heal' | 'system' | 'critical' | 'guardian' | 'item';
 }
 
 // ---- Purgatorio Board Tile ----

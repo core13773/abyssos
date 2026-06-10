@@ -32,7 +32,14 @@ export function resolveMonsterBattle(
   }
 
   // Calculate combat bonuses from guardian cards
-  const diceBonus = getGuardianDiceBonus(p.guardianCards, p.hp, p.maxHp);
+  let diceBonus = getGuardianDiceBonus(p.guardianCards, p.hp, p.maxHp);
+
+  // 소모품: 날카로운 단검 buff
+  const daggerBuff = p.buffs.find((b) => b.id === 'dagger');
+  if (daggerBuff) {
+    diceBonus += daggerBuff.value;
+    p.buffs = p.buffs.filter((b) => b.id !== 'dagger');
+  }
 
   const roll = forcedRoll ?? rollD6(rng);
   const total = roll + diceBonus;
@@ -91,6 +98,13 @@ export function resolveMonsterBattle(
     }
   } else {
     let dmg = monster.penaltyHp;
+
+    // 소모품: 철벽 방패 buff
+    const shieldBuff = p.buffs.find((b) => b.id === 'shield');
+    if (shieldBuff) {
+      dmg = Math.max(0, dmg + shieldBuff.value);
+      p.buffs = p.buffs.filter((b) => b.id !== 'shield');
+    }
 
     if (isFumble) {
       dmg *= 2;

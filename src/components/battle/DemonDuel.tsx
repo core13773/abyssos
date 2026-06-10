@@ -209,6 +209,14 @@ export default function DemonDuel() {
       log.push({ turn: s.turnNumber, message: locale === 'en'
         ? `${game.emoji} ${game.name.en}: cleared! Move ${moveAmt} spaces!`
         : `${game.emoji} ${game.name.ko}: 성공! ${moveAmt}칸 전진!`, type: 'critical' });
+      // Perfect clear bonus (score >= 5)
+      if (score >= 5) {
+        p.soulStones = (p.soulStones || 0) + 1;
+        p.perfectClears = (p.perfectClears || 0) + 1;
+        log.push({ turn: s.turnNumber, message: locale === 'en'
+          ? '✨ Perfect Clear! +1 Soul Stone'
+          : '✨ 퍼펙트 클리어! 영혼석 +1', type: 'item' });
+      }
       useGameStore.setState({
         player: p,
         dice: [moveAmt, 0], demonDice: null, isDouble: false, doubleCount: 0,

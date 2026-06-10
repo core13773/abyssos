@@ -91,6 +91,7 @@ interface GameActions {
   resolveGatekeeperAction: () => void;
   skipBattleAction: () => void;
   useGuardianAction: (guardianId: string) => void;
+  useConsumable: (id: string) => void;
   nextTurn: () => void;
   clearEffects: () => void;
 
@@ -203,11 +204,17 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (state.phase !== 'moving') return;
 
       const moveBonus = state.player.moveBonus || 0;
-      const diceVal0 = state.dice?.[0] ?? 0;
-      const diceVal1 = state.dice?.[1] ?? 0;
+      const fixedDiceBuff = state.player.buffs.find((b) => b.id === 'fixed_dice');
+      let diceVal0 = state.dice?.[0] ?? 0;
+      let diceVal1 = state.dice?.[1] ?? 0;
+      const p = { ...state.player, moveBonus: 0, buffs: [...state.player.buffs] };
+      if (fixedDiceBuff) {
+        diceVal0 = fixedDiceBuff.value;
+        diceVal1 = fixedDiceBuff.value;
+        p.buffs = p.buffs.filter((b) => b.id !== 'fixed_dice');
+      }
       // Ensure minimum move of 1 tile forward (safety net)
       const totalMove = Math.max(1, diceVal0 + diceVal1 + moveBonus);
-      const p = { ...state.player, moveBonus: 0 };
       const remaining = remainingTilesInCircle(state.board, p.currentTileId);
 
       if (totalMove >= remaining) {
@@ -390,7 +397,10 @@ export const useGameStore = create<GameStore>((set, get) => {
         });
       } else {
         const dmgReduction = getGuardianDamageReduction(p.guardianCards);
-        const dmg = Math.max(1, gk.penaltyHp - dmgReduction);
+        const shieldBuff = p.buffs.find((b) => b.id === 'shield');
+        const totalReduction = dmgReduction + (shieldBuff ? Math.abs(shieldBuff.value) : 0);
+        if (shieldBuff) p.buffs = p.buffs.filter((b) => b.id !== 'shield');
+        const dmg = Math.max(1, gk.penaltyHp - totalReduction);
         p.hp = Math.max(1, p.hp - dmg);
 
         // Pushback: move player back on the board
@@ -428,6 +438,60 @@ export const useGameStore = create<GameStore>((set, get) => {
         totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
         dice: null, demonDice: null, isDouble: false, doubleCount: 0,
         log: [...state.log, { turn: state.turnNumber, message: t('battle.result.maskSkip', loc()), type: 'guardian' }],
+      });
+    },
+
+    useConsumable: (id: string) => {
+      const state = get();
+      const idx = state.player.consumables.findIndex((c) => c.id === id);
+      if (idx === -1) return;
+      const consumable = state.player.consumables[idx];
+      const p = { ...state.player, consumables: [...state.player.consumables], buffs: [...state.player.buffs], curseCards: [...state.player.curseCards] };
+      p.consumables.splice(idx, 1);
+      const l = getActiveLocale();
+      const name = l === 'en' ? consumable.nameEn : consumable.name;
+      let effectMsg = '';
+      switch (id) {
+        case 'cons-meat':
+          p.hp = Math.min(p.maxHp, p.hp + 20);
+          effectMsg = l === 'en' ? `🍖 ${name}: HP +20` : `🍖 ${name}: HP +20`;
+          break;
+        case 'cons-potion':
+          p.hp = Math.min(p.maxHp, p.hp + 50);
+          effectMsg = l === 'en' ? `🍷 ${name}: HP +50` : `🍷 ${name}: HP +50`;
+          break;
+        case 'cons-dagger':
+          p.buffs.push({ id: 'dagger', name: l === 'en' ? 'Sharp Dagger' : '날카로운 단검', remainingTurns: 1, value: 3 });
+          effectMsg = l === 'en' ? `⚔️ ${name}: Next attack +3` : `⚔️ ${name}: 다음 공격 +3`;
+          break;
+        case 'cons-shield':
+          p.buffs.push({ id: 'shield', name: l === 'en' ? 'Iron Shield' : '철벽 방패', remainingTurns: 1, value: -5 });
+          effectMsg = l === 'en' ? `🛡️ ${name}: Next damage -5` : `🛡️ ${name}: 다음 피해 -5`;
+          break;
+        case 'cons-blessing':
+          p.buffs = [];
+          effectMsg = l === 'en' ? `🌟 ${name}: All penalties cleared` : `🌟 ${name}: 모든 패널티 초기화`;
+          break;
+        case 'cons-remove-curse':
+          if (p.curseCards.length > 0) {
+            const removed = p.curseCards[0];
+            p.curseCards = p.curseCards.slice(1);
+            const remName = l === 'en' ? removed.nameEn : removed.name;
+            effectMsg = l === 'en' ? `💀 ${name}: Curse removed (${remName})` : `💀 ${name}: 저주 제거 (${remName})`;
+          } else {
+            effectMsg = l === 'en' ? `💀 ${name}: No curse to remove` : `💀 ${name}: 제거할 저주 없음`;
+          }
+          break;
+        case 'cons-dice':
+          p.buffs.push({ id: 'fixed_dice', name: l === 'en' ? 'Fixed Dice' : '운의 주사위', remainingTurns: 1, value: 6 });
+          effectMsg = l === 'en' ? `🎲 ${name}: Next dice fixed at 6` : `🎲 ${name}: 다음 주사위 6 고정`;
+          break;
+        default:
+          effectMsg = l === 'en' ? `Used ${name}` : `${name} 사용`;
+      }
+      set({
+        player: p,
+        log: [...state.log, { turn: state.turnNumber, message: effectMsg, type: 'item' }],
       });
     },
 
