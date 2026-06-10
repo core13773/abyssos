@@ -244,6 +244,13 @@ export interface Player {
   grace: number;                             // 은총 게이지 (0-100)
   currentSphereId?: SphereId;               // 천국 현재 천구
   celestialRelics: CelestialRelic[];        // 보유 성물 (천국, 최대 9)
+
+  // ---- NEW V0.2 fields ----
+  curseCards: CurseCard[];                   // 보유 저주카드
+  consumables: Consumable[];                 // 보유 소모품
+  soulStones: number;                        // 영혼석 (메타 재화)
+  perfectClears: number;                     // 완벽 클리어 누적
+  achievements: string[];                    // 획득 업적 ID 목록
 }
 
 // ---- Dice ----
@@ -362,6 +369,46 @@ export interface ParadisoTile {
 
 export type ParadisoTileType = 'spirit' | 'blessing' | 'archangel';
 
+// ---- Curse Card (NEW V0.2) ----
+export interface CurseCard {
+  id: string;
+  circleId: CircleId;
+  name: string;
+  nameEn: string;
+  element: ElementType;
+  effect: string;
+  effectEn: string;
+  penalty: string;
+  penaltyEn: string;
+  narrative: string;
+  narrativeEn: string;
+}
+
+// ---- Consumable (NEW V0.2) ----
+export interface Consumable {
+  id: string;
+  name: string;
+  nameEn: string;
+  effect: string;
+  effectEn: string;
+  icon: string;
+  cost: number;
+  oneTime: boolean;
+}
+
+// ---- Perfect Clear (NEW V0.2) ----
+export type PerfectClearLevel = 'perfect' | 'flawless' | 'divine' | null;
+
+// ---- Achievement (NEW V0.2) ----
+export interface Achievement {
+  id: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  descriptionEn: string;
+  icon: string;
+}
+
 // ---- Full Game State ----
 
 export interface GameState {
@@ -411,4 +458,14 @@ export interface GameState {
   paradisoDice: DiceRoll | null;
   paradisoIsDouble: boolean;
   paradisoDoubleCount: number;
+
+  // ---- NEW V0.2 state ----
+  activeCurseReward: CurseCard | null;
+  activeConsumableReward: Consumable | null;
+  showPerfectClear: PerfectClearLevel;
+  comboCount: number;
+  showCombo: boolean;
+  shopItems: Consumable[];
+  showShop: boolean;
+  storyEvent: { title: string; body: string; choices: { label: string; effect: string }[] } | null;
 }

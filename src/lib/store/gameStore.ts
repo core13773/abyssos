@@ -129,6 +129,8 @@ export const useGameStore = create<GameStore>((set, get) => {
       isStunned: false, buffs: [],
       era: 'inferno', purificationCards: [], totalCardCount: 0,
       virtue: 0, grace: 0, celestialRelics: [],
+      curseCards: [], consumables: [], soulStones: 0,
+      perfectClears: 0, achievements: [],
     },
     board: [],
     dice: null, demonDice: null, isDouble: false, doubleCount: 0,
@@ -142,6 +144,9 @@ export const useGameStore = create<GameStore>((set, get) => {
     purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
     paradisoBoard: [], activeLightSpirit: null, activeArchangel: null, activeCelestialReward: null,
     paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+    activeCurseReward: null, activeConsumableReward: null,
+    showPerfectClear: null, comboCount: 0, showCombo: false,
+    shopItems: [], showShop: false, storyEvent: null,
 
     initGame: () => {
       _rng = createRNG(timeSeed());

@@ -22,6 +22,11 @@ export function createPlayerV4(): Player {
     virtue: 0,
     grace: 0,
     celestialRelics: [],
+    curseCards: [],
+    consumables: [],
+    soulStones: 0,
+    perfectClears: 0,
+    achievements: [],
   };
 }
 
@@ -67,6 +72,14 @@ export function createNewGameV4(): GameState {
     paradisoDice: null,
     paradisoIsDouble: false,
     paradisoDoubleCount: 0,
+    activeCurseReward: null,
+    activeConsumableReward: null,
+    showPerfectClear: null,
+    comboCount: 0,
+    showCombo: false,
+    shopItems: [],
+    showShop: false,
+    storyEvent: null,
   };
 }
 
