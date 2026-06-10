@@ -77,9 +77,9 @@ export default function DemonDuel() {
           {!resolved ? (
             <WhackMole
               targetCount={targetCount}
-              appearTime={650}
-              spawnInterval={750}
-              totalTime={totalTime}
+              appearTime={900}
+              spawnInterval={1100}
+              totalTime={Math.max(totalTime, 10)}
               onResult={handleResult}
             />
           ) : (

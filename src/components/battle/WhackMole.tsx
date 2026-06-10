@@ -31,6 +31,7 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
   const onResultRef = useRef(onResult);
   onResultRef.current = onResult;
   const spawnedCountRef = useRef(0);
+  const isRunningRef = useRef(false);
 
   const startGame = useCallback(() => {
     setPhase('playing');
@@ -38,9 +39,10 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
     scoreRef.current = 0;
     setTimeLeft(totalTime);
     spawnedCountRef.current = 0;
+    isRunningRef.current = true;
 
     const spawnEnemy = () => {
-      if (phase !== 'playing' && phase !== 'ready') return;
+      if (!isRunningRef.current) return;
       let pos: number;
       do { pos = Math.floor(Math.random() * GRID.length); }
       while (pos === activeRef.current && GRID.length > 1);
@@ -67,12 +69,13 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
       if (remaining <= 0) {
         if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
         if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+        isRunningRef.current = false;
         setPhase('done');
         const finalScore = scoreRef.current;
         setTimeout(() => onResultRef.current(finalScore >= targetCount, finalScore), 500);
       }
     }, 100);
-  }, [phase, totalTime, appearTime, spawnInterval, targetCount]);
+  }, [totalTime, appearTime, spawnInterval, targetCount]);
 
   useEffect(() => {
     return () => {
@@ -82,7 +85,7 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
   }, []);
 
   const handleWhack = useCallback((idx: number) => {
-    if (phase !== 'playing') return;
+    if (!isRunningRef.current) return;
     if (activeRef.current === idx) {
       activeRef.current = null;
       setActive(null);
@@ -91,11 +94,12 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
       if (scoreRef.current >= targetCount) {
         if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
         if (gameTimerRef.current) clearInterval(gameTimerRef.current);
+        isRunningRef.current = false;
         setPhase('done');
         setTimeout(() => onResultRef.current(true, scoreRef.current), 400);
       }
     }
-  }, [phase, targetCount]);
+  }, [targetCount]);
 
   const timePct = (timeLeft / totalTime) * 100;
 
@@ -125,8 +129,8 @@ export default function WhackMole({ targetCount, appearTime, spawnInterval, tota
             {GRID.map((pos, i) => (
               <button
                 key={i}
-                onClick={(e) => { e.stopPropagation(); handleWhack(i); }}
-                className="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 active:scale-90 transition-transform"
+                onPointerDown={(e) => { e.preventDefault(); handleWhack(i); }}
+                className="absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 active:scale-90 transition-transform touch-none"
                 style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
               >
                 <AnimatePresence>
