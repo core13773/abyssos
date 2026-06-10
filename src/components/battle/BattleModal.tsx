@@ -29,9 +29,9 @@ export default function BattleModal() {
   const [result, setResult] = useState<boolean | null>(null);
   const [resolved, setResolved] = useState(false);
 
-  if (phase !== 'battle' || !monster) return null;
-
-  const monPower = monster.power;
+  // NOTE: All hooks must be declared before any early return to satisfy the
+  // Rules of Hooks. `monster` may be null here, so guard with optional chaining.
+  const monPower = monster?.power ?? 0;
 
   const handleResult = useCallback((success: boolean, d6val?: number) => {
     setResult(success);
@@ -49,6 +49,8 @@ export default function BattleModal() {
     setResolved(true);
     setBattleRoll(success ? Math.max(roll, monPower) : roll);
   }, [setBattleRoll, monPower]);
+
+  if (phase !== 'battle' || !monster) return null;
 
   const monName = locale === 'en' ? monster.nameEn : monster.name;
   const ability = locale === 'en' ? monster.abilityEn : monster.ability;
