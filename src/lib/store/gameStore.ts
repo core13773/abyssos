@@ -192,7 +192,6 @@ export const useGameStore = create<GameStore>((set, get) => {
       let shakeScreen = false;
 
       if (duelResult.outcome === 'player_crit' || duelResult.outcome === 'player_win') {
-        // Player wins — just set dice and phase, use simple state
         const msg = loc() === 'en' ? duelResult.message : duelResult.messageKo;
         const isDouble = duelResult.playerRoll.isDouble;
         const doubleCount = isDouble ? state.doubleCount + 1 : 0;
@@ -200,16 +199,13 @@ export const useGameStore = create<GameStore>((set, get) => {
         set({
           player: p,
           dice: [duelResult.playerRoll.dice[0], duelResult.playerRoll.dice[1]],
-          demonDice: null,
-          isDouble,
-          doubleCount,
-          phase: 'moving',
-          shakeScreen: false,
+          demonDice: [duelResult.demonRoll.dice[0], duelResult.demonRoll.dice[1]],
+          isDouble, doubleCount,
+          phase: 'moving', shakeScreen: false,
           showSparkles: duelResult.outcome === 'player_crit',
           log: [...state.log, { turn: state.turnNumber, message: msg, type: 'roll' }],
         });
       } else {
-        // Demon wins — take damage
         shakeScreen = true;
         const dmg = duelResult.outcome === 'demon_crit' ? 5 : 3;
         p.hp = Math.max(0, p.hp - dmg);
@@ -217,14 +213,9 @@ export const useGameStore = create<GameStore>((set, get) => {
         set({
           player: p,
           dice: [duelResult.playerRoll.dice[0], duelResult.playerRoll.dice[1]],
-          demonDice: null,
-          phase: 'rolling',
-          totalTurns: state.totalTurns + 1,
-          turnNumber: state.turnNumber + 1,
-          isDouble: false,
-          doubleCount: 0,
-          shakeScreen,
-          showSparkles: false,
+          demonDice: [duelResult.demonRoll.dice[0], duelResult.demonRoll.dice[1]],
+          phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          isDouble: false, doubleCount: 0, shakeScreen, showSparkles: false,
           log: [...state.log, { turn: state.turnNumber, message: msg, type: 'roll' }],
         });
       }

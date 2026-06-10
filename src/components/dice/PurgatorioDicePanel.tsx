@@ -78,16 +78,16 @@ export default function PurgatorioDicePanel() {
   return (
     <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-stone-900/80 border border-stone-800">
       {/* Dice display */}
-      <div className="flex gap-3 items-center">
+      <div className="flex gap-2 items-center">
         {dice ? (
           <>
-            <DiceFace value={dice[0]} size={50} />
-            <DiceFace value={dice[1]} size={50} />
+            <DiceFace value={dice[0]} size={46} />
+            <DiceFace value={dice[1]} size={46} />
             {demonDice && demonDice.length >= 2 && (
               <>
-                <span className="text-lg font-bold text-red-600">VS</span>
-                <DiceFace value={demonDice[0]} size={50} />
-                <DiceFace value={demonDice[1]} size={50} />
+                <span className="text-xs font-bold text-red-500 mx-0.5">VS</span>
+                <DiceFace value={demonDice[0]} size={46} />
+                <DiceFace value={demonDice[1]} size={46} />
               </>
             )}
           </>
