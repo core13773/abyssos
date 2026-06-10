@@ -181,7 +181,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const poison = p.buffs.find((b) => b.id === 'poison');
       if (poison) p.hp = Math.max(0, p.hp + poison.value);
 
-      // ── Demon vs User Dice Duel ──
+      // ── Demon vs User Dice Duel + Auto-Move ──
       const playerRoll = rollDice(_rng);
       const demonRoll = rollDice(_rng);
       const demonBonus = getDemonBonus(p.currentCircleId);
@@ -192,19 +192,67 @@ export const useGameStore = create<GameStore>((set, get) => {
       let shakeScreen = false;
 
       if (duelResult.outcome === 'player_crit' || duelResult.outcome === 'player_win') {
-        // Player wins the duel — can move
+        // Player wins — auto-move immediately (no separate Move button)
         showSparkles = duelResult.outcome === 'player_crit';
         msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
-        p.moveBonus = (p.moveBonus || 0); // preserve existing move bonus
+        p.moveBonus = (p.moveBonus || 0);
 
         const isDouble = duelResult.playerRoll.isDouble;
         const doubleCount = isDouble ? state.doubleCount + 1 : 0;
+        const totalMove = Math.max(1, duelResult.playerRoll.sum + (p.moveBonus || 0));
+        p.moveBonus = 0;
 
-        set({
-          player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice, isDouble, doubleCount,
-          phase: 'moving', shakeScreen, showSparkles,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-        });
+        // Execute move directly
+        const remaining = remainingTilesInCircle(state.board, p.currentTileId);
+        const prevTileId = p.currentTileId;
+        if (totalMove >= remaining) {
+          const lastTile = state.board.find((t) => t.circleId === p.currentCircleId && t.index === 11);
+          if (lastTile) p.currentTileId = lastTile.id;
+          const gk = getGatekeeper(p.currentCircleId);
+          set({
+            player: p, phase: 'gatekeeper', activeGatekeeper: gk || null,
+            dice: null, demonDice: null, isDouble: false, doubleCount: 0,
+            log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+          });
+        } else {
+          let currentTile = state.board.find((t) => t.id === p.currentTileId);
+          for (let i = 0; i < totalMove; i++) {
+            if (!currentTile) break;
+            const next = getNextTileV4(state.board, currentTile.id);
+            if (!next) break;
+            currentTile = next;
+          }
+          if (currentTile && currentTile.id !== prevTileId) {
+            p.currentTileId = currentTile.id;
+            p.currentCircleId = currentTile.circleId;
+          } else if (currentTile && currentTile.id === prevTileId) {
+            const forced = getNextTileV4(state.board, prevTileId);
+            if (forced) { p.currentTileId = forced.id; p.currentCircleId = forced.circleId; }
+          }
+          const tile = state.board.find((t) => t.id === p.currentTileId);
+          if (tile?.type === 'monster' && tile.monsterId) {
+            let monster = getMonster(tile.monsterId);
+            if (tile.label === 'elite' && monster) monster = { ...monster, power: monster.power + 2, rewardHp: monster.rewardHp * 3 };
+            const monName = (loc() === 'en' ? monster?.nameEn : monster?.name) || '';
+            set({
+              player: p, phase: 'battle', activeMonster: monster || null,
+              dice: null, demonDice: null, isDouble: false, doubleCount: 0,
+              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+            });
+          } else if (tile?.type === 'event' && tile.eventKind) {
+            set({
+              player: p, phase: 'event', pendingEventKind: tile.eventKind,
+              dice: null, demonDice: null, isDouble: false, doubleCount: 0,
+              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+            });
+          } else {
+            set({
+              player: p, phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+              dice: null, demonDice: null, isDouble: false, doubleCount: 0,
+              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+            });
+          }
+        }
       } else {
         // Demon wins — take damage, can't move, turn passes
         shakeScreen = true;
@@ -212,13 +260,10 @@ export const useGameStore = create<GameStore>((set, get) => {
         p.hp = Math.max(0, p.hp - dmg);
         msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
         msgs.push(loc() === 'en' ? `-${dmg} HP! Turn lost.` : `-${dmg} HP! 턴 소실.`);
-
         set({
           player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice,
-          phase: 'rolling', // stay in rolling — player must roll again
-          totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          isDouble: false, doubleCount: 0,
-          shakeScreen, showSparkles,
+          phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          isDouble: false, doubleCount: 0, shakeScreen, showSparkles,
           log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
         });
       }
@@ -516,10 +561,10 @@ export const useGameStore = create<GameStore>((set, get) => {
       const poison = p.buffs.find((b) => b.id === 'poison');
       if (poison) p.hp = Math.max(0, p.hp + poison.value);
 
-      // ── Demon vs User Dice Duel (Purgatorio) ──
+      // ── Demon vs User Dice Duel (Purgatorio) + Auto-Move ──
       const playerRoll = rollDice(_rng);
       const demonRoll = rollDice(_rng);
-      const demonBonus = getDemonBonus(p.currentTerraceId ?? 7); // use terrace depth
+      const demonBonus = getDemonBonus(p.currentTerraceId ?? 7);
       const duel = resolveDiceDuel(playerRoll, demonRoll, demonBonus);
 
       const msgs: string[] = [];
@@ -529,32 +574,67 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (duel.outcome === 'player_crit' || duel.outcome === 'player_win') {
         showSparkles = duel.outcome === 'player_crit';
         msgs.push(loc() === 'en' ? duel.message : duel.messageKo);
-        const isDouble = playerRoll.isDouble;
-        const doubleCount = isDouble ? state.purgatorioDoubleCount + 1 : 0;
-
-        // Step of Zeal: double allows 3 moves
-        if (isDouble && p.purificationCards.some((c) => c.id === 'purification-4')) {
+        if (playerRoll.isDouble && p.purificationCards.some((c) => c.id === 'purification-4')) {
           msgs.push(t('purgatorio.stepOfZeal', loc()));
         }
 
-        set({
-          player: p, purgatorioDice: playerRoll.dice, demonDice: demonRoll.dice, purgatorioIsDouble: isDouble, purgatorioDoubleCount: doubleCount,
-          phase: 'purgatorio_moving', shakeScreen, showSparkles,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-        });
+        const isDouble = playerRoll.isDouble;
+        const doubleCount = isDouble ? state.purgatorioDoubleCount + 1 : 0;
+        const totalMove = Math.max(1, playerRoll.sum + (p.moveBonus || 0));
+        p.moveBonus = 0;
+
+        // Auto-move
+        const board = state.purgatorioBoard;
+        const remaining = remainingTilesInTerrace(board, p.currentTileId);
+        if (totalMove >= remaining) {
+          const lastTile = board.find((t) => t.terraceId === p.currentTerraceId && t.index === 7);
+          if (lastTile) p.currentTileId = lastTile.id;
+          const angel = getAngelGuardian(p.currentTerraceId!);
+          set({
+            player: p, phase: 'purgatorio_angel', activeAngelGuardian: angel || null,
+            purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+            log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+          });
+        } else {
+          let currentTile = board.find((t) => t.id === p.currentTileId);
+          for (let i = 0; i < totalMove; i++) {
+            if (!currentTile) break;
+            const next = getNextPurgatorioTile(board, currentTile.id);
+            if (!next) break;
+            currentTile = next;
+          }
+          if (currentTile) { p.currentTileId = currentTile.id; p.currentTerraceId = currentTile.terraceId; }
+          const tile = board.find((t) => t.id === p.currentTileId);
+          if (tile?.type === 'sin' && tile.sinProjectionId) {
+            const sinProj = getSinProjection(tile.sinProjectionId);
+            set({
+              player: p, phase: 'purgatorio_battle', activeSinProjection: sinProj || null,
+              purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+            });
+          } else if (tile?.type === 'event' && tile.eventKind) {
+            set({
+              player: p, phase: 'purgatorio_event', pendingEventKind: tile.eventKind,
+              purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+            });
+          } else {
+            set({
+              player: p, phase: 'purgatorio_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+              purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+            });
+          }
+        }
       } else {
         shakeScreen = true;
         const dmg = duel.outcome === 'demon_crit' ? 5 : 3;
         p.hp = Math.max(0, p.hp - dmg);
         msgs.push(loc() === 'en' ? duel.message : duel.messageKo);
-        msgs.push(loc() === 'en' ? `-${dmg} HP! Turn lost.` : `-${dmg} HP! 턴 소실.`);
-
         set({
           player: p, purgatorioDice: playerRoll.dice, demonDice: demonRoll.dice,
-          phase: 'purgatorio_rolling',
-          totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          purgatorioIsDouble: false, purgatorioDoubleCount: 0,
-          shakeScreen, showSparkles,
+          phase: 'purgatorio_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          purgatorioIsDouble: false, purgatorioDoubleCount: 0, shakeScreen, showSparkles,
           log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
         });
       }
@@ -783,7 +863,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (state.phase !== 'paradiso_rolling') return;
       const p = { ...state.player, buffs: [...state.player.buffs] };
 
-      // ── Demon vs User Dice Duel (Paradiso — 3D4 system preserved) ──
+      // ── Demon vs User Dice Duel (Paradiso 3D4) + Auto-Move ──
       const d1 = _rng.nextInt(1, 4);
       const d2 = _rng.nextInt(1, 4);
       const d3 = _rng.nextInt(1, 4);
@@ -792,54 +872,79 @@ export const useGameStore = create<GameStore>((set, get) => {
       const isTriple = d1 === d2 && d2 === d3;
       const isDouble = (d1 === d2) || (d2 === d3) || (d1 === d3);
 
-      // Demon also rolls 3D4
       const dd1 = _rng.nextInt(1, 4);
       const dd2 = _rng.nextInt(1, 4);
       const dd3 = _rng.nextInt(1, 4);
       const demonSum = dd1 + dd2 + dd3;
       const demonBonus = getDemonBonus(p.currentSphereId ?? 9);
 
-      // Paradiso duel: player must beat demon's total
       const playerWins = isTriple || (!(dd1 === dd2 && dd2 === dd3) && (isDouble || sum > demonSum + demonBonus));
-      const demonWins = !playerWins;
 
       const msgs: string[] = [];
       let showSparkles = false;
 
       if (playerWins) {
-        if (isTriple) {
-          showSparkles = true;
-          p.grace = Math.min(150, (p.grace || 0) + 10);
-          msgs.push(loc() === 'en'
-            ? `💫 TRIPLE! [${d1}][${d2}][${d3}] = ${sum} vs Demon [${dd1}][${dd2}][${dd3}] = ${demonSum}. +10 Grace!`
-            : `💫 트리플! [${d1}][${d2}][${d3}] = ${sum} vs 악마 [${dd1}][${dd2}][${dd3}] = ${demonSum}. 은총 +10!`);
-        } else if (isDouble) {
-          p.grace = Math.min(150, (p.grace || 0) + 5);
-          msgs.push(loc() === 'en'
-            ? `✨ Double! [${d1}][${d2}][${d3}] = ${sum} vs Demon ${demonSum}. +5 Grace!`
-            : `✨ 더블! [${d1}][${d2}][${d3}] = ${sum} vs 악마 ${demonSum}. 은총 +5!`);
+        if (isTriple) { showSparkles = true; p.grace = Math.min(150, (p.grace || 0) + 10); }
+        else if (isDouble) p.grace = Math.min(150, (p.grace || 0) + 5);
+        msgs.push(loc() === 'en'
+          ? `⚔ You win! [${d1}][${d2}][${d3}] = ${sum} vs Demon ${demonSum}+${demonBonus} = ${demonSum + demonBonus}`
+          : `⚔ 승리! [${d1}][${d2}][${d3}] = ${sum} vs 악마 ${demonSum}+${demonBonus} = ${demonSum + demonBonus}`);
+
+        // Auto-move
+        const totalMove = Math.max(1, sum + (p.moveBonus || 0));
+        p.moveBonus = 0;
+        const board = state.paradisoBoard;
+        const remaining = remainingTilesInSphere(board, p.currentTileId);
+        if (totalMove >= remaining) {
+          const lastTile = board.find((t) => t.sphereId === p.currentSphereId && t.index === 9);
+          if (lastTile) p.currentTileId = lastTile.id;
+          const archangel = getArchangel(p.currentSphereId!);
+          set({
+            player: p, phase: 'paradiso_archangel', activeArchangel: archangel || null,
+            paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0, showSparkles,
+            log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+          });
         } else {
-          msgs.push(loc() === 'en'
-            ? `⚔ You win! [${d1}][${d2}][${d3}] = ${sum} vs Demon ${demonSum}+${demonBonus} = ${demonSum + demonBonus}`
-            : `⚔ 승리! [${d1}][${d2}][${d3}] = ${sum} vs 악마 ${demonSum}+${demonBonus} = ${demonSum + demonBonus}`);
+          let currentTile = board.find((t) => t.id === p.currentTileId);
+          for (let i = 0; i < totalMove; i++) {
+            if (!currentTile) break;
+            const next = getNextParadisoTile(board, currentTile.id);
+            if (!next) break;
+            currentTile = next;
+          }
+          if (currentTile) { p.currentTileId = currentTile.id; p.currentSphereId = currentTile.sphereId; }
+          const tile = board.find((t) => t.id === p.currentTileId);
+          if (tile?.type === 'spirit' && tile.spiritId) {
+            const spirit = getLightSpirit(tile.spiritId);
+            set({
+              player: p, phase: 'paradiso_blessing', activeLightSpirit: spirit || null,
+              paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+            });
+          } else if (tile?.type === 'blessing') {
+            const bonus = _rng.nextInt(2, 5);
+            p.grace = Math.min(150, (p.grace || 0) + bonus);
+            set({
+              player: p, phase: 'paradiso_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+              paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+            });
+          } else {
+            set({
+              player: p, phase: 'paradiso_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+              paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+            });
+          }
         }
-        set({
-          player: p, paradisoDice: dice, paradisoIsDouble: isDouble, paradisoDoubleCount: 0,
-          phase: 'paradiso_moving', showSparkles,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-        });
       } else {
-        // Demon wins — lose grace, can't move
         const graceLoss = 3;
         p.grace = Math.max(0, (p.grace || 0) - graceLoss);
         msgs.push(loc() === 'en'
           ? `💀 Demon wins! [${dd1}][${dd2}][${dd3}]+${demonBonus} = ${demonSum + demonBonus} beats your ${sum}. -${graceLoss} Grace!`
           : `💀 악마 승리! [${dd1}][${dd2}][${dd3}]+${demonBonus} = ${demonSum + demonBonus}이 ${sum}를 이겼다. 은총 -${graceLoss}!`);
-
         set({
-          player: p, paradisoDice: dice,
-          phase: 'paradiso_rolling',
-          totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
+          player: p, paradisoDice: dice, demonDice: null,
+          phase: 'paradiso_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
           paradisoIsDouble: false, paradisoDoubleCount: 0,
           log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
         });
