@@ -181,7 +181,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const poison = p.buffs.find((b) => b.id === 'poison');
       if (poison) p.hp = Math.max(0, p.hp + poison.value);
 
-      // ── Demon vs User Dice Duel + Auto-Move ──
+      // ── Demon vs User Dice Duel ──
       const playerRoll = rollDice(_rng);
       const demonRoll = rollDice(_rng);
       const demonBonus = getDemonBonus(p.currentCircleId);
@@ -192,81 +192,24 @@ export const useGameStore = create<GameStore>((set, get) => {
       let shakeScreen = false;
 
       if (duelResult.outcome === 'player_crit' || duelResult.outcome === 'player_win') {
+        // Player wins the duel — show dice + Move button
         showSparkles = duelResult.outcome === 'player_crit';
         msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
         p.moveBonus = (p.moveBonus || 0);
-
         const isDouble = duelResult.playerRoll.isDouble;
         const doubleCount = isDouble ? state.doubleCount + 1 : 0;
-        const totalMove = Math.max(1, duelResult.playerRoll.sum + (p.moveBonus || 0));
-        p.moveBonus = 0;
 
-        try {
-          // Execute auto-move
-          const remaining = remainingTilesInCircle(state.board, p.currentTileId);
-          const prevTileId = p.currentTileId;
-          if (totalMove >= remaining) {
-            const lastTile = state.board.find((t) => t.circleId === p.currentCircleId && t.index === 11);
-            if (lastTile) p.currentTileId = lastTile.id;
-            const gk = getGatekeeper(p.currentCircleId);
-            set({
-              player: p, phase: 'gatekeeper', activeGatekeeper: gk || null,
-              dice: null, demonDice: null, isDouble: false, doubleCount: 0,
-              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-            });
-          } else {
-            let currentTile = state.board.find((t) => t.id === p.currentTileId);
-            for (let i = 0; i < totalMove; i++) {
-              if (!currentTile) break;
-              const next = getNextTileV4(state.board, currentTile.id);
-              if (!next) break;
-              currentTile = next;
-            }
-            if (currentTile && currentTile.id !== prevTileId) {
-              p.currentTileId = currentTile.id;
-              p.currentCircleId = currentTile.circleId;
-            } else if (currentTile) {
-              const forced = getNextTileV4(state.board, prevTileId);
-              if (forced) { p.currentTileId = forced.id; p.currentCircleId = forced.circleId; }
-            }
-            const tile = state.board.find((t) => t.id === p.currentTileId);
-            if (tile?.type === 'monster' && tile.monsterId) {
-              let monster = getMonster(tile.monsterId);
-              if (tile.label === 'elite' && monster) monster = { ...monster, power: monster.power + 2, rewardHp: monster.rewardHp * 3 };
-              set({
-                player: p, phase: 'battle', activeMonster: monster || null,
-                dice: null, demonDice: null, isDouble: false, doubleCount: 0,
-                log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-              });
-            } else if (tile?.type === 'event' && tile.eventKind) {
-              set({
-                player: p, phase: 'event', pendingEventKind: tile.eventKind,
-                dice: null, demonDice: null, isDouble: false, doubleCount: 0,
-                log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-              });
-            } else {
-              set({
-                player: p, phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-                dice: null, demonDice: null, isDouble: false, doubleCount: 0,
-                log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-              });
-            }
-          }
-        } catch {
-          // Fallback: set phase to moving with dice visible
-          set({
-            player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice, isDouble, doubleCount,
-            phase: 'moving', shakeScreen: false, showSparkles: true,
-            log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-          });
-        }
+        set({
+          player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice, isDouble, doubleCount,
+          phase: 'moving', shakeScreen: false, showSparkles,
+          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+        });
       } else {
         // Demon wins — take damage, can't move, turn passes
         shakeScreen = true;
         const dmg = duelResult.outcome === 'demon_crit' ? 5 : 3;
         p.hp = Math.max(0, p.hp - dmg);
         msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
-        msgs.push(loc() === 'en' ? `-${dmg} HP! Turn lost.` : `-${dmg} HP! 턴 소실.`);
         set({
           player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice,
           phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
@@ -587,52 +530,15 @@ export const useGameStore = create<GameStore>((set, get) => {
 
         const isDouble = playerRoll.isDouble;
         const doubleCount = isDouble ? state.purgatorioDoubleCount + 1 : 0;
-        const totalMove = Math.max(1, playerRoll.sum + (p.moveBonus || 0));
-        p.moveBonus = 0;
-
-        // Auto-move
-        const board = state.purgatorioBoard;
-        const remaining = remainingTilesInTerrace(board, p.currentTileId);
-        if (totalMove >= remaining) {
-          const lastTile = board.find((t) => t.terraceId === p.currentTerraceId && t.index === 7);
-          if (lastTile) p.currentTileId = lastTile.id;
-          const angel = getAngelGuardian(p.currentTerraceId!);
-          set({
-            player: p, phase: 'purgatorio_angel', activeAngelGuardian: angel || null,
-            purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
-            log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-          });
-        } else {
-          let currentTile = board.find((t) => t.id === p.currentTileId);
-          for (let i = 0; i < totalMove; i++) {
-            if (!currentTile) break;
-            const next = getNextPurgatorioTile(board, currentTile.id);
-            if (!next) break;
-            currentTile = next;
-          }
-          if (currentTile) { p.currentTileId = currentTile.id; p.currentTerraceId = currentTile.terraceId; }
-          const tile = board.find((t) => t.id === p.currentTileId);
-          if (tile?.type === 'sin' && tile.sinProjectionId) {
-            const sinProj = getSinProjection(tile.sinProjectionId);
-            set({
-              player: p, phase: 'purgatorio_battle', activeSinProjection: sinProj || null,
-              purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
-              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-            });
-          } else if (tile?.type === 'event' && tile.eventKind) {
-            set({
-              player: p, phase: 'purgatorio_event', pendingEventKind: tile.eventKind,
-              purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
-              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-            });
-          } else {
-            set({
-              player: p, phase: 'purgatorio_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-              purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
-              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-            });
-          }
+        if (isDouble && p.purificationCards.some((c) => c.id === 'purification-4')) {
+          msgs.push(t('purgatorio.stepOfZeal', loc()));
         }
+
+        set({
+          player: p, purgatorioDice: playerRoll.dice, demonDice: demonRoll.dice, purgatorioIsDouble: isDouble, purgatorioDoubleCount: doubleCount,
+          phase: 'purgatorio_moving', shakeScreen: false, showSparkles,
+          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+        });
       } else {
         shakeScreen = true;
         const dmg = duel.outcome === 'demon_crit' ? 5 : 3;
@@ -897,52 +803,11 @@ export const useGameStore = create<GameStore>((set, get) => {
           ? `⚔ You win! [${d1}][${d2}][${d3}] = ${sum} vs Demon ${demonSum}+${demonBonus} = ${demonSum + demonBonus}`
           : `⚔ 승리! [${d1}][${d2}][${d3}] = ${sum} vs 악마 ${demonSum}+${demonBonus} = ${demonSum + demonBonus}`);
 
-        // Auto-move
-        const totalMove = Math.max(1, sum + (p.moveBonus || 0));
-        p.moveBonus = 0;
-        const board = state.paradisoBoard;
-        const remaining = remainingTilesInSphere(board, p.currentTileId);
-        if (totalMove >= remaining) {
-          const lastTile = board.find((t) => t.sphereId === p.currentSphereId && t.index === 9);
-          if (lastTile) p.currentTileId = lastTile.id;
-          const archangel = getArchangel(p.currentSphereId!);
-          set({
-            player: p, phase: 'paradiso_archangel', activeArchangel: archangel || null,
-            paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0, showSparkles,
-            log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-          });
-        } else {
-          let currentTile = board.find((t) => t.id === p.currentTileId);
-          for (let i = 0; i < totalMove; i++) {
-            if (!currentTile) break;
-            const next = getNextParadisoTile(board, currentTile.id);
-            if (!next) break;
-            currentTile = next;
-          }
-          if (currentTile) { p.currentTileId = currentTile.id; p.currentSphereId = currentTile.sphereId; }
-          const tile = board.find((t) => t.id === p.currentTileId);
-          if (tile?.type === 'spirit' && tile.spiritId) {
-            const spirit = getLightSpirit(tile.spiritId);
-            set({
-              player: p, phase: 'paradiso_blessing', activeLightSpirit: spirit || null,
-              paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
-              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-            });
-          } else if (tile?.type === 'blessing') {
-            const bonus = _rng.nextInt(2, 5);
-            p.grace = Math.min(150, (p.grace || 0) + bonus);
-            set({
-              player: p, phase: 'paradiso_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-              paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
-              log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
-            });
-          } else {
-            set({
-              player: p, phase: 'paradiso_rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-              paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
-            });
-          }
-        }
+        set({
+          player: p, paradisoDice: dice, paradisoIsDouble: isDouble, paradisoDoubleCount: 0,
+          phase: 'paradiso_moving', showSparkles,
+          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+        });
       } else {
         const graceLoss = 3;
         p.grace = Math.max(0, (p.grace || 0) - graceLoss);
