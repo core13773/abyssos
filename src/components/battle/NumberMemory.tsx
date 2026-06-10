@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
 
 interface Props {
-  digits: number;       // 3-6 digit number to memorize
-  memorizeTime: number;  // ms to show the number
+  digits: number;
+  memorizeTime: number;
   onResult: (success: boolean) => void;
 }
 
@@ -17,6 +17,8 @@ function generateNumber(digits: number): string {
   }
   return result;
 }
+
+const KEYPAD = [1, 2, 3, 4, 5, 6, 7, 8, 9, -1, 0, -2]; // -1 = empty, -2 = delete
 
 export default function NumberMemory({ digits, memorizeTime, onResult }: Props) {
   const locale = useLocale((s) => s.locale);
@@ -42,18 +44,33 @@ export default function NumberMemory({ digits, memorizeTime, onResult }: Props) 
     return () => clearTimeout(hideTimer);
   }, [digits, memorizeTime]);
 
-  const handleSubmit = useCallback(() => {
+  const handleDigit = useCallback((d: number) => {
     if (phase !== 'input') return;
-    setPhase('done');
-    const correct = userInput === number;
-    setTimeout(() => onResultRef.current(correct), 500);
-  }, [phase, userInput, number]);
+    setUserInput((prev) => {
+      if (prev.length >= digits) return prev;
+      return prev + d.toString();
+    });
+  }, [phase, digits]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSubmit();
-  }, [handleSubmit]);
+  const handleDelete = useCallback(() => {
+    if (phase !== 'input') return;
+    setUserInput((prev) => prev.slice(0, -1));
+  }, [phase]);
 
-  const displayDigits = revealed ? number.split('') : number.split('').map(() => '?');
+  // Auto-submit when all digits entered
+  useEffect(() => {
+    if (phase === 'input' && userInput.length === digits) {
+      setPhase('done');
+      const correct = userInput === number;
+      setTimeout(() => onResultRef.current(correct), 500);
+    }
+  }, [phase, userInput, digits, number]);
+
+  const displayDigits = revealed
+    ? number.split('')
+    : number.split('').map(() => '?');
+
+  const inputDisplay = userInput.padEnd(digits, '•').split('');
 
   return (
     <div className="flex flex-col items-center gap-3 select-none">
@@ -78,31 +95,51 @@ export default function NumberMemory({ digits, memorizeTime, onResult }: Props) 
 
       {phase === 'input' && (
         <div className="w-full text-center">
+          {/* Input display boxes */}
           <div className="flex gap-1 justify-center mb-3">
-            {displayDigits.map((d, i) => (
-              <span key={i} className="w-8 h-10 bg-stone-800 border border-stone-600 rounded-lg flex items-center justify-center text-xl font-bold font-mono text-stone-500">
+            {inputDisplay.map((d, i) => (
+              <span
+                key={i}
+                className={`w-8 h-10 border rounded-lg flex items-center justify-center text-xl font-bold font-mono transition-colors ${
+                  i < userInput.length
+                    ? 'bg-amber-900/30 border-amber-500 text-amber-300'
+                    : 'bg-stone-800 border-stone-600 text-stone-600'
+                }`}
+              >
                 {d}
               </span>
             ))}
           </div>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value.replace(/\D/g, '').slice(0, digits))}
-            onKeyDown={handleKeyDown}
-            className="w-40 text-center text-xl font-bold font-mono bg-stone-800 border-2 border-amber-600/50 rounded-xl py-2 text-amber-200 outline-none focus:border-amber-400 tracking-widest"
-            autoFocus
-            maxLength={digits}
-            placeholder={Array(digits).fill('•').join('')}
-          />
-          <button
-            onClick={handleSubmit}
-            disabled={userInput.length < digits}
-            className="block mx-auto mt-2 px-6 py-2 bg-amber-700 hover:bg-amber-600 disabled:bg-stone-800 disabled:text-stone-600 text-white font-bold rounded-xl text-sm active:scale-95 transition-transform"
-          >
-            {locale === 'en' ? 'Submit' : '확인'}
-          </button>
+
+          {/* Numeric keypad */}
+          <div className="grid grid-cols-3 gap-1.5 max-w-[180px] mx-auto">
+            {KEYPAD.map((key) => {
+              if (key === -1) {
+                return <div key="empty" />;
+              }
+              if (key === -2) {
+                return (
+                  <button
+                    key="del"
+                    onClick={handleDelete}
+                    className="h-11 rounded-xl bg-stone-700 hover:bg-stone-600 active:bg-stone-500 text-stone-300 font-bold text-sm transition-colors"
+                  >
+                    ⌫
+                  </button>
+                );
+              }
+              return (
+                <button
+                  key={key}
+                  onClick={() => handleDigit(key)}
+                  disabled={userInput.length >= digits}
+                  className="h-11 rounded-xl bg-stone-800 hover:bg-stone-700 active:bg-amber-800 disabled:opacity-40 text-amber-200 font-bold text-lg transition-colors border border-stone-700 hover:border-amber-700/50"
+                >
+                  {key}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
