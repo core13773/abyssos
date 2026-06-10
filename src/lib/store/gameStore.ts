@@ -192,29 +192,40 @@ export const useGameStore = create<GameStore>((set, get) => {
       let shakeScreen = false;
 
       if (duelResult.outcome === 'player_crit' || duelResult.outcome === 'player_win') {
-        // Player wins the duel — show dice + Move button
-        showSparkles = duelResult.outcome === 'player_crit';
-        msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
-        p.moveBonus = (p.moveBonus || 0);
+        // Player wins — just set dice and phase, use simple state
+        const msg = loc() === 'en' ? duelResult.message : duelResult.messageKo;
         const isDouble = duelResult.playerRoll.isDouble;
         const doubleCount = isDouble ? state.doubleCount + 1 : 0;
 
         set({
-          player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice, isDouble, doubleCount,
-          phase: 'moving', shakeScreen: false, showSparkles,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+          player: p,
+          dice: [duelResult.playerRoll.dice[0], duelResult.playerRoll.dice[1]],
+          demonDice: null,
+          isDouble,
+          doubleCount,
+          phase: 'moving',
+          shakeScreen: false,
+          showSparkles: duelResult.outcome === 'player_crit',
+          log: [...state.log, { turn: state.turnNumber, message: msg, type: 'roll' }],
         });
       } else {
-        // Demon wins — take damage, can't move, turn passes
+        // Demon wins — take damage
         shakeScreen = true;
         const dmg = duelResult.outcome === 'demon_crit' ? 5 : 3;
         p.hp = Math.max(0, p.hp - dmg);
-        msgs.push(loc() === 'en' ? duelResult.message : duelResult.messageKo);
+        const msg = loc() === 'en' ? duelResult.message : duelResult.messageKo;
         set({
-          player: p, dice: duelResult.playerRoll.dice, demonDice: duelResult.demonRoll.dice,
-          phase: 'rolling', totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          isDouble: false, doubleCount: 0, shakeScreen, showSparkles,
-          log: [...state.log, ...msgs.map((m) => ({ turn: state.turnNumber, message: m, type: 'roll' as const }))],
+          player: p,
+          dice: [duelResult.playerRoll.dice[0], duelResult.playerRoll.dice[1]],
+          demonDice: null,
+          phase: 'rolling',
+          totalTurns: state.totalTurns + 1,
+          turnNumber: state.turnNumber + 1,
+          isDouble: false,
+          doubleCount: 0,
+          shakeScreen,
+          showSparkles: false,
+          log: [...state.log, { turn: state.turnNumber, message: msg, type: 'roll' }],
         });
       }
       if (showSparkles) setTimeout(() => set({ showSparkles: false }), 2000);
