@@ -436,6 +436,8 @@ export interface GameState {
   // Game end
   escaped: boolean;
   totalTurns: number;
+  // NG+ mode
+  ngPlus: boolean;
 
   // ---- Demon dice (for vs display) ----
   demonDice: DiceRoll | null;

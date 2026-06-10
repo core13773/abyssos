@@ -4,12 +4,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
-import { loadCollectedCards } from '@/lib/store/gameStore';
+import { loadCollectedCards, useGameStore } from '@/lib/store/gameStore';
 import type { CollectedCards } from '@/lib/store/gameStore';
 import { GUARDIANS } from '@/lib/data/guardians';
 import { PURIFICATION_CARDS } from '@/lib/data/purgatorio';
 import { CELESTIAL_RELICS } from '@/lib/data/paradiso';
 import { META_UPGRADES, loadMetaProgress, saveMetaProgress } from '@/lib/data/metaUpgrades';
+import AchievementPanel from '@/components/layout/AchievementPanel';
+import HiddenBossModal from '@/components/events/HiddenBossModal';
 
 // ── Card mini-display helpers ──
 const ELEMENT_EMOJI: Record<string, string> = {
@@ -401,6 +403,7 @@ export default function HomePage() {
   const [realmState, setRealmState] = useState<RealmState>(() => loadRealmState());
   const [collectedCards, setCollectedCards] = useState<CollectedCards>(() => loadCollectedCards());
   const [activeTab, setActiveTab] = useState<'inferno' | 'purgatorio' | 'paradiso'>('inferno');
+  const [showHiddenBoss, setShowHiddenBoss] = useState(false);
 
   useEffect(() => {
     const onStorage = () => {
@@ -683,6 +686,61 @@ export default function HomePage() {
         className="w-full max-w-md z-10 mb-4"
       >
         <MetaUpgradePanel locale={locale} />
+      </motion.section>
+
+      {/* NG+ Button */}
+      {totalCompleted >= 3 && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.75 }}
+          className="w-full max-w-md z-10 mb-4"
+        >
+          <button
+            onClick={() => {
+              useGameStore.getState().startNGPlus();
+              router.push('/game');
+            }}
+            className="w-full py-3 rounded-xl bg-red-900/40 border border-red-700/40 text-red-300 text-sm font-bold hover:bg-red-900/60 transition-colors animate-pulse"
+          >
+            ♾️ {locale === 'en' ? 'NEW GAME+' : '새 게임+'}
+          </button>
+          <p className="text-[10px] text-stone-600 text-center mt-1">
+            {locale === 'en' ? 'Monsters +2 power, rewards x1.5' : '몬스터 전투력 +2, 보상 1.5배'}
+          </p>
+        </motion.section>
+      )}
+
+      {/* Hidden Boss */}
+      {totalCompleted >= 3 && (
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.78 }}
+          className="w-full max-w-md z-10 mb-4"
+        >
+          <button
+            onClick={() => setShowHiddenBoss(true)}
+            className="w-full py-3 rounded-xl bg-purple-900/40 border border-purple-700/40 text-purple-300 text-sm font-bold hover:bg-purple-900/60 transition-colors"
+          >
+            🌑 {locale === 'en' ? 'Abyss Challenge' : '심연 도전'}
+          </button>
+          <p className="text-[10px] text-stone-600 text-center mt-1">
+            {locale === 'en' ? 'Defeat Corrupted Virgil' : '타락한 베르길리우스 처치'}
+          </p>
+        </motion.section>
+      )}
+
+      <HiddenBossModal open={showHiddenBoss} onClose={() => setShowHiddenBoss(false)} />
+
+      {/* Achievements */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.8 }}
+        className="w-full max-w-md z-10 mb-4"
+      >
+        <AchievementPanel />
       </motion.section>
 
       {/* Footer */}

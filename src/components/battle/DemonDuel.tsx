@@ -15,6 +15,11 @@ import LightningReact from './LightningReact';
 import HiddenWord from './HiddenWord';
 import SmokeMaze from './SmokeMaze';
 import CrystalBreak from './CrystalBreak';
+import ChainReaction from './ChainReaction';
+import ShadowHunt from './ShadowHunt';
+import WordScramble from './WordScramble';
+import SoulCounter from './SoulCounter';
+import ElementalMatch from './ElementalMatch';
 
 type Tier = 'easy' | 'med' | 'hard';
 
@@ -157,6 +162,71 @@ const ROSTER = [
         regenChance={tier === 'easy' ? 0.05 : tier === 'med' ? 0.1 : 0.15}
         timeLimit={tier === 'easy' ? 12 : tier === 'med' ? 10 : 8}
         onResult={(success) => onResult(success, success ? (tier === 'easy' ? 4 : tier === 'med' ? 5 : 6) : 2)}
+      />
+    ),
+  },
+  {
+    id: 'chain',
+    emoji: '🔗',
+    name: { en: 'Chain Reaction', ko: '연쇄 반응' },
+    hint: { en: 'Click nodes in the shown order!', ko: '보여준 순서대로 노드를 클릭하라!' },
+    render: (tier: Tier, onResult: (s: boolean, n: number) => void) => (
+      <ChainReaction
+        nodeCount={tier === 'easy' ? 4 : tier === 'med' ? 5 : 6}
+        timeLimit={tier === 'easy' ? 6 : tier === 'med' ? 5 : 4}
+        onResult={(success, score) => onResult(success, success ? score : 2)}
+      />
+    ),
+  },
+  {
+    id: 'shadow',
+    emoji: '👤',
+    name: { en: 'Shadow Hunt', ko: '그림자 사냥' },
+    hint: { en: 'Catch shadows in the darkness!', ko: '어둠 속에서 그림자를 잡아라!' },
+    render: (tier: Tier, onResult: (s: boolean, n: number) => void) => (
+      <ShadowHunt
+        targetCount={tier === 'easy' ? 4 : tier === 'med' ? 6 : 8}
+        spawnInterval={tier === 'easy' ? 1400 : tier === 'med' ? 1100 : 900}
+        visibleTime={tier === 'easy' ? 900 : tier === 'med' ? 700 : 550}
+        totalTime={tier === 'easy' ? 12 : tier === 'med' ? 11 : 10}
+        onResult={(success, score) => onResult(success, success ? score : 2)}
+      />
+    ),
+  },
+  {
+    id: 'scramble',
+    emoji: '🧩',
+    name: { en: 'Word Scramble', ko: '낱말 퍼즐' },
+    hint: { en: 'Unscramble the divine words!', ko: '신성한 단어를 맞춰라!' },
+    render: (tier: Tier, onResult: (s: boolean, n: number) => void) => (
+      <WordScramble
+        timeLimit={tier === 'easy' ? 20 : tier === 'med' ? 16 : 12}
+        onResult={(success, score) => onResult(success, success ? score : 2)}
+      />
+    ),
+  },
+  {
+    id: 'soulcount',
+    emoji: '👻',
+    name: { en: 'Soul Counter', ko: '영혼 계수' },
+    hint: { en: 'Count the passing souls!', ko: '지나가는 영혼의 수를 세라!' },
+    render: (tier: Tier, onResult: (s: boolean, n: number) => void) => (
+      <SoulCounter
+        duration={tier === 'easy' ? 5 : tier === 'med' ? 4 : 3}
+        spawnRate={tier === 'easy' ? 500 : tier === 'med' ? 400 : 300}
+        onResult={(success, score) => onResult(success, success ? score : 2)}
+      />
+    ),
+  },
+  {
+    id: 'elemental',
+    emoji: '⚗️',
+    name: { en: 'Elemental Match', ko: '원소 맞추기' },
+    hint: { en: 'Match elements to their powers!', ko: '원소와 힘을 짝지어라!' },
+    render: (tier: Tier, onResult: (s: boolean, n: number) => void) => (
+      <ElementalMatch
+        timeLimit={tier === 'easy' ? 18 : tier === 'med' ? 14 : 10}
+        onResult={(success, score) => onResult(success, success ? score : 2)}
       />
     ),
   },

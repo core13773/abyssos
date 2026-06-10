@@ -81,6 +81,7 @@ import { createParadisoGame, checkParadisoComplete } from '@/lib/game/paradiso-e
 import { buildParadisoBoard, getNextParadisoTile, remainingTilesInSphere } from '@/lib/game/paradiso-board';
 import { createRNG, timeSeed } from '@/lib/utils/random';
 import { t, getActiveLocale } from '@/lib/i18n/translations';
+import { unlockAchievement } from '@/lib/data/achievements';
 
 interface GameActions {
   initGame: () => void;
@@ -99,6 +100,7 @@ interface GameActions {
   setStoryEvent: (event: { title: string; body: string; choices: { label: string; effect: string }[] } | null) => void;
   nextTurn: () => void;
   clearEffects: () => void;
+  startNGPlus: () => void;
 
   // ---- Purgatorio actions ----
   startPurgatorio: () => void;
@@ -153,6 +155,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     activeCurseReward: null, activeConsumableReward: null,
     showPerfectClear: null, comboCount: 0, showCombo: false,
     shopItems: [], showShop: false, storyEvent: null,
+    ngPlus: false,
 
     initGame: () => {
       _rng = createRNG(timeSeed());
@@ -160,6 +163,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({
         ...newGame,
         phase: 'rolling',
+        ngPlus: false,
         purgatorioBoard: [],
         activeSinProjection: null, activeAngelGuardian: null, activePurificationReward: null,
         purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
@@ -295,13 +299,26 @@ export const useGameStore = create<GameStore>((set, get) => {
       const state = get();
       if (state.phase !== 'battle' || !state.activeMonster) return;
 
+      // NG+ buff: monster power +2, rewards x1.5
+      let monster = state.activeMonster;
+      if (state.ngPlus) {
+        monster = { ...monster, power: monster.power + 2, rewardHp: Math.ceil(monster.rewardHp * 1.5) };
+      }
+
       // Use timing slider result, fallback to random D6
       const sliderRoll = state.battleRoll ?? _rng.nextInt(1, 6);
-      const result = resolveMonsterBattle(state.player, state.activeMonster, _rng, sliderRoll);
+      const result = resolveMonsterBattle(state.player, monster, _rng, sliderRoll);
       const newLog = [...state.log, ...result.logs.map((l) => ({ ...l, turn: state.turnNumber }))];
 
       if (result.victory) {
         // Victory: advance turn, clear monster, go back to rolling
+        // Track monster kills for achievement
+        try {
+          const raw = localStorage.getItem('abyssos_kills');
+          const kills = (raw ? parseInt(raw, 10) : 0) + 1;
+          localStorage.setItem('abyssos_kills', String(kills));
+          if (kills >= 50) unlockAchievement('demon-hunter');
+        } catch { /* ignore */ }
         set({
           player: result.updatedPlayer,
           phase: 'rolling', activeMonster: null, battleRoll: null,
@@ -407,9 +424,15 @@ export const useGameStore = create<GameStore>((set, get) => {
       const state = get();
       if (state.phase !== 'gatekeeper' || !state.activeGatekeeper) return;
 
-      const gk = state.activeGatekeeper;
+      let gk = state.activeGatekeeper;
       const p = { ...state.player };
       const gkName = loc() === 'en' ? gk.nameEn : gk.name;
+
+      // NG+ buff: gatekeeper power +1, rewards x1.5
+      if (state.ngPlus) {
+        gk = { ...gk, power: gk.power + 1, rewardHp: Math.ceil(gk.rewardHp * 1.5), rewardMove: Math.ceil(gk.rewardMove * 1.5) };
+      }
+
       const guardianDiceBonus = getGuardianDiceBonus(p.guardianCards, p.hp, p.maxHp);
 
       // GK-1 special: bonus from guardian cards held
@@ -437,6 +460,14 @@ export const useGameStore = create<GameStore>((set, get) => {
         const guardian = getGuardian(gk.guardianId);
         if (guardian) p.guardianCards = [...p.guardianCards, guardian];
 
+        // Check card master achievement
+        const totalCards = p.guardianCards.length + p.purificationCards.length + p.celestialRelics.length;
+        if (totalCards >= 25) unlockAchievement('card-master');
+        // Check cursed one achievement
+        if ((p.curseCards?.length || 0) >= 5) unlockAchievement('cursed-one');
+        // Check soul stones collector
+        if ((p.soulStones || 0) >= 30) unlockAchievement('soul-collector');
+
         const escaped = gk.id === 'gk-1';
         const circleName = loc() === 'en' ? `Circle ${newCircleId}` : `${newCircleId}층`;
 
@@ -444,6 +475,10 @@ export const useGameStore = create<GameStore>((set, get) => {
         if (escaped) {
           saveRealmCompletion('inferno', state.totalTurns);
           saveCollectedCards('inferno', p.guardianCards.map((g) => g.id));
+          unlockAchievement('hell-survivor');
+          if (state.totalTurns <= 30) unlockAchievement('speed-demon');
+          const hadDefeat = state.log.some((l) => l.type === 'damage' && l.message.includes('패배')) || state.log.some((l) => l.type === 'damage' && l.message.includes('Defeated'));
+          if (!hadDefeat) unlockAchievement('undefeated');
         }
 
         set({
@@ -578,6 +613,23 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     clearEffects: () => set({ shakeScreen: false, showSparkles: false }),
+
+    startNGPlus: () => {
+      _rng = createRNG(timeSeed());
+      const newGame = createNewGameV4();
+      const p = { ...newGame.player };
+      p.maxHp += 20;
+      p.hp += 20;
+      p.soulStones = (p.soulStones || 0) + 5;
+      set({
+        ...newGame,
+        phase: 'rolling',
+        ngPlus: true,
+        player: p,
+        log: [...newGame.log, { turn: 0, message: loc() === 'en' ? '♾️ NEW GAME+ STARTED!' : '♾️ 새 게임+ 시작!', type: 'critical' }],
+      });
+      unlockAchievement('ng-plus');
+    },
 
     // ============================================================
     // Purgatorio Actions
@@ -781,7 +833,13 @@ export const useGameStore = create<GameStore>((set, get) => {
         if (completed) {
           saveRealmCompletion('purgatorio', state.totalTurns);
           saveCollectedCards('purgatorio', p.purificationCards.map((c) => c.id));
+          unlockAchievement('purgator');
         }
+        // Check achievements
+        const totalCards2 = p.guardianCards.length + p.purificationCards.length + p.celestialRelics.length;
+        if (totalCards2 >= 25) unlockAchievement('card-master');
+        if ((p.curseCards?.length || 0) >= 5) unlockAchievement('cursed-one');
+        if ((p.soulStones || 0) >= 30) unlockAchievement('soul-collector');
 
         set({
           player: p, activeAngelGuardian: null, activePurificationReward: purification,
@@ -985,7 +1043,21 @@ export const useGameStore = create<GameStore>((set, get) => {
         if (completed) {
           saveRealmCompletion('paradiso', state.totalTurns);
           saveCollectedCards('paradiso', p.celestialRelics.map((r) => r.id));
+          unlockAchievement('celestial');
+          // Check divine pilgrim (all 3 realms)
+          try {
+            const raw = localStorage.getItem('abyssos_realms');
+            const realms = raw ? JSON.parse(raw) : {};
+            if (realms.inferno?.completed && realms.purgatorio?.completed) {
+              unlockAchievement('divine-pilgrim');
+            }
+          } catch { /* ignore */ }
         }
+        // Check achievements
+        const totalCards3 = p.guardianCards.length + p.purificationCards.length + p.celestialRelics.length;
+        if (totalCards3 >= 25) unlockAchievement('card-master');
+        if ((p.curseCards?.length || 0) >= 5) unlockAchievement('cursed-one');
+        if ((p.soulStones || 0) >= 30) unlockAchievement('soul-collector');
 
         const archName = loc() === 'en' ? archangel.nameEn : archangel.name;
         set({

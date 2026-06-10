@@ -87,7 +87,7 @@
 
 ### 2.1 이동 시스템 — 악마 도전 (Demon Duel)
 
-주사위 없이 **10종 회전 미니게임**으로 이동을 결정합니다. 매 턴 다른 게임이 등장합니다.
+주사위 없이 **15종 회전 미니게임**으로 이동을 결정합니다. 매 턴 다른 게임이 등장합니다.
 
 | 미니게임 | 장르 | 점수 기준 | 이동 거리 |
 |----------|------|----------|----------|
@@ -101,6 +101,11 @@
 | 👁 Hidden Word | 숨은 단어 | 찾은 글자 수 | 글자 수에 비례 |
 | 🌫 Smoke Maze | 안개 미로 | 출구 도달 여부 | 성공 시 +이동 |
 | 💎 Crystal Break | 수정 파괴 | 파괴한 수정 수 | 수에 비례 |
+| 🔗 Chain Reaction | 연쇄 반응 | 순서대로 클릭한 노드 수 | 성공 시 고정 이동 |
+| 👤 Shadow Hunt | 그림자 사냥 | 어둠 속 그림자 클릭 | 성공 시 고정 이동 |
+| 🧩 Word Scramble | 낱말 퍼즐 | 흩어진 글자 조합 | 완성 단어 수 |
+| 👻 Soul Counter | 영혼 계수 | 지나가는 영혼 수 세기 | 성공 시 고정 이동 |
+| ⚗️ Elemental Match | 원소 맞추기 | 원소와 효과 짝짓기 | 성공 시 고정 이동 |
 
 **퍼펙트 클리어 본 시스템:**
 - 미니게임 점수 ≥ 5: **✨ 퍼펙트 클리어** → 영혼석 +1
@@ -501,15 +506,15 @@
 | **Phase 3** | 소모품 시스템 (12종) | ✅ 완료 |
 | **Phase 4** | 별빛 상자/상점 시스템 (ShopModal) | ✅ 완료 |
 | **Phase 5** | 완벽 클리어 시스템 (PerfectClearOverlay) | ✅ 완료 |
-| **Phase 6** | 새 미니게임 5종 추가 (10종 Demon Duel) | ✅ 완료 |
+| **Phase 6** | 새 미니게임 5종 추가 (15종 Demon Duel) | ✅ 완료 |
 | **Phase 7** | 메타 프로그레션 (5종 업그레이드) | ✅ 완료 |
 | **Phase 8** | 연옥편 구현 (7 Terraces + 수호천사) | ✅ 완료 |
 | **Phase 9** | 천국편 구현 (9 Spheres + 대천사) | ✅ 완료 |
 | **Phase 10** | 로그 색상 + UI 개선 | ✅ 완료 |
 | **Phase 11** | GitHub Pages SPA fallback | ✅ 완료 |
-| **Phase 12** | 업적 시스템 | ⏳ 예정 |
-| **Phase 13** | NG+ 모드 | ⏳ 예정 |
-| **Phase 14** | 히든 보스 | ⏳ 예정 |
+| **Phase 12** | 업적 시스템 (14종 업적 + 패널) | ✅ 완료 |
+| **Phase 13** | NG+ 모드 (난이도 상승 + 보상 증가) | ✅ 완료 |
+| **Phase 14** | 히든 보스 — 타락한 베르길리우스 | ✅ 완료 |
 
 ---
 
@@ -523,10 +528,10 @@ src/
 │   ├── page.tsx              # 로비 (메타 업그레이드 패널)
 │   └── layout.tsx
 ├── components/
-│   ├── battle/               # 15종 전투 미니게임
+│   ├── battle/               # 20종 전투/이동 미니게임
 │   │   ├── BattleModal.tsx   # 몬스터 전투 모달
-│   │   ├── DemonDuel.tsx     # 10종 이동 미니게임
-│   │   └── [15개 미니게임 컴포넌트]
+│   │   ├── DemonDuel.tsx     # 15종 이동 미니게임
+│   │   └── [20개 미니게임 컴포넌트]
 │   ├── board-v4/             # 보드 렌더링
 │   ├── effects/              # 이펙트 오버레이
 │   │   └── PerfectClearOverlay.tsx
@@ -534,6 +539,7 @@ src/
 │   │   ├── GatekeeperModal.tsx   # 수문장 보스전
 │   │   ├── AngelModal.tsx        # 연옥 수호천사
 │   │   ├── ArchangelModal.tsx    # 천국 대천사
+│   │   ├── HiddenBossModal.tsx   # 히든 보스전
 │   │   ├── ShopModal.tsx         # 상점
 │   │   └── StoryEventModal.tsx   # 서사 이벤트
 │   ├── guardian/             # 보상 모달
@@ -549,7 +555,8 @@ src/
 │   │   ├── consumables.ts    # 12종 소모품
 │   │   ├── purgatorio.ts     # 연옥 데이터
 │   │   ├── paradiso.ts       # 천국 데이터
-│   │   └── metaUpgrades.ts   # 5종 메타 업그레이드
+│   │   ├── metaUpgrades.ts   # 5종 메타 업그레이드
+│   │   └── achievements.ts   # 14종 업적
 │   ├── game/                 # 게임 엔진
 │   │   ├── engine.ts         # 지옥 엔진
 │   │   ├── purgatorio-engine.ts
@@ -568,5 +575,6 @@ src/
 
 **버전**: V0.2 "Via Divina" | **날짜**: 2026-06-10
 **기반**: Dante Alighieri, La Divina Commedia — Inferno · Purgatorio · Paradiso
-**미니게임**: 25종 (10 이동 + 15 전투) | **이벤트**: 10종 | **카드**: 9 수호 + 9 저주 + 12 소모품 + 7 정화 + 9 성물
+**미니게임**: 30종 (15 이동 + 15 전투) | **이벤트**: 10종 | **카드**: 9 수호 + 9 저주 + 12 소모품 + 7 정화 + 9 성물
+**업적**: 14종 | **NG+**: ✅ | **히든 보스**: 타락한 베르길리우스
 **3부작 전체**: 지옥 9층 → 연옥 7단 → 천국 9천구 | **배포**: GitHub Pages (SPA)

@@ -83,6 +83,7 @@ export function createNewGameV4(): GameState {
     shopItems: [],
     showShop: false,
     storyEvent: null,
+    ngPlus: false,
   };
 }
 
