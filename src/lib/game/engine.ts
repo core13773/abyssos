@@ -2,10 +2,11 @@ import type { GameState, Player } from '@/types/game';
 import { buildBoardV4 } from './board-v4';
 import { createRNG, timeSeed } from '@/lib/utils/random';
 import { t, getActiveLocale } from '@/lib/i18n/translations';
+import { applyMetaUpgrades } from '@/lib/data/metaUpgrades';
 
 /** Create a new player starting at Circle 9, tile 0 */
 export function createPlayerV4(): Player {
-  return {
+  const player: Player = {
     name: 'Wanderer',
     hp: 100,
     maxHp: 100,
@@ -28,6 +29,8 @@ export function createPlayerV4(): Player {
     perfectClears: 0,
     achievements: [],
   };
+  applyMetaUpgrades(player);
+  return player;
 }
 
 /** Create a fresh game */

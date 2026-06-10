@@ -9,6 +9,7 @@ import type { CollectedCards } from '@/lib/store/gameStore';
 import { GUARDIANS } from '@/lib/data/guardians';
 import { PURIFICATION_CARDS } from '@/lib/data/purgatorio';
 import { CELESTIAL_RELICS } from '@/lib/data/paradiso';
+import { META_UPGRADES, loadMetaProgress, saveMetaProgress } from '@/lib/data/metaUpgrades';
 
 // ── Card mini-display helpers ──
 const ELEMENT_EMOJI: Record<string, string> = {
@@ -147,6 +148,78 @@ const REALMS: RealmCardData[] = [
     lockedReasonEn: 'Purify Purgatory first',
   },
 ];
+
+// ── Meta Upgrade Panel ──
+function MetaUpgradePanel({ locale }: { locale: 'en' | 'ko' }) {
+  const [meta, setMeta] = useState(loadMetaProgress());
+  const [open, setOpen] = useState(false);
+
+  const handleUpgrade = (id: string, cost: number) => {
+    const current = meta.upgrades[id] || 0;
+    const upgrade = META_UPGRADES.find((u) => u.id === id);
+    if (!upgrade || current >= upgrade.maxLevel) return;
+    if (meta.soulStones < cost) return;
+    const next = {
+      ...meta,
+      soulStones: meta.soulStones - cost,
+      upgrades: { ...meta.upgrades, [id]: current + 1 },
+    };
+    saveMetaProgress(next);
+    setMeta(next);
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full py-2 rounded-xl bg-purple-900/40 border border-purple-700/40 text-purple-300 text-xs font-bold hover:bg-purple-900/60 transition-colors"
+      >
+        ✨ {locale === 'en' ? `Meta Upgrades (${meta.soulStones} stones)` : `메타 업그레이드 (${meta.soulStones}석)`}
+      </button>
+    );
+  }
+
+  return (
+    <div className="bg-stone-900/80 border border-purple-700/40 rounded-xl p-3">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-xs font-bold text-purple-300">
+          ✨ {locale === 'en' ? 'Meta Upgrades' : '메타 업그레이드'}
+        </h3>
+        <span className="text-[10px] text-purple-400">✨ {meta.soulStones}</span>
+        <button onClick={() => setOpen(false)} className="text-[10px] text-stone-500 hover:text-stone-300">✕</button>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {META_UPGRADES.map((u) => {
+          const level = meta.upgrades[u.id] || 0;
+          const cost = u.costPerLevel * (level + 1);
+          const canAfford = meta.soulStones >= cost && level < u.maxLevel;
+          return (
+            <div key={u.id} className="flex items-center justify-between bg-stone-950/50 rounded-lg px-2 py-1.5">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-stone-300">{locale === 'en' ? u.nameEn : u.name}</p>
+                <p className="text-[9px] text-stone-500 truncate">{locale === 'en' ? u.descriptionEn : u.description}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[9px] text-purple-400">Lv.{level}/{u.maxLevel}</span>
+                <button
+                  onClick={() => handleUpgrade(u.id, cost)}
+                  disabled={!canAfford}
+                  className={`text-[9px] px-2 py-0.5 rounded font-bold transition-colors ${
+                    canAfford
+                      ? 'bg-purple-700 text-white hover:bg-purple-600'
+                      : 'bg-stone-800 text-stone-600 cursor-not-allowed'
+                  }`}
+                >
+                  {level >= u.maxLevel ? (locale === 'en' ? 'MAX' : '최대') : `${cost}✨`}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 // ── Color palette per realm for inline style fallback ──
 const REALM_COLORS: Record<string, { bg: string; border: string; text: string; glow: string }> = {
@@ -602,6 +675,16 @@ export default function HomePage() {
         )}
       </motion.section>
 
+      {/* Meta Upgrades */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+        className="w-full max-w-md z-10 mb-4"
+      >
+        <MetaUpgradePanel locale={locale} />
+      </motion.section>
+
       {/* Footer */}
       <motion.footer
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -614,7 +697,7 @@ export default function HomePage() {
             : '"천국으로 가는 길은 지옥에서 시작된다." — 단테 알리기에리'}
         </p>
         <p className="mt-1 text-stone-800">
-          Abyssos V0.1a — Built with Next.js
+          Abyssos V0.2 — Built with Next.js
         </p>
       </motion.footer>
     </main>
