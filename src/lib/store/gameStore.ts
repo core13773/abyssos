@@ -151,7 +151,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         phase: 'rolling',
         purgatorioBoard: [],
         activeSinProjection: null, activeAngelGuardian: null, activePurificationReward: null,
-        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+        purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
         player: {
           ...newGame.player,
           era: 'inferno' as const,
@@ -182,22 +182,10 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (poison) p.hp = Math.max(0, p.hp + poison.value);
 
       // ── Demon vs User Dice Duel ──
-      let duelResult: ReturnType<typeof resolveDiceDuel>;
-      try {
-        const playerRoll = rollDice(_rng);
-        const demonRoll = rollDice(_rng);
-        const demonBonus = getDemonBonus(p.currentCircleId);
-        duelResult = resolveDiceDuel(playerRoll, demonRoll, demonBonus);
-      } catch {
-        // Fallback: if duel fails for any reason, use simple roll
-        const simpleRoll = rollDice(_rng);
-        set({
-          player: p, dice: simpleRoll.dice, demonDice: null, isDouble: simpleRoll.isDouble, doubleCount: 0,
-          phase: 'moving', shakeScreen: false, showSparkles: false,
-          log: [...state.log, { turn: state.turnNumber, message: `🎲 [${simpleRoll.dice[0]}][${simpleRoll.dice[1]}] = ${simpleRoll.sum} spaces`, type: 'roll' }],
-        });
-        return;
-      }
+      const playerRoll = rollDice(_rng);
+      const demonRoll = rollDice(_rng);
+      const demonBonus = getDemonBonus(p.currentCircleId);
+      const duelResult = resolveDiceDuel(playerRoll, demonRoll, demonBonus);
 
       const msgs: string[] = [];
       let showSparkles = false;
@@ -298,7 +286,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         set({
           player: p, phase: 'rolling',
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          dice: null, isDouble: false, doubleCount: 0,
+          dice: null, demonDice: null, isDouble: false, doubleCount: 0,
           log: [...state.log, { turn: state.turnNumber, message: t('event.arrive', loc(), { label: tile?.label || '?', circle: p.currentCircleId }), type: 'move' }],
         });
       }
@@ -321,7 +309,7 @@ export const useGameStore = create<GameStore>((set, get) => {
           player: result.updatedPlayer,
           phase: 'rolling', activeMonster: null, battleRoll: null,
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          dice: null, isDouble: false, doubleCount: 0,
+          dice: null, demonDice: null, isDouble: false, doubleCount: 0,
           shakeScreen: result.shake, showSparkles: result.sparkles,
           log: newLog,
         });
@@ -340,7 +328,7 @@ export const useGameStore = create<GameStore>((set, get) => {
             player: result.updatedPlayer,
             phase: 'rolling', activeMonster: null, battleRoll: null,
             totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-            dice: null, isDouble: false, doubleCount: 0,
+            dice: null, demonDice: null, isDouble: false, doubleCount: 0,
             shakeScreen: result.shake, showSparkles: result.sparkles,
             log: newLog,
           });
@@ -359,7 +347,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({
         player: result.updatedPlayer, phase: 'rolling', pendingEventKind: null,
         totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-        dice: null, isDouble: false, doubleCount: 0,
+        dice: null, demonDice: null, isDouble: false, doubleCount: 0,
         shakeScreen: result.shake, showSparkles: result.sparkles,
         log: [...state.log, ...result.logs.map((l) => ({ ...l, turn: state.turnNumber }))],
       });
@@ -434,7 +422,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         set({
           player: p, phase: 'rolling', activeGatekeeper: null,
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          dice: null, isDouble: false, doubleCount: 0, shakeScreen: true,
+          dice: null, demonDice: null, isDouble: false, doubleCount: 0, shakeScreen: true,
           log: [...state.log, { turn: state.turnNumber, message: t('gk.result.defeat', loc(), { roll: total, power: gk.power, name: gkName, hp: dmg, push: gk.pushback }), type: 'critical' }],
         });
         setTimeout(() => set({ shakeScreen: false }), 600);
@@ -453,7 +441,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({
         player: p, phase: 'rolling', activeMonster: null,
         totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-        dice: null, isDouble: false, doubleCount: 0,
+        dice: null, demonDice: null, isDouble: false, doubleCount: 0,
         log: [...state.log, { turn: state.turnNumber, message: t('battle.result.maskSkip', loc()), type: 'guardian' }],
       });
     },
@@ -480,7 +468,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const state = get();
       set({
         phase: 'rolling', turnNumber: state.turnNumber + 1, totalTurns: state.totalTurns + 1,
-        dice: null, isDouble: false, doubleCount: 0, battleRoll: null,
+        dice: null, demonDice: null, isDouble: false, doubleCount: 0, battleRoll: null,
       });
     },
 
@@ -619,7 +607,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         set({
           player: p, phase: 'purgatorio_rolling',
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+          purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
           log: [...state.log, { turn: state.turnNumber, message: t('event.arrive', loc(), { label: tile?.label || '?', circle: p.currentTerraceId ?? 1 }), type: 'move' }],
         });
       }
@@ -669,7 +657,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({
         player: p, phase: 'purgatorio_rolling', activeSinProjection: null,
         totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+        purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
         showSparkles: finalHp > 0, shakeScreen: finalHp < -8,
         log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `🤔 "${sinName}": Chose "${choiceLabel}" → ${hpMsg}${moveMsg}${virtueMsg}` : `🤔 "${sinName}": "${choiceLabel}" 선택 → ${hpMsg}${moveMsg}${virtueMsg}`, type: finalHp >= 0 ? 'heal' : 'damage' }],
       });
@@ -685,7 +673,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({
         player: result.updatedPlayer, phase: 'purgatorio_rolling', pendingEventKind: null,
         totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+        purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
         shakeScreen: result.shake, showSparkles: result.sparkles,
         log: [...state.log, ...result.logs.map((l) => ({ ...l, turn: state.turnNumber }))],
       });
@@ -732,7 +720,7 @@ export const useGameStore = create<GameStore>((set, get) => {
           player: result.updatedPlayer,
           phase: 'purgatorio_rolling', activeAngelGuardian: null,
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+          purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
           shakeScreen: result.shake,
           log: [...state.log, ...result.logs.map((l) => ({ ...l, turn: state.turnNumber }))],
         });
@@ -753,7 +741,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({
         player: p, phase: 'purgatorio_rolling', activeSinProjection: null, battleRoll: null,
         totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
+        purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0,
         log: [...state.log, { turn: state.turnNumber, message: t('purgatorio.eventAngelFeather', loc()), type: 'guardian' }],
       });
     },
@@ -762,7 +750,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const state = get();
       set({
         phase: 'purgatorio_rolling', turnNumber: state.turnNumber + 1, totalTurns: state.totalTurns + 1,
-        purgatorioDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0, battleRoll: null,
+        purgatorioDice: null, demonDice: null, purgatorioIsDouble: false, purgatorioDoubleCount: 0, battleRoll: null,
         activePurificationReward: null,
       });
     },
@@ -904,14 +892,14 @@ export const useGameStore = create<GameStore>((set, get) => {
         set({
           player: p, phase: 'paradiso_rolling',
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+          paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
           log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `🌟 Blessing: +${bonus} Grace (${p.grace})` : `🌟 축복: 은총 +${bonus} (${p.grace})`, type: 'heal' }],
         });
       } else {
         set({
           player: p, phase: 'paradiso_rolling',
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+          paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
         });
       }
     },
@@ -936,7 +924,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({
         player: p, phase: 'paradiso_rolling', activeLightSpirit: null,
         totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-        paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0, showSparkles: true,
+        paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0, showSparkles: true,
         log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `✨ ${spiritName} blesses you! +${graceGain} Grace${bonusText} (${p.grace})` : `✨ ${spiritName}의 축복! 은총 +${graceGain}${bonusText} (${p.grace})`, type: 'heal' }],
       });
       setTimeout(() => set({ showSparkles: false }), 2000);
@@ -980,7 +968,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         set({
           player: p, phase: 'paradiso_rolling', activeArchangel: null,
           totalTurns: state.totalTurns + 1, turnNumber: state.turnNumber + 1,
-          paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
+          paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0,
           log: [...state.log, { turn: state.turnNumber, message: loc() === 'en' ? `💫 ${archName} gazes calmly. Grace -3. Try again.` : `💫 ${archName}이 조용히 바라본다. 은총 -3. 다시 시도하세요.`, type: 'system' }],
         });
       }
@@ -992,7 +980,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const state = get();
       set({
         phase: 'paradiso_rolling', turnNumber: state.turnNumber + 1, totalTurns: state.totalTurns + 1,
-        paradisoDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0, battleRoll: null,
+        paradisoDice: null, demonDice: null, paradisoIsDouble: false, paradisoDoubleCount: 0, battleRoll: null,
         activeCelestialReward: null,
       });
     },
