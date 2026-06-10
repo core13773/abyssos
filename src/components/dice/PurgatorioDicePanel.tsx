@@ -5,16 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/lib/store/gameStore';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
-import DiceFace from './DiceFace';
 import Button from '@/components/ui/Button';
 
 export default function PurgatorioDicePanel() {
   const locale = useLocale((s) => s.locale);
   const phase = useGameStore((s) => s.phase);
-  const infernoDice = useGameStore((s) => s.dice);
-  const purgatorioDiceData = useGameStore((s) => s.purgatorioDice);
-  const paradisoDiceData = useGameStore((s) => s.paradisoDice);
   const player = useGameStore((s) => s.player);
+  const dice = useGameStore((s) => s.dice);
   const rollDiceAction = useGameStore((s) => s.rollDiceAction);
   const resolveEventAction = useGameStore((s) => s.resolveEventAction);
   const rollPurgatorioDice = useGameStore((s) => s.rollPurgatorioDice);
@@ -30,8 +27,6 @@ export default function PurgatorioDicePanel() {
 
   const isPurgatorio = player.era === 'purgatorio';
   const isParadiso = player.era === 'paradiso';
-
-  const dice = isParadiso ? paradisoDiceData : isPurgatorio ? purgatorioDiceData : infernoDice;
 
   const isRollPhase = isParadiso ? phase === 'paradiso_rolling'
     : isPurgatorio ? phase === 'purgatorio_rolling'
@@ -55,7 +50,7 @@ export default function PurgatorioDicePanel() {
       else if (isPurgatorio) rollPurgatorioDice();
       else rollDiceAction();
       setIsRolling(false);
-    }, 500);
+    }, 400);
   };
 
   const handleMove = () => {
@@ -77,43 +72,25 @@ export default function PurgatorioDicePanel() {
 
   return (
     <div className="flex flex-col items-center gap-2 p-3 rounded-xl bg-stone-900/80 border border-stone-800">
-      {/* Dice display */}
-      <div className="flex gap-3 items-center">
-        {isDuelPhase ? (
-          <p className="text-2xl animate-bounce">👹</p>
-        ) : dice ? (
-          <>
-            <DiceFace value={dice[0]} size={50} />
-            <DiceFace value={dice[1]} size={50} />
-          </>
-        ) : (
-          <>
-            <DiceFace value={1} size={50} rolling={isRolling} />
-            <DiceFace value={isParadiso ? 4 : 6} size={50} rolling={isRolling} />
-          </>
-        )}
-      </div>
-
-      {/* Action buttons */}
       <AnimatePresence mode="wait">
         {isRollPhase && (
           <motion.div key="roll" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="w-full text-center">
             <Button onClick={handleRoll} variant="primary" size="lg" className={`w-full min-h-[44px] ${summonColor}`} disabled={isRolling}>
-              🎲 {t('dice.roll', locale)}
+              👹 {locale === 'en' ? 'Challenge Demon' : '악마에게 도전'}
             </Button>
           </motion.div>
         )}
         {isDuelPhase && (
           <motion.div key="duel" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="w-full text-center">
-            <p className="text-sm text-red-400 animate-pulse font-bold">
-              👹 {locale === 'en' ? 'Fight the demon!' : '악마와 대결하라!'}
+            <p className="text-lg text-red-400 animate-pulse font-bold">
+              👹 {locale === 'en' ? 'Fight!' : '대결 중!'}
             </p>
           </motion.div>
         )}
         {isMovePhase && dice && (
           <motion.div key="move" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="w-full text-center">
-            <Button onClick={handleMove} variant="primary" className={`w-full mt-2 min-h-[44px] ${summonColor}`}>
-              {t('dice.move', locale)}
+            <Button onClick={handleMove} variant="primary" className={`w-full min-h-[44px] ${summonColor}`}>
+              ▶ {locale === 'en' ? 'Move' : '이동'}
             </Button>
           </motion.div>
         )}
