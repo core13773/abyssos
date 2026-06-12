@@ -539,7 +539,7 @@ export default function HomePage() {
           <button
             onClick={() => {
               const next = locale === 'en' ? 'ko' : 'en';
-              window.location.href = `/${next}/`;
+              router.push(`/${next}/`);
             }}
             className="text-[11px] px-3 py-1 rounded-full bg-stone-800/60 border border-stone-700/40 text-stone-400 hover:text-stone-200 hover:border-stone-600 transition-colors"
             aria-label={locale === 'en' ? 'Switch to Korean' : 'Switch to English'}

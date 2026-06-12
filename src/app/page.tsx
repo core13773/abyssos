@@ -41,13 +41,13 @@ export default function RootPage() {
       {locale && (
         <div className="flex gap-3 mt-4">
           <a
-            href="/ko/"
+            href="ko/"
             className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 text-sm hover:bg-stone-700 transition-colors"
           >
             🇰🇷 한국어
           </a>
           <a
-            href="/en/"
+            href="en/"
             className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 text-sm hover:bg-stone-700 transition-colors"
           >
             🇺🇸 English
