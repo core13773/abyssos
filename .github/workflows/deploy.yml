@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
@@ -45,8 +45,10 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /abyssos
           NEXT_PUBLIC_GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           NEXT_PUBLIC_ADSENSE_ID: ${{ secrets.ADSENSE_PUBLISHER_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT_MAIN: ${{ secrets.ADSENSE_SLOT_MAIN }}
 
       # SPA fallback: inject redirect script into 404.html for GitHub Pages
+      # Handles both old /game paths and new i18n /en /ko paths
       - run: |
           node -e "
           const fs = require('fs');
@@ -54,7 +56,7 @@ jobs:
           const htmlPath = path.join('out', '404.html');
           if (fs.existsSync(htmlPath)) {
             let html = fs.readFileSync(htmlPath, 'utf8');
-            const script = \`<script>(function(){var r=sessionStorage.getItem('__spa_redirect');if(r){sessionStorage.removeItem('__spa_redirect');window.history.replaceState(null,'',r);return;}var p=window.location.pathname,b='/abyssos',s=window.location.search+window.location.hash;if(p.startsWith(b+'/game/')||p.startsWith(b+'/')){sessionStorage.setItem('__spa_redirect',p.slice(b.length)+s);window.location.replace(b+'/');}})();</script>\`;
+            const script = \`<script>(function(){var r=sessionStorage.getItem('__spa_redirect');if(r){sessionStorage.removeItem('__spa_redirect');window.history.replaceState(null,'',r);return;}var p=window.location.pathname,b='/abyssos',s=window.location.search+window.location.hash;var m=p.match(new RegExp('^'+b+'/(en|ko)(/|$)'));if(m){sessionStorage.setItem('__spa_redirect',p.slice(b.length)+s);window.location.replace(b+'/'+m[1]+'/');return;}if(p.startsWith(b+'/game/')||p.startsWith(b+'/')){sessionStorage.setItem('__spa_redirect',p.slice(b.length)+s);window.location.replace(b+'/');}})();</script>\`;
             html = html.replace('</head>', script + '</head>');
             fs.writeFileSync(htmlPath, html);
           }

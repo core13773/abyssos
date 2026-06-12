@@ -8,6 +8,14 @@ export default function RootPage() {
   const [locale, setLocale] = useState<string | null>(null);
 
   useEffect(() => {
+    // Handle SPA fallback redirect from 404.html (GitHub Pages)
+    const spaRedirect = typeof window !== 'undefined' ? sessionStorage.getItem('__spa_redirect') : null;
+    if (spaRedirect) {
+      sessionStorage.removeItem('__spa_redirect');
+      router.replace(spaRedirect);
+      return;
+    }
+
     const stored = typeof window !== 'undefined' ? localStorage.getItem('abyssos_locale') : null;
     if (stored === 'en' || stored === 'ko') {
       setLocale(stored);

@@ -5,6 +5,7 @@ import type { NextConfig } from "next";
  *   NEXT_PUBLIC_BASE_PATH   — /abyssos for GitHub Pages, empty for local
  *   NEXT_PUBLIC_GA_ID       — Google Analytics 4 measurement ID (G-XXXXXXXXXX)
  *   NEXT_PUBLIC_ADSENSE_ID  — Google AdSense publisher ID (ca-pub-XXXXXXXXXXXXXXX)
+ *   NEXT_PUBLIC_ADSENSE_SLOT_MAIN — AdSense ad slot ID for main page
  */
 const nextConfig: NextConfig = {
   output: 'export',
