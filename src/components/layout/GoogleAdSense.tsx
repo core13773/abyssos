@@ -3,7 +3,7 @@
 import Script from 'next/script';
 import { useSyncExternalStore } from 'react';
 
-const AD_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_ID;
+const AD_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-4794002106764884';
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 /**
