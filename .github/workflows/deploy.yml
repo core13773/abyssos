@@ -27,14 +27,13 @@ jobs:
       - run: npm ci
 
       # Override next.config.ts for GitHub Pages static export
+      # Custom domain webgame.monster → no basePath needed
       - run: |
           cat > next.config.ts << 'NEXTCONF'
           import type { NextConfig } from "next";
           const nextConfig: NextConfig = {
             output: 'export',
             trailingSlash: true,
-            basePath: '/abyssos',
-            assetPrefix: '/abyssos',
             images: { unoptimized: true },
           };
           export default nextConfig;
@@ -43,12 +42,13 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /abyssos
+          NEXT_PUBLIC_DOMAIN: webgame.monster
           NEXT_PUBLIC_GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           NEXT_PUBLIC_ADSENSE_ID: ${{ secrets.ADSENSE_PUBLISHER_ID }}
           NEXT_PUBLIC_ADSENSE_SLOT_MAIN: ${{ secrets.ADSENSE_SLOT_MAIN }}
 
       # SPA fallback: inject redirect script into 404.html for GitHub Pages
-      # Handles both old /game paths and new i18n /en /ko paths
+      # Custom domain (webgame.monster) — no basePath prefix
       - run: |
           node -e "
           const fs = require('fs');
@@ -56,7 +56,7 @@ jobs:
           const htmlPath = path.join('out', '404.html');
           if (fs.existsSync(htmlPath)) {
             let html = fs.readFileSync(htmlPath, 'utf8');
-            const script = \`<script>(function(){var r=sessionStorage.getItem('__spa_redirect');if(r){sessionStorage.removeItem('__spa_redirect');window.history.replaceState(null,'',r);return;}var p=window.location.pathname,b='/abyssos',s=window.location.search+window.location.hash;var m=p.match(new RegExp('^'+b+'/(en|ko)(/|$)'));if(m){sessionStorage.setItem('__spa_redirect',p.slice(b.length)+s);window.location.replace(b+'/'+m[1]+'/');return;}if(p.startsWith(b+'/game/')||p.startsWith(b+'/')){sessionStorage.setItem('__spa_redirect',p.slice(b.length)+s);window.location.replace(b+'/');}})();</script>\`;
+            const script = \`<script>(function(){var r=sessionStorage.getItem('__spa_redirect');if(r){sessionStorage.removeItem('__spa_redirect');window.history.replaceState(null,'',r);return;}var p=window.location.pathname,s=window.location.search+window.location.hash;var m=p.match(/^\/(en|ko)(\/|$)/);if(m){sessionStorage.setItem('__spa_redirect',p+s);window.location.replace('/'+m[1]+'/');return;}if(p.startsWith('/game/')){sessionStorage.setItem('__spa_redirect',p+s);window.location.replace('/');}})();</script>\`;
             html = html.replace('</head>', script + '</head>');
             fs.writeFileSync(htmlPath, html);
           }
