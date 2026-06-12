@@ -33,7 +33,7 @@ function createDefaultPurgatorioClearPlayer(): Player {
   };
 }
 
-export default function GamePage() {
+export default function GameClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const eraParam = searchParams.get('era');
@@ -74,7 +74,7 @@ export default function GamePage() {
 
     if (era === 'purgatorio') {
       if (!getRealmCompleted('inferno')) {
-        router.replace('/');
+        router.replace(`/${locale}/`);
         return;
       }
       const infernoPlayer = createDefaultInfernoClearPlayer();
@@ -86,7 +86,7 @@ export default function GamePage() {
 
     if (era === 'paradiso') {
       if (!getRealmCompleted('purgatorio')) {
-        router.replace('/');
+        router.replace(`/${locale}/`);
         return;
       }
       const purgatorioPlayer = createDefaultPurgatorioClearPlayer();
@@ -132,7 +132,7 @@ export default function GamePage() {
           <Button variant="primary" size="lg" onClick={initGame} className="w-full bg-purple-700 hover:bg-purple-600">
             {locale === 'en' ? '🌅 Journey Again' : '🌅 다시 여정을 시작'}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="w-full mt-2">
+          <Button variant="ghost" size="sm" onClick={() => router.push(`/${locale}/`)} className="w-full mt-2">
             {t('top.lobby', locale)}
           </Button>
         </section>
@@ -158,7 +158,7 @@ export default function GamePage() {
           <Button variant="primary" size="lg" onClick={initGame} className="w-full bg-amber-600 hover:bg-amber-500">
             {locale === 'en' ? '☀ Journey Again' : '☀ 다시 여정을 시작'}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="w-full mt-2">
+          <Button variant="ghost" size="sm" onClick={() => router.push(`/${locale}/`)} className="w-full mt-2">
             {t('top.lobby', locale)}
           </Button>
         </section>
@@ -182,7 +182,7 @@ export default function GamePage() {
           <Button variant="primary" size="lg" onClick={initGame} className="w-full">
             {t('player.challengeAgain', locale)}
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => router.push('/')} className="w-full mt-2">
+          <Button variant="ghost" size="sm" onClick={() => router.push(`/${locale}/`)} className="w-full mt-2">
             {t('top.lobby', locale)}
           </Button>
         </section>
@@ -193,7 +193,7 @@ export default function GamePage() {
   return (
     <main className="min-h-screen bg-stone-950" aria-label={t('top.title', locale)}>
       <nav className="flex items-center justify-between px-2 py-2 border-b border-stone-800 bg-stone-950/90 sticky top-0 z-40 backdrop-blur gap-1" aria-label={locale === 'ko' ? '게임 메뉴' : 'Game Menu'}>
-        <button onClick={() => router.push('/')} className="text-stone-500 hover:text-stone-300 text-xs transition-colors shrink-0" aria-label={locale === 'ko' ? '로비로 돌아가기' : 'Back to Lobby'}>
+        <button onClick={() => router.push(`/${locale}/`)} className="text-stone-500 hover:text-stone-300 text-xs transition-colors shrink-0" aria-label={locale === 'ko' ? '로비로 돌아가기' : 'Back to Lobby'}>
           {t('top.lobby', locale)}
         </button>
         <h1 className="text-xs font-bold font-serif text-amber-400/80 truncate text-center">{t('top.title', locale)}</h1>

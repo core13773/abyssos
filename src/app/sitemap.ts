@@ -7,30 +7,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
     : 'http://localhost:3000';
 
-  return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
-      alternates: {
-        languages: {
-          en: baseUrl,
-          ko: baseUrl,
-        },
-      },
-    },
-    {
-      url: `${baseUrl}/game`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-      alternates: {
-        languages: {
-          en: `${baseUrl}/game`,
-          ko: `${baseUrl}/game`,
-        },
-      },
-    },
+  const pages = [
+    { path: '/', priority: 1.0 },
+    { path: '/ko/', priority: 1.0 },
+    { path: '/en/', priority: 1.0 },
+    { path: '/ko/game/', priority: 0.9 },
+    { path: '/en/game/', priority: 0.9 },
+    { path: '/ko/privacy/', priority: 0.5 },
+    { path: '/en/privacy/', priority: 0.5 },
   ];
+
+  return pages.map(({ path, priority }) => ({
+    url: `${baseUrl}${path}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority,
+    alternates: {
+      languages: {
+        'x-default': `${baseUrl}/`,
+        en: `${baseUrl}/en/`,
+        ko: `${baseUrl}/ko/`,
+      },
+    },
+  }));
 }

@@ -53,8 +53,14 @@ export default function AdUnit({
 
   if (!AD_CLIENT || !slot) return null;
 
+  const isTestMode = process.env.NODE_ENV !== 'production';
+
   return (
-    <div ref={containerRef} className={`ad-container ${className}`}>
+    <div
+      ref={containerRef}
+      className={`ad-container ${className}`}
+      style={{ minHeight: format === 'horizontal' ? 90 : format === 'vertical' ? 250 : 250 }}
+    >
       <ins
         className="adsbygoogle"
         style={{ display: 'block' }}
@@ -62,6 +68,7 @@ export default function AdUnit({
         data-ad-slot={slot}
         data-ad-format={format}
         data-full-width-responsive={responsive ? 'true' : 'false'}
+        data-adtest={isTestMode ? 'on' : undefined}
       />
     </div>
   );
