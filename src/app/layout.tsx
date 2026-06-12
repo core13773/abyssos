@@ -10,7 +10,7 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <head>
         <meta name="google-site-verification" content="H7mODFbLsLZQVighNNZBIlFHoInuoI881YleLZ7b4vo" />
-        <meta name="naver-site-verification" content="d3bdccc042222b7398003848de1b9b650f57df12" />
+        <meta name="naver-site-verification" content="f2ee86bf2dbffd9f349214dc82766bbf8066ed00" />
         <meta name="google-adsense-account" content="ca-pub-4794002106764884" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://googleads.g.doubleclick.net" />
