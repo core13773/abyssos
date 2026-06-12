@@ -7,9 +7,12 @@ import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
 import GoogleAdSense from '@/components/layout/GoogleAdSense';
 import { routing } from '@/i18n/routing';
 
-const siteUrl = process.env.NEXT_PUBLIC_BASE_PATH
-  ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
-  : 'http://localhost:3000';
+// Primary domain for production (custom domain), fallback for local dev
+const siteUrl = process.env.NEXT_PUBLIC_DOMAIN
+  ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
+  : process.env.NEXT_PUBLIC_BASE_PATH
+    ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
+    : 'http://localhost:3000';
 
 export const viewport: Viewport = {
   themeColor: [
@@ -119,6 +122,12 @@ export async function generateMetadata({
     category: 'game',
     applicationName: isKo ? '어비소스' : 'Abyssos',
     generator: 'Next.js',
+    verification: {
+      google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+      other: {
+        'naver-site-verification': [process.env.NEXT_PUBLIC_NAVER_VERIFICATION].filter(Boolean) as string[],
+      },
+    },
   };
 }
 

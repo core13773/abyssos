@@ -3,9 +3,12 @@ import type { MetadataRoute } from 'next';
 export const dynamic = 'force-static';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_PATH
-    ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
-    : 'http://localhost:3000';
+  // Primary domain for production (custom domain), fallback for local dev
+  const baseUrl = process.env.NEXT_PUBLIC_DOMAIN
+    ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
+    : process.env.NEXT_PUBLIC_BASE_PATH
+      ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
+      : 'http://localhost:3000';
 
   const pages = [
     { path: '/', priority: 1.0 },
@@ -20,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return pages.map(({ path, priority }) => ({
     url: `${baseUrl}${path}`,
     lastModified: new Date(),
-    changeFrequency: 'weekly',
+    changeFrequency: 'weekly' as const,
     priority,
     alternates: {
       languages: {
