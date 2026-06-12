@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
 import '../globals.css';
 import LocaleSync from '@/components/layout/LocaleSync';
-import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
-import GoogleAdSense from '@/components/layout/GoogleAdSense';
 import { routing } from '@/i18n/routing';
 
 // Primary domain for production (custom domain), fallback for local dev
@@ -158,10 +155,6 @@ export default async function LocaleLayout({
           rel="stylesheet"
         />
       </head>
-      <Suspense fallback={null}>
-        <GoogleAnalytics />
-      </Suspense>
-      <GoogleAdSense />
       <LocaleSync />
       {children}
     </>
