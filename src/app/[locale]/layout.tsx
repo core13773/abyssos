@@ -123,7 +123,7 @@ export async function generateMetadata({
     applicationName: isKo ? '어비소스' : 'Abyssos',
     generator: 'Next.js',
     verification: {
-      google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+      google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || 'H7mODFbLsLZQVighNNZBIlFHoInuoI881YleLZ7b4vo',
       other: {
         'naver-site-verification': [process.env.NEXT_PUBLIC_NAVER_VERIFICATION].filter(Boolean) as string[],
       },
