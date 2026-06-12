@@ -530,6 +530,24 @@ export default function HomePage() {
           {locale === 'en' ? 'The Divine Comedy Trilogy' : '신곡 3부작'}
         </motion.p>
 
+        {/* Language toggle */}
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.25 }}
+          className="mt-3"
+        >
+          <button
+            onClick={() => {
+              const next = locale === 'en' ? 'ko' : 'en';
+              window.location.href = `/${next}/`;
+            }}
+            className="text-[11px] px-3 py-1 rounded-full bg-stone-800/60 border border-stone-700/40 text-stone-400 hover:text-stone-200 hover:border-stone-600 transition-colors"
+            aria-label={locale === 'en' ? 'Switch to Korean' : 'Switch to English'}
+          >
+            {locale === 'en' ? '🇰🇷 한국어' : '🇺🇸 English'}
+          </button>
+        </motion.div>
+
         {/* Progress indicator */}
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
