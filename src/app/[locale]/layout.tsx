@@ -57,7 +57,7 @@ export async function generateMetadata({
     alternates: {
       canonical: `/${locale}/`,
       languages: {
-        'x-default': '/',
+        'x-default': '/en/',
         en: '/en/',
         ko: '/ko/',
       },
@@ -109,6 +109,12 @@ export async function generateMetadata({
         'max-image-preview': 'large',
         'max-snippet': -1,
       },
+    },
+    formatDetection: {
+      telephone: false,
+      date: false,
+      address: false,
+      email: false,
     },
     category: 'game',
     applicationName: isKo ? '어비소스' : 'Abyssos',

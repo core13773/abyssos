@@ -467,25 +467,71 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen flex flex-col items-center p-4 sm:p-6 bg-stone-950 relative" aria-labelledby="hero-title">
-      {/* JSON-LD Structured Data */}
+      {/* JSON-LD Structured Data — locale-aware for international SEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'VideoGame',
-            name: 'Abyssos — The Divine Comedy Trilogy',
-            description: 'A strategic roguelike board game through the 9 circles of Hell, 7 terraces of Purgatory, and 9 spheres of Paradise.',
-            url: 'https://core13773.github.io/abyssos',
-            playMode: 'SinglePlayer',
-            applicationCategory: 'Game',
-            genre: ['Roguelike', 'Board Game', 'Card Battle', 'Dark Fantasy'],
-            operatingSystem: 'Web',
-            author: { '@type': 'Organization', name: 'Abyssos' },
-            datePublished: '2026-06-10',
-            inLanguage: ['en', 'ko'],
-            offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-          }),
+          __html: JSON.stringify(
+            locale === 'ko'
+              ? {
+                  '@context': 'https://schema.org',
+                  '@graph': [
+                    {
+                      '@type': 'VideoGame',
+                      name: '어비소스 — 신곡 3부작',
+                      description: '단테의 신곡을 모티브로 한 전략적 로그라이크 보드게임. 9층 지옥, 7개 테라스 연옥, 9개 천구를 통과하라.',
+                      url: 'https://core13773.github.io/abyssos/ko/',
+                      playMode: 'SinglePlayer',
+                      applicationCategory: 'Game',
+                      genre: ['Roguelike', '보드게임', '카드 배틀', '다크 판타지'],
+                      operatingSystem: 'Web',
+                      author: { '@type': 'Organization', name: 'Abyssos' },
+                      datePublished: '2026-06-10',
+                      inLanguage: 'ko',
+                      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+                      image: 'https://core13773.github.io/abyssos/images/og-image.png',
+                    },
+                    {
+                      '@type': 'WebSite',
+                      name: '어비소스',
+                      url: 'https://core13773.github.io/abyssos/ko/',
+                      inLanguage: 'ko',
+                    },
+                  ],
+                }
+              : {
+                  '@context': 'https://schema.org',
+                  '@graph': [
+                    {
+                      '@type': 'VideoGame',
+                      name: 'Abyssos — The Divine Comedy Trilogy',
+                      description: "A strategic roguelike board game through Dante's Divine Comedy. Traverse 9 circles of Inferno, 7 terraces of Purgatory, and 9 spheres of Paradise.",
+                      url: 'https://core13773.github.io/abyssos/en/',
+                      playMode: 'SinglePlayer',
+                      applicationCategory: 'Game',
+                      genre: ['Roguelike', 'Board Game', 'Card Battle', 'Dark Fantasy', 'Strategy'],
+                      operatingSystem: 'Web',
+                      author: { '@type': 'Organization', name: 'Abyssos' },
+                      datePublished: '2026-06-10',
+                      inLanguage: 'en',
+                      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+                      image: 'https://core13773.github.io/abyssos/images/og-image.png',
+                    },
+                    {
+                      '@type': 'WebSite',
+                      name: 'Abyssos',
+                      url: 'https://core13773.github.io/abyssos/en/',
+                      inLanguage: 'en',
+                    },
+                    {
+                      '@type': 'Organization',
+                      name: 'Abyssos',
+                      url: 'https://core13773.github.io/abyssos/',
+                      email: 'core13773@gmail.com',
+                    },
+                  ],
+                }
+          ),
         }}
       />
 

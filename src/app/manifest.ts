@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'Abyssos',
     description:
       'A strategic roguelike board game through Dante\'s 9 circles of Hell. Roll dice, fight monsters, defeat gatekeepers, and escape the abyss.',
-    start_url: `${baseUrl}/ko/`,
+    start_url: `${baseUrl}/en/`,
     display: 'standalone',
     background_color: '#0c0a09',
     theme_color: '#1c1917',
@@ -24,7 +24,7 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     categories: ['games', 'entertainment'],
-    lang: 'ko',
+    lang: 'en',
     dir: 'ltr',
   };
 }
