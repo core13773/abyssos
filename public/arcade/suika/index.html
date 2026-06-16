@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0a09">
+  <meta name="google-adsense-account" content="ca-pub-4794002106764884">
+  <title>Merge Fruits — Arcade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/arcade/_shared/css/style.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4794002106764884" crossorigin="anonymous"></script>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({ google_ad_client: "ca-pub-4794002106764884", enable_page_level_ads: true });</script>
+</head>
+<body>
+  <div id="game-wrap">
+    <canvas id="game"></canvas>
+
+    <div id="hud" class="hidden"><div id="score">0</div></div>
+    <button id="back-btn" class="hidden" aria-label="Back">←</button>
+    <button id="lang-btn" data-i18n="langLabel" aria-label="Switch language">한국어</button>
+    <button id="mute-btn" aria-label="Toggle sound">🔊</button>
+
+    <div id="menu" class="overlay hidden">
+      <div class="menu-inner"><div id="game-list" class="game-list"></div></div>
+    </div>
+
+    <div id="game-over" class="overlay hidden">
+      <div class="panel">
+        <h2 data-i18n="gameOver">GAME OVER</h2>
+        <div class="row"><span data-i18n="score">Score</span><b id="final-score">0</b></div>
+        <div class="row"><span data-i18n="best">Best</span><b id="best-score">0</b></div>
+        <div class="btns">
+          <button id="revive-btn" class="btn primary" data-i18n="revive">📺 Revive (Watch Ad)</button>
+          <button id="restart-btn" class="btn" data-i18n="restart">Restart</button>
+          <button id="menu-btn" class="btn" data-i18n="menuBtn">Menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>window.ARCADE_GAME = 'suika';</script>
+  <script src="/arcade/_shared/js/ads.js"></script>
+  <script src="/arcade/_shared/js/i18n.js"></script>
+  <script src="/arcade/_shared/js/engine.js"></script>
+  <script src="/arcade/_shared/js/games/suika.js"></script>
+  <script src="/arcade/_shared/js/arcade-boot.js"></script>
+</body>
+</html>

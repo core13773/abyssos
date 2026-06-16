@@ -617,6 +617,20 @@ export default function HomePage() {
         </motion.div>
       </header>
 
+      {/* Arcade 진입 배너 */}
+      <motion.section
+        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+        className="w-full max-w-md z-10 mb-4"
+      >
+        <button
+          onClick={() => router.push(`/${locale}/arcade`)}
+          className="w-full py-3 rounded-xl bg-amber-900/40 border border-amber-700/40 text-amber-300 text-sm font-bold hover:bg-amber-900/60 transition-colors flex items-center justify-center gap-2"
+        >
+          🎮 {locale === 'en' ? 'Arcade — 8 Mini Games' : '아케이드 — 8종 미니게임'}
+          <span className="text-amber-600" aria-hidden="true">→</span>
+        </button>
+      </motion.section>
+
       {/* Realm Selection Cards */}
       <section className="w-full max-w-md z-10 flex flex-col gap-3 sm:gap-4 pb-8" aria-label={locale === 'ko' ? '세계 선택' : 'Realm Selection'}>
         <h2 className="sr-only">{locale === 'ko' ? '여정을 선택하세요' : 'Choose your journey'}</h2>
