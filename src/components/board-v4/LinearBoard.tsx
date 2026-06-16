@@ -1,12 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useGameStore } from '@/lib/store/gameStore';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import { CIRCLES } from '@/lib/data/circles';
-import { getMonster } from '@/lib/data/monsters';
 import BoardTileComponent from './BoardTile';
 
 export default function LinearBoard() {

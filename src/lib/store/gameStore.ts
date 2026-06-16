@@ -65,7 +65,7 @@ function saveCollectedCards(realm: 'inferno' | 'purgatorio' | 'paradiso', cardId
 
 import { rollDice } from '@/lib/game/dice';
 import { getNextTileV4, remainingTilesInCircle } from '@/lib/game/board-v4';
-import { buildPurgatorioBoard, getNextPurgatorioTile, remainingTilesInTerrace } from '@/lib/game/purgatorio-board';
+import { getNextPurgatorioTile, remainingTilesInTerrace } from '@/lib/game/purgatorio-board';
 import { resolveMonsterBattle } from '@/lib/game/battle';
 import { resolveEventV4 } from '@/lib/game/events-v4';
 import { resolvePurgatorioEvent } from '@/lib/game/purgatorio-events';
@@ -78,7 +78,7 @@ import { getSinProjection, getAngelGuardian, getPurificationCard } from '@/lib/d
 import { getLightSpirit, getArchangel, getRelic } from '@/lib/data/paradiso';
 import { CONSUMABLES } from '@/lib/data/consumables';
 import { createParadisoGame, checkParadisoComplete } from '@/lib/game/paradiso-engine';
-import { buildParadisoBoard, getNextParadisoTile, remainingTilesInSphere } from '@/lib/game/paradiso-board';
+import { getNextParadisoTile, remainingTilesInSphere } from '@/lib/game/paradiso-board';
 import { createRNG, timeSeed } from '@/lib/utils/random';
 import { t, getActiveLocale } from '@/lib/i18n/translations';
 import { unlockAchievement } from '@/lib/data/achievements';

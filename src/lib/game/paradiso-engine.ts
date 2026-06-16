@@ -1,6 +1,5 @@
 import type { GameState, Player } from '@/types/game';
 import { buildParadisoBoard } from './paradiso-board';
-import { createRNG, timeSeed } from '@/lib/utils/random';
 import { t, getActiveLocale } from '@/lib/i18n/translations';
 
 /** Create a player for Paradiso, inheriting from a prior state */
@@ -22,8 +21,7 @@ export function createParadisoPlayer(priorPlayer: Player): Player {
 }
 
 export function createParadisoGame(priorPlayer: Player): Partial<GameState> {
-  const rng = createRNG(timeSeed());
-  const board = buildParadisoBoard(rng);
+  const board = buildParadisoBoard();
   const player = createParadisoPlayer(priorPlayer);
   const loc = getActiveLocale();
 

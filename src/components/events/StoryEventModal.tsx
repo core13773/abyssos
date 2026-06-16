@@ -2,13 +2,11 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/lib/store/gameStore';
-import { useLocale } from '@/lib/i18n/localeStore';
 import Button from '@/components/ui/Button';
 
 export default function StoryEventModal() {
   const storyEvent = useGameStore((s) => s.storyEvent);
   const setStoryEvent = useGameStore((s) => s.setStoryEvent);
-  const locale = useLocale((s) => s.locale);
 
   if (!storyEvent) return null;
 

@@ -26,6 +26,8 @@ export default function HiddenWord({ wordLength, distractCount, timeLimit, onRes
   useEffect(() => { onResultRef.current = onResult; }, [onResult]);
 
   useEffect(() => {
+    // 난이도 prop 변경 시 무작위 단어를 뽑아 게임 상태를 초기화 — 정당한 부작용(Math.random 포함).
+    /* eslint-disable react-hooks/set-state-in-effect */
     const words = locale === 'en' ? WORDS_EN : WORDS_KO;
     const candidates = words.filter((w) => w.length === wordLength);
     const word = candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : words[0];
@@ -41,6 +43,7 @@ export default function HiddenWord({ wordLength, distractCount, timeLimit, onRes
     setFoundCount(0);
     setPhase('memorize');
     setTimeLeft(timeLimit);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const memorizeTimer = setTimeout(() => {
       setPhase('find');

@@ -46,7 +46,7 @@ export default function HiddenBossModal({ open, onClose }: Props) {
     }
   };
 
-  const handlePhase3 = (success: boolean, _score: number) => {
+  const handlePhase3 = (success: boolean) => {
     const next = [...phaseResults];
     next[2] = success;
     setPhaseResults(next);

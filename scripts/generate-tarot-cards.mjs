@@ -111,7 +111,7 @@ function svgWrap(inner) {
 }
 
 // ─── Golden Frame (shared across all cards) ──────────────────────────────
-function goldenFrame(roman, name, enName, cardNum) {
+function goldenFrame(roman, name, enName) {
   const M = 30; // margin
   const innerW = W - M*2;
   const innerH = H - M*2;
@@ -1041,7 +1041,7 @@ function generateCards() {
       continue;
     }
 
-    const frame = goldenFrame(card.roman, card.name, card.en, card.n);
+    const frame = goldenFrame(card.roman, card.name, card.en);
     const symbolArt = symbolFunc();
     const inner = `
       ${frame}

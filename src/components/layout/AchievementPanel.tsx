@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
-import { ACHIEVEMENTS, loadAchievements, checkAchievement } from '@/lib/data/achievements';
+import { ACHIEVEMENTS, loadAchievements } from '@/lib/data/achievements';
 
 export default function AchievementPanel() {
   const locale = useLocale((s) => s.locale);

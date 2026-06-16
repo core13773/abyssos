@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
 
 interface Props {
@@ -23,12 +22,16 @@ export default function SmokeMaze({ gridSize, fogRadius, timeLimit, onResult }: 
   useEffect(() => { onResultRef.current = onResult; }, [onResult]);
 
   useEffect(() => {
+    // 난이도 prop(gridSize/timeLimit) 변경 시 게임 상태를 초기화 — 정당한 부작용.
+    // key 기반 리셋은 부모 구조 변경이 필요해 effect에서 유지.
+    /* eslint-disable react-hooks/set-state-in-effect */
     const total = gridSize * gridSize;
     setPlayerPos(0);
     setGoalPos(total - 1);
     setVisited(new Set([0]));
     setPhase('playing');
     setTimeLeft(timeLimit);
+    /* eslint-enable react-hooks/set-state-in-effect */
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         const next = Math.max(0, prev - 0.1);

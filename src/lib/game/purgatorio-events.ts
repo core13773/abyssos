@@ -22,9 +22,9 @@ export function resolvePurgatorioEvent(
   switch (eventKind) {
     case 'rest':     return resolvePrayer(player, rng);
     case 'choice':   return resolveCrossroads(player, rng);
-    case 'blessing': return resolveStarlight(player, rng);
+    case 'blessing': return resolveStarlight(player);
     case 'curse':    return resolveSinWeight(player, rng);
-    case 'treasure': return resolveAngelFeather(player, rng);
+    case 'treasure': return resolveAngelFeather(player);
     case 'trap':     return resolveSinWeight(player, rng); // trap → weight of sin
     default:         return { updatedPlayer: { ...player }, logs: [], shake: false, sparkles: false };
   }
@@ -80,7 +80,7 @@ function resolveCrossroads(player: Player, rng: RNG): PurgatorioEventResult {
 }
 
 /** Starlight Vision (blessing equivalent) — reduces enemy power for this terrace */
-function resolveStarlight(player: Player, rng: RNG): PurgatorioEventResult {
+function resolveStarlight(player: Player): PurgatorioEventResult {
   const p = { ...player };
   const loc = getActiveLocale();
 
@@ -123,7 +123,7 @@ function resolveSinWeight(player: Player, rng: RNG): PurgatorioEventResult {
 }
 
 /** Angel Feather (treasure equivalent) — allows skipping next battle */
-function resolveAngelFeather(player: Player, rng: RNG): PurgatorioEventResult {
+function resolveAngelFeather(player: Player): PurgatorioEventResult {
   const p = { ...player };
   const loc = getActiveLocale();
 

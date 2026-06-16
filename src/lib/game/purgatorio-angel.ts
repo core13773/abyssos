@@ -28,7 +28,7 @@ export function getPurificationDiceBonus(cards: PurificationCard[], hp: number, 
 /**
  * Check if enemy power is reduced by Breath of Gentleness.
  */
-export function getAngelPowerReduction(cards: PurificationCard[], hp: number, maxHp: number): number {
+export function getAngelPowerReduction(cards: PurificationCard[]): number {
   let reduction = 0;
 
   if (cards.some((c) => c.id === 'purification-3')) {
@@ -85,7 +85,7 @@ export function resolveAngelBattle(
   const totalDiceBonus = guardianBonus + purificationBonus;
 
   // Reduce angel power from Breath of Gentleness
-  const powerReduction = getAngelPowerReduction(p.purificationCards, p.hp, p.maxHp);
+  const powerReduction = getAngelPowerReduction(p.purificationCards);
   const effectivePower = Math.max(1, angel.power - powerReduction);
 
   // Roll: apply Kiss of Temperance double-roll

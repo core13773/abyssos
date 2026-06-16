@@ -21,15 +21,9 @@ export default function ChainReaction({ nodeCount, timeLimit, onResult }: Props)
   const onResultRef = useRef(onResult);
   useEffect(() => { onResultRef.current = onResult; }, [onResult]);
 
-  const positions = useRef<{ x: number; y: number }[]>([]);
-  if (positions.current.length === 0) {
-    for (let i = 0; i < nodeCount; i++) {
-      positions.current.push({
-        x: 15 + Math.random() * 70,
-        y: 15 + Math.random() * 60,
-      });
-    }
-  }
+  // 노드 위치는 게임 시작 시에만 무작위로 생성 → ref 대신 state로 관리
+  // (render 중 ref 접근/수정, Math.random 호출 규칙 위반 방지)
+  const [positions, setPositions] = useState<{ x: number; y: number }[]>([]);
 
   const startRound = useCallback((currentRound: number, currentClicked: number[]) => {
     if (currentRound >= nodeCount) {
@@ -61,13 +55,12 @@ export default function ChainReaction({ nodeCount, timeLimit, onResult }: Props)
   }, [nodeCount, timeLimit]);
 
   const startGame = useCallback(() => {
-    positions.current = [];
-    for (let i = 0; i < nodeCount; i++) {
-      positions.current.push({
+    setPositions(
+      Array.from({ length: nodeCount }, () => ({
         x: 15 + Math.random() * 70,
         y: 15 + Math.random() * 60,
-      });
-    }
+      })),
+    );
     setRound(0);
     startRound(0, []);
   }, [startRound, nodeCount]);
@@ -121,7 +114,7 @@ export default function ChainReaction({ nodeCount, timeLimit, onResult }: Props)
           </div>
           <div className="relative w-full h-44 bg-stone-900/60 rounded-xl border border-stone-700 overflow-hidden">
             {sequence.map((idx) => {
-              const pos = positions.current[idx];
+              const pos = positions[idx];
               const isShown = phase === 'show' || clicked.includes(idx);
               const isNext = phase === 'play' && clicked.length === sequence.indexOf(idx);
               return (

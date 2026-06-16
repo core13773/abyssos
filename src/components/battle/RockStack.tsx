@@ -39,7 +39,7 @@ export default function RockStack({ targetHeight, swayAmount, onResult }: Props)
       });
       setSway(Math.sin(elapsed * 2) * swayAmount);
     }, 100);
-  }, [targetHeight, swayAmount]);
+  }, [targetHeight, swayAmount, height]);
 
   const handleStack = useCallback(() => {
     if (phase !== 'playing') return;

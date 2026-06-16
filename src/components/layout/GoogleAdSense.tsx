@@ -24,7 +24,6 @@ export default function GoogleAdSense() {
 
   if (!AD_CLIENT) {
     if (IS_PROD) {
-      // eslint-disable-next-line no-console
       console.warn('[AdSense] NEXT_PUBLIC_ADSENSE_ID is not set. Ads will not load.');
     }
     return null;

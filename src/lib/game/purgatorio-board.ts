@@ -1,6 +1,5 @@
 import type { PurgatorioTile, TerraceId, EventKind } from '@/types/game';
 import { TERRACES } from '@/lib/data/purgatorio';
-import type { RNG } from '@/lib/utils/random';
 
 /**
  * Build purgatorio linear board: 8 tiles per terrace × 7 = 56 tiles.
@@ -8,12 +7,12 @@ import type { RNG } from '@/lib/utils/random';
  * Pattern: A - B - Choice - A - B - Prayer - B - Choice → Angel
  * (전진만 가능, 후퇴 없음)
  */
-export function buildPurgatorioBoard(rng: RNG): PurgatorioTile[] {
+export function buildPurgatorioBoard(): PurgatorioTile[] {
   const board: PurgatorioTile[] = [];
   let globalIdx = 0;
 
   for (const terrace of TERRACES) {
-    const tiles = buildTerraceTiles(terrace.id, rng);
+    const tiles = buildTerraceTiles(terrace.id);
     for (const t of tiles) {
       t.globalIndex = globalIdx++;
       board.push(t);
@@ -22,7 +21,7 @@ export function buildPurgatorioBoard(rng: RNG): PurgatorioTile[] {
   return board;
 }
 
-function buildTerraceTiles(terraceId: TerraceId, rng: RNG): PurgatorioTile[] {
+function buildTerraceTiles(terraceId: TerraceId): PurgatorioTile[] {
   const tiles: PurgatorioTile[] = [];
 
   const makeTile = (

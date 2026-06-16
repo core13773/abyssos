@@ -14,13 +14,15 @@ interface Props {
 export default function LightningReact({ reactionTime, fakeChance, totalRounds, onResult }: Props) {
   const locale = useLocale((s) => s.locale);
   const [phase, setPhase] = useState<'ready' | 'waiting' | 'strike' | 'fake' | 'done'>('ready');
-  const [round, setRound] = useState(0);
+  const [, setRound] = useState(0);
   const [successCount, setSuccessCount] = useState(0);
   const [message, setMessage] = useState('');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onResultRef = useRef(onResult);
   useEffect(() => { onResultRef.current = onResult; }, [onResult]);
 
+  // nextRound 는 스스로를 다시 예약(재귀)하므로, ref로 우회해 "선언 전 참조"를 피한다.
+  const nextRoundRef = useRef<((currentSuccess: number) => void) | null>(null);
   const nextRound = useCallback((currentSuccess: number) => {
     setPhase('waiting');
     setMessage('');
@@ -37,7 +39,7 @@ export default function LightningReact({ reactionTime, fakeChance, totalRounds, 
               setPhase('done');
               setTimeout(() => onResultRef.current(currentSuccess >= Math.ceil(totalRounds * 0.6)), 500);
             } else {
-              nextRound(currentSuccess);
+              nextRoundRef.current?.(currentSuccess);
             }
             return nr;
           });
@@ -52,7 +54,7 @@ export default function LightningReact({ reactionTime, fakeChance, totalRounds, 
               setPhase('done');
               setTimeout(() => onResultRef.current(currentSuccess >= Math.ceil(totalRounds * 0.6)), 500);
             } else {
-              nextRound(currentSuccess);
+              nextRoundRef.current?.(currentSuccess);
             }
             return nr;
           });
@@ -60,6 +62,7 @@ export default function LightningReact({ reactionTime, fakeChance, totalRounds, 
       }
     }, delay);
   }, [reactionTime, fakeChance, totalRounds, locale]);
+  useEffect(() => { nextRoundRef.current = nextRound; }, [nextRound]);
 
   const startGame = useCallback(() => {
     setRound(0);

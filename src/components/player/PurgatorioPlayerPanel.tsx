@@ -79,7 +79,6 @@ export default function PurgatorioPlayerPanel() {
     const grace = player.grace || 0;
     const maxGrace = player.celestialRelics?.some(c => c.id === 'relic-8') ? 150 : 100;
     const gracePct = grace / maxGrace;
-    const totalCards = player.totalCardCount || (player.guardianCards.length + player.purificationCards.length + player.celestialRelics.length);
     const recentLog = log.slice(-1)[0];
 
     return (

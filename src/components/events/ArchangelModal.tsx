@@ -17,7 +17,7 @@ export default function ArchangelModal() {
   const player = useGameStore((s) => s.player);
   const setBattleRoll = useGameStore((s) => s.setBattleRoll);
   const resolveParadisoArchangel = useGameStore((s) => s.resolveParadisoArchangel);
-  const useConsumable = useGameStore((s) => s.useConsumable);
+  const consumeItem = useGameStore((s) => s.useConsumable);
   const locale = useLocale((s) => s.locale);
 
   const [result, setResult] = useState<boolean | null>(null);
@@ -114,7 +114,7 @@ export default function ArchangelModal() {
                 {player.consumables.map((c) => (
                   <button
                     key={c.id}
-                    onClick={() => useConsumable(c.id)}
+                    onClick={() => consumeItem(c.id)}
                     className="text-[10px] bg-stone-800 hover:bg-stone-700 border border-stone-600 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
                     title={locale === 'en' ? c.effectEn : c.effect}
                   >

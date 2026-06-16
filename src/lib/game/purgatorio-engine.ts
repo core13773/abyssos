@@ -1,6 +1,5 @@
 import type { GameState, Player } from '@/types/game';
 import { buildPurgatorioBoard } from './purgatorio-board';
-import { createRNG, timeSeed } from '@/lib/utils/random';
 import { t, getActiveLocale } from '@/lib/i18n/translations';
 
 /**
@@ -25,8 +24,7 @@ export function createPurgatorioPlayer(infernoPlayer: Player): Player {
  * Create a fresh Purgatorio game state from an Inferno-clear player.
  */
 export function createPurgatorioGame(infernoPlayer: Player): Partial<GameState> {
-  const rng = createRNG(timeSeed());
-  const purgatorioBoard = buildPurgatorioBoard(rng);
+  const purgatorioBoard = buildPurgatorioBoard();
   const player = createPurgatorioPlayer(infernoPlayer);
   const loc = getActiveLocale();
 

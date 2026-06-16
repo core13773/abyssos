@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
 
 interface MatchItem {

@@ -13,6 +13,8 @@ export default function PerfectClearOverlay() {
 
   useEffect(() => {
     if (showPerfectClear) {
+      // 스토어 트리거 발생 시 2초간 오버레이 표시 — 타이머 구동 부작용.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
       const t = setTimeout(() => setVisible(false), 2000);
       return () => clearTimeout(t);
@@ -21,6 +23,8 @@ export default function PerfectClearOverlay() {
 
   useEffect(() => {
     if (showCombo && comboCount >= 2) {
+      // 콤보 트리거 발생 시 1.5초간 표시 — 타이머 구동 부작용.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setComboVisible(true);
       const t = setTimeout(() => setComboVisible(false), 1500);
       return () => clearTimeout(t);

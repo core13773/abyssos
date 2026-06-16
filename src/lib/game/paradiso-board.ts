@@ -1,12 +1,11 @@
 import type { ParadisoTile, SphereId } from '@/types/game';
 import { SPHERES } from '@/lib/data/paradiso';
-import type { RNG } from '@/lib/utils/random';
 
-export function buildParadisoBoard(rng: RNG): ParadisoTile[] {
+export function buildParadisoBoard(): ParadisoTile[] {
   const board: ParadisoTile[] = [];
   let globalIdx = 0;
   for (const sphere of SPHERES) {
-    const tiles = buildSphereTiles(sphere.id, rng);
+    const tiles = buildSphereTiles(sphere.id);
     for (const t of tiles) {
       t.globalIndex = globalIdx++;
       board.push(t);
@@ -15,7 +14,7 @@ export function buildParadisoBoard(rng: RNG): ParadisoTile[] {
   return board;
 }
 
-function buildSphereTiles(sphereId: SphereId, rng: RNG): ParadisoTile[] {
+function buildSphereTiles(sphereId: SphereId): ParadisoTile[] {
   const tiles: ParadisoTile[] = [];
   const sphere = SPHERES.find(s => s.id === sphereId)!;
 

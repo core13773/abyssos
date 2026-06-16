@@ -17,7 +17,6 @@ export default function SpeedTyping({ wordLength, onResult }: Props) {
   const [targetWord, setTargetWord] = useState('');
   const [userInput, setUserInput] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
-  const [startTime, setStartTime] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onResultRef = useRef(onResult);
   useEffect(() => {
@@ -32,11 +31,11 @@ export default function SpeedTyping({ wordLength, onResult }: Props) {
     setTargetWord(word);
     setUserInput('');
     setPhase('typing');
-    setStartTime(Date.now());
+    const start = Date.now();
     setTimeLeft(timeLimit);
 
     timerRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
+      const elapsed = (Date.now() - start) / 1000;
       const remaining = Math.max(0, timeLimit - elapsed);
       setTimeLeft(remaining);
       if (remaining <= 0) {

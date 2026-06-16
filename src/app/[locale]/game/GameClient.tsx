@@ -98,7 +98,7 @@ export default function GameClient() {
 
     initGame();
     initDoneRef.current = true;
-  }, [board.length, purgatorioBoard.length, paradisoBoard.length, eraParam, initGame, router]);
+  }, [board.length, purgatorioBoard.length, paradisoBoard.length, eraParam, initGame, router, locale]);
 
   const isBoardReady = isParadiso ? paradisoBoard.length > 0 : isPurgatorio ? purgatorioBoard.length > 0 : board.length > 0;
 

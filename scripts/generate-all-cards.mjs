@@ -159,7 +159,6 @@ function gatekeeperCard(card, loc) {
   const name = loc === 'en' ? card.nameEn : card.name;
   const title = loc === 'en' ? card.titleEn : card.title;
   const mechanic = loc === 'en' ? card.mechanicEn : card.mechanic;
-  const narrative = loc === 'en' ? card.narrativeEn : card.narrative;
   const targetLabel = loc === 'en' ? 'D6 TARGET' : 'D6 목표';
   const mechLabel = loc === 'en' ? 'UNIQUE MECHANIC' : '고유 기믹';
   const winLabel = loc === 'en' ? 'VICTORY' : '승리';
@@ -236,7 +235,6 @@ function guardianCard(card, loc) {
   const name = loc === 'en' ? card.nameEn : card.name;
   const mainEffect = loc === 'en' ? card.mainEffectEn : card.mainEffect;
   const subEffect = loc === 'en' ? card.subEffectEn : card.subEffect;
-  const narrative = loc === 'en' ? card.narrativeEn : card.narrative;
   const guardLabel = loc === 'en' ? 'GUARDIAN' : '수호카드';
   const effectType = card.effectType === 'active' ? 'ACTIVE' : card.effectType === 'both' ? 'BOTH' : 'PASSIVE';
   const mainLabel = loc === 'en' ? 'MAIN EFFECT' : '주 효과';

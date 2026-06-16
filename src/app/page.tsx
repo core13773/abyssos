@@ -1,31 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function RootPage() {
   const router = useRouter();
-  const [locale, setLocale] = useState<string | null>(null);
 
   useEffect(() => {
     // Handle SPA fallback redirect from 404.html (GitHub Pages)
-    const spaRedirect = typeof window !== 'undefined' ? sessionStorage.getItem('__spa_redirect') : null;
-    if (spaRedirect) {
-      sessionStorage.removeItem('__spa_redirect');
-      router.replace(spaRedirect);
-      return;
+    if (typeof window !== 'undefined') {
+      const spaRedirect = sessionStorage.getItem('__spa_redirect');
+      if (spaRedirect) {
+        sessionStorage.removeItem('__spa_redirect');
+        router.replace(spaRedirect);
+        return;
+      }
     }
 
     const stored = typeof window !== 'undefined' ? localStorage.getItem('abyssos_locale') : null;
-    if (stored === 'en' || stored === 'ko') {
-      setLocale(stored);
-      router.replace(`/${stored}/`);
-      return;
-    }
-
-    const navLang = navigator.language;
-    const detected = navLang.startsWith('ko') ? 'ko' : 'en';
-    setLocale(detected);
+    const detected = stored === 'en' || stored === 'ko'
+      ? stored
+      : navigator.language.startsWith('ko') ? 'ko' : 'en';
     router.replace(`/${detected}/`);
   }, [router]);
 
@@ -38,22 +33,20 @@ export default function RootPage() {
       <p className="text-xs text-stone-600">Loading Abyssos...</p>
 
       {/* Manual fallback in case redirect is blocked */}
-      {locale && (
-        <div className="flex gap-3 mt-4">
-          <a
-            href="ko/"
-            className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 text-sm hover:bg-stone-700 transition-colors"
-          >
-            🇰🇷 한국어
-          </a>
-          <a
-            href="en/"
-            className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 text-sm hover:bg-stone-700 transition-colors"
-          >
-            🇺🇸 English
-          </a>
-        </div>
-      )}
+      <div className="flex gap-3 mt-4">
+        <a
+          href="ko/"
+          className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 text-sm hover:bg-stone-700 transition-colors"
+        >
+          🇰🇷 한국어
+        </a>
+        <a
+          href="en/"
+          className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 text-sm hover:bg-stone-700 transition-colors"
+        >
+          🇺🇸 English
+        </a>
+      </div>
     </main>
   );
 }

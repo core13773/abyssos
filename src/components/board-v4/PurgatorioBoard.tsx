@@ -6,7 +6,6 @@ import { useLocale } from '@/lib/i18n/localeStore';
 import { t } from '@/lib/i18n/translations';
 import { TERRACES } from '@/lib/data/purgatorio';
 import { getSinProjection } from '@/lib/data/purgatorio';
-import { getPurificationCard } from '@/lib/data/purgatorio';
 
 const ELEMENT_EMOJI: Record<string, string> = {
   earth: '🪨', sight: '👁', smoke: '🌫', lightning: '⚡',
