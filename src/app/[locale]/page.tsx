@@ -869,6 +869,10 @@ export default function HomePage() {
           </a>
         </p>
         <nav className="mt-2 flex items-center justify-center gap-3 text-stone-600" aria-label={locale === 'en' ? 'Legal' : '법적 고지'}>
+          <a href={`/${locale}/guides/`} className="underline hover:text-stone-400 transition-colors">
+            {locale === 'en' ? 'Guides' : '공략'}
+          </a>
+          <span aria-hidden="true">·</span>
           <a href={`/${locale}/privacy/`} className="underline hover:text-stone-400 transition-colors">
             {locale === 'en' ? 'Privacy' : '개인정보처리방침'}
           </a>

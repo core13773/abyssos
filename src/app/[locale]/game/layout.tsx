@@ -22,9 +22,9 @@ export async function generateMetadata({
     description: isKo
       ? '지옥, 연옥, 천국 중 하나를 선택해 여정을 시작하세요. 주사위, 카드, 타이밍 배틀이 있는 전략적 로그라이크 보드게임.'
       : 'Start your journey through Inferno, Purgatorio, or Paradiso. A strategic roguelike board game with dice, cards, and timing battles.',
-    metadataBase: new URL(`${siteUrl}/${locale}/`),
+    metadataBase: new URL(siteUrl),
     alternates: {
-      canonical: `/${locale}/game/`,
+      canonical: `${siteUrl}/${locale}/game/`,
     },
     openGraph: {
       title: isKo ? '플레이 어비소스 — 신곡 3부작' : 'Play Abyssos — The Divine Comedy Trilogy',

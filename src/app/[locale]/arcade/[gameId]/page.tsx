@@ -29,8 +29,8 @@ export async function generateMetadata({
   return {
     title: isKo ? `${name} — 아케이드` : `${name} — Arcade`,
     description: desc,
-    metadataBase: new URL(`${siteUrl}/${locale}/`),
-    alternates: { canonical: `/${locale}/arcade/${gameId}/` },
+    metadataBase: new URL(siteUrl),
+    alternates: { canonical: `${siteUrl}/${locale}/arcade/${gameId}/` },
     openGraph: {
       title: name,
       description: desc,

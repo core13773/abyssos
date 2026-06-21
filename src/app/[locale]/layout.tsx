@@ -53,13 +53,13 @@ export async function generateMetadata({
     authors: [{ name: 'Abyssos' }],
     creator: 'Abyssos',
     publisher: 'Abyssos',
-    metadataBase: new URL(`${siteUrl}/${locale}/`),
+    metadataBase: new URL(siteUrl),
     alternates: {
-      canonical: `/${locale}/`,
+      canonical: `${siteUrl}/${locale}/`,
       languages: {
-        'x-default': '/en/',
-        en: '/en/',
-        ko: '/ko/',
+        'x-default': `${siteUrl}/en/`,
+        en: `${siteUrl}/en/`,
+        ko: `${siteUrl}/ko/`,
       },
     },
     icons: {

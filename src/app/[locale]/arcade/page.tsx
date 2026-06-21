@@ -111,6 +111,10 @@ export default function ArcadeHubPage() {
       <footer className="text-stone-700 text-[10px] text-center pb-4 z-10">
         <p className="font-serif italic">Abyssos Arcade</p>
         <nav className="mt-2 flex items-center justify-center gap-2 text-stone-600" aria-label={isKo ? '법적 고지' : 'Legal'}>
+          <a href={`/${locale}/guides/`} className="underline hover:text-stone-400 transition-colors">
+            {isKo ? '공략' : 'Guides'}
+          </a>
+          <span aria-hidden="true">·</span>
           <a href={`/${locale}/privacy/`} className="underline hover:text-stone-400 transition-colors">
             {isKo ? '개인정보처리방침' : 'Privacy'}
           </a>

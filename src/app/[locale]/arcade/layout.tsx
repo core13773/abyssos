@@ -20,8 +20,8 @@ export async function generateMetadata({
     description: isKo
       ? '8종 게임을 한곳에서. 스택 타워, 플래피, 레인 닷지, 과일 합치기, 2048, 칼 던지기, 컬러 스위치, 그리고 어비소스 로그라이크.'
       : '8 games in one place: Stack Tower, Flappy, Lane Dodge, Merge Fruits, 2048, Knife Hit, Color Switch, and the Abyssos roguelike.',
-    metadataBase: new URL(`${siteUrl}/${locale}/`),
-    alternates: { canonical: `/${locale}/arcade/` },
+    metadataBase: new URL(siteUrl),
+    alternates: { canonical: `${siteUrl}/${locale}/arcade/` },
     openGraph: {
       title: isKo ? '아케이드 — 어비소스' : 'Arcade — Abyssos',
       description: isKo
