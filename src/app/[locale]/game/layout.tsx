@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 
-const siteUrl = process.env.NEXT_PUBLIC_BASE_PATH
-  ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
-  : 'http://localhost:3000';
+const siteUrl = process.env.NEXT_PUBLIC_DOMAIN
+  ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
+  : process.env.NEXT_PUBLIC_BASE_PATH
+    ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
+    : 'http://localhost:3000';
 
 export async function generateMetadata({
   params,

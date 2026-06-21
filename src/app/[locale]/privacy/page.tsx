@@ -33,7 +33,7 @@ export default function PrivacyPage() {
         </h2>
         <p>
           {isKo
-            ? '본 게임은 회원가입 없이 플레이할 수 있으며, 이름, 이메일 주소, 전화번호 등 어떠한 개인식별정볏도 수집하지 않습니다.'
+            ? '본 게임은 회원가입 없이 플레이할 수 있으며, 이름, 이메일 주소, 전화번호 등 어떠한 개인식별정보도 수집하지 않습니다.'
             : 'The Game does not require registration and does not collect any personally identifiable information such as name, email, or phone number.'}
         </p>
 

@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1050" width="750" height="1050">
-  <rect width="750" height="1050" fill="#1a1a2e"/>
-  <rect x="30" y="30" width="690" height="990" rx="12" fill="none" stroke="#f0d060" stroke-width="4"/>
-  <text x="375" y="500" text-anchor="middle" font-family="serif" font-size="60" fill="#f0d060">TEST CARD</text>
-  <text x="375" y="560" text-anchor="middle" font-family="serif" font-size="30" fill="#daa520">테스트 카드</text>
-</svg>

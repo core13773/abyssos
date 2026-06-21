@@ -17,20 +17,6 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         '/_next/',
         '/api/',
-        // Debug & test pages
-        '/debug*.html',
-        '/svg-test.html',
-        '/test-*.html',
-        '/card-preview.html',
-        // SVGs used during development
-        '/del-*.svg',
-        '/step*.svg',
-        '/test-*.svg',
-        '/file.svg',
-        '/globe.svg',
-        '/next.svg',
-        '/vercel.svg',
-        '/window.svg',
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,

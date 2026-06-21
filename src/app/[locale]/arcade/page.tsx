@@ -31,7 +31,8 @@ export default function ArcadeHubPage() {
               '@type': 'ListItem',
               position: i + 1,
               name: isKo ? g.nameKo : g.nameEn,
-              url: `/${locale}/arcade/${g.id}/`,
+              // abyssos 로그라이크는 /game 으로 라우팅되므로 /arcade/ URL(404)를 피한다.
+              url: g.abyssos ? `/${locale}/game/` : `/${locale}/arcade/${g.id}/`,
             })),
           }),
         }}
@@ -109,6 +110,19 @@ export default function ArcadeHubPage() {
 
       <footer className="text-stone-700 text-[10px] text-center pb-4 z-10">
         <p className="font-serif italic">Abyssos Arcade</p>
+        <nav className="mt-2 flex items-center justify-center gap-2 text-stone-600" aria-label={isKo ? '법적 고지' : 'Legal'}>
+          <a href={`/${locale}/privacy/`} className="underline hover:text-stone-400 transition-colors">
+            {isKo ? '개인정보처리방침' : 'Privacy'}
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href={`/${locale}/terms/`} className="underline hover:text-stone-400 transition-colors">
+            {isKo ? '이용약관' : 'Terms'}
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href={`/${locale}/contact/`} className="underline hover:text-stone-400 transition-colors">
+            {isKo ? '문의' : 'Contact'}
+          </a>
+        </nav>
       </footer>
     </main>
   );

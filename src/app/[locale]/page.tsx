@@ -14,6 +14,13 @@ import AchievementPanel from '@/components/layout/AchievementPanel';
 import HiddenBossModal from '@/components/events/HiddenBossModal';
 import AdUnit from '@/components/layout/AdUnit';
 
+// 사이트 기준 URL (커스텀 도메인 우선, GitHub Pages 차선, 로컬 dev 폴백)
+const siteUrl = process.env.NEXT_PUBLIC_DOMAIN
+  ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
+  : process.env.NEXT_PUBLIC_BASE_PATH
+    ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
+    : 'http://localhost:3000';
+
 // ── Card mini-display helpers ──
 const ELEMENT_EMOJI: Record<string, string> = {
   ice: '❄️', illusion: '🎭', blood: '🩸', fire: '🔥', mud: '💢', gold: '💰', poison: '☠️', wind: '🌪', holy: '✨',
@@ -480,7 +487,7 @@ export default function HomePage() {
                       '@type': 'VideoGame',
                       name: '어비소스 — 신곡 3부작',
                       description: '단테의 신곡을 모티브로 한 전략적 로그라이크 보드게임. 9층 지옥, 7개 테라스 연옥, 9개 천구를 통과하라.',
-                      url: 'https://core13773.github.io/abyssos/ko/',
+                      url: `${siteUrl}/ko/`,
                       playMode: 'SinglePlayer',
                       applicationCategory: 'Game',
                       genre: ['Roguelike', '보드게임', '카드 배틀', '다크 판타지'],
@@ -489,12 +496,12 @@ export default function HomePage() {
                       datePublished: '2026-06-10',
                       inLanguage: 'ko',
                       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-                      image: 'https://core13773.github.io/abyssos/images/og-image.png',
+                      image: `${siteUrl}/images/og-image.png`,
                     },
                     {
                       '@type': 'WebSite',
                       name: '어비소스',
-                      url: 'https://core13773.github.io/abyssos/ko/',
+                      url: `${siteUrl}/ko/`,
                       inLanguage: 'ko',
                     },
                   ],
@@ -506,7 +513,7 @@ export default function HomePage() {
                       '@type': 'VideoGame',
                       name: 'Abyssos — The Divine Comedy Trilogy',
                       description: "A strategic roguelike board game through Dante's Divine Comedy. Traverse 9 circles of Inferno, 7 terraces of Purgatory, and 9 spheres of Paradise.",
-                      url: 'https://core13773.github.io/abyssos/en/',
+                      url: `${siteUrl}/en/`,
                       playMode: 'SinglePlayer',
                       applicationCategory: 'Game',
                       genre: ['Roguelike', 'Board Game', 'Card Battle', 'Dark Fantasy', 'Strategy'],
@@ -515,18 +522,18 @@ export default function HomePage() {
                       datePublished: '2026-06-10',
                       inLanguage: 'en',
                       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-                      image: 'https://core13773.github.io/abyssos/images/og-image.png',
+                      image: `${siteUrl}/images/og-image.png`,
                     },
                     {
                       '@type': 'WebSite',
                       name: 'Abyssos',
-                      url: 'https://core13773.github.io/abyssos/en/',
+                      url: `${siteUrl}/en/`,
                       inLanguage: 'en',
                     },
                     {
                       '@type': 'Organization',
                       name: 'Abyssos',
-                      url: 'https://core13773.github.io/abyssos/',
+                      url: `${siteUrl}/`,
                       email: 'core13773@gmail.com',
                     },
                   ],
@@ -780,7 +787,7 @@ export default function HomePage() {
           <button
             onClick={() => {
               useGameStore.getState().startNGPlus();
-              router.push('/game');
+              router.push(`/${locale}/game`);
             }}
             className="w-full py-3 rounded-xl bg-red-900/40 border border-red-700/40 text-red-300 text-sm font-bold hover:bg-red-900/60 transition-colors animate-pulse"
           >
@@ -861,6 +868,19 @@ export default function HomePage() {
             core13773@gmail.com
           </a>
         </p>
+        <nav className="mt-2 flex items-center justify-center gap-3 text-stone-600" aria-label={locale === 'en' ? 'Legal' : '법적 고지'}>
+          <a href={`/${locale}/privacy/`} className="underline hover:text-stone-400 transition-colors">
+            {locale === 'en' ? 'Privacy' : '개인정보처리방침'}
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href={`/${locale}/terms/`} className="underline hover:text-stone-400 transition-colors">
+            {locale === 'en' ? 'Terms' : '이용약관'}
+          </a>
+          <span aria-hidden="true">·</span>
+          <a href={`/${locale}/contact/`} className="underline hover:text-stone-400 transition-colors">
+            {locale === 'en' ? 'Contact' : '문의'}
+          </a>
+        </nav>
       </motion.footer>
     </main>
   );

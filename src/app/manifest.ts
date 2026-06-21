@@ -3,9 +3,11 @@ import type { MetadataRoute } from 'next';
 export const dynamic = 'force-static';
 
 export default function manifest(): MetadataRoute.Manifest {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_PATH
-    ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
-    : 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_DOMAIN
+    ? `https://${process.env.NEXT_PUBLIC_DOMAIN}`
+    : process.env.NEXT_PUBLIC_BASE_PATH
+      ? `https://core13773.github.io${process.env.NEXT_PUBLIC_BASE_PATH}`
+      : 'http://localhost:3000';
 
   return {
     name: 'Abyssos — The Divine Comedy Trilogy',

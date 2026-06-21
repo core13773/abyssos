@@ -41,7 +41,9 @@ jobs:
 
       - run: npm run build
         env:
-          NEXT_PUBLIC_BASE_PATH: /abyssos
+          # 커스텀 도메인(webgame.monster)은 루트에서 서빙되므로 basePath 없음.
+          # NEXT_PUBLIC_BASE_PATH를 설정하면 assetPath()가 /abyssos prefix를 붙여
+          # 실제 도메인에서 이미지 404가 발생하므로 설정하지 않는다.
           NEXT_PUBLIC_DOMAIN: webgame.monster
           NEXT_PUBLIC_GA_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           NEXT_PUBLIC_ADSENSE_ID: ${{ secrets.ADSENSE_PUBLISHER_ID }}

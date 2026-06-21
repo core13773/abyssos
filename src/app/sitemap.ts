@@ -21,6 +21,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/en/arcade/', priority: 0.8 },
     { path: '/ko/privacy/', priority: 0.5 },
     { path: '/en/privacy/', priority: 0.5 },
+    { path: '/ko/terms/', priority: 0.4 },
+    { path: '/en/terms/', priority: 0.4 },
+    { path: '/ko/contact/', priority: 0.4 },
+    { path: '/en/contact/', priority: 0.4 },
   ];
 
   // Arcade 게임별 페이지
