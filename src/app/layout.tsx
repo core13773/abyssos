@@ -12,6 +12,7 @@ export default function RootLayout({
       <head>
         <meta name="google-site-verification" content="H7mODFbLsLZQVighNNZBIlFHoInuoI881YleLZ7b4vo" />
         <meta name="naver-site-verification" content="f2ee86bf2dbffd9f349214dc82766bbf8066ed00" />
+        <meta name="6c892d6b7362da74026ce3e0881ee31bcb5b9ef0" content="6c892d6b7362da74026ce3e0881ee31bcb5b9ef0" />
         <meta name="google-adsense-account" content="ca-pub-4794002106764884" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://googleads.g.doubleclick.net" />
