@@ -2,15 +2,18 @@
 
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
-export default function GoogleAnalytics() {
+/**
+ * Tracks SPA route changes. Uses useSearchParams, so it must sit inside a
+ * Suspense boundary (required by Next.js static export / prerendering).
+ */
+function RouteTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Track route changes in Next.js App Router
   useEffect(() => {
     if (!GA_ID || typeof window === 'undefined') return;
     if (typeof window.gtag !== 'function') return;
@@ -21,6 +24,10 @@ export default function GoogleAnalytics() {
     });
   }, [pathname, searchParams]);
 
+  return null;
+}
+
+export default function GoogleAnalytics() {
   if (!GA_ID) return null;
 
   return (
@@ -41,6 +48,9 @@ export default function GoogleAnalytics() {
           });
         `}
       </Script>
+      <Suspense fallback={null}>
+        <RouteTracker />
+      </Suspense>
     </>
   );
 }

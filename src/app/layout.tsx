@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import './globals.css';
+import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
 
 export default function RootLayout({
   children,
@@ -19,18 +20,10 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4794002106764884"
           crossOrigin="anonymous"
         />
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-DJK0ZFRYKM"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-DJK0ZFRYKM');`,
-          }}
-        />
       </head>
       <body className="min-h-full bg-stone-950 text-stone-200 antialiased">
         {children}
+        <GoogleAnalytics />
       </body>
     </html>
   );
