@@ -4,9 +4,7 @@ import { useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { getArcadeGame } from '@/lib/data/arcadeGames';
-import AdUnit from '@/components/layout/AdUnit';
 
-const AD_SLOT_MAIN = process.env.NEXT_PUBLIC_ADSENSE_SLOT_MAIN;
 
 // localStorage 최고기록은 구독이 필요 없으므로 no-op 구독.
 // useSyncExternalStore 로 읽어 effect 내 동기 setState(hydration/린트 문제)를 피한다.
@@ -108,12 +106,6 @@ export default function ArcadeGameClient({
           </p>
         </motion.div>
 
-        {/* 광고 */}
-        {AD_SLOT_MAIN && (
-          <section className="mt-5" aria-label={isKo ? '광고' : 'Advertisement'}>
-            <AdUnit slot={AD_SLOT_MAIN} format="horizontal" responsive className="my-2" />
-          </section>
-        )}
       </div>
     </main>
   );

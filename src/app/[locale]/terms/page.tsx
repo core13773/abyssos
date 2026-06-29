@@ -60,8 +60,8 @@ export default function TermsPage() {
         </h2>
         <p>
           {isKo
-            ? '본 게임은 Google AdSense 등 제3자 광고 네트워크를 통해 광고를 게재할 수 있습니다. 광고 콘텐츠에 대해서는 책임지지 않습니다.'
-            : 'The Game may display advertisements through third-party networks such as Google AdSense. We are not responsible for the content of advertisements.'}
+            ? '본 게임은 HilltopAds 등 제3자 광고 네트워크를 통해 광고를 게재할 수 있습니다. 광고 콘텐츠에 대해서는 책임지지 않습니다.'
+            : 'The Game may display advertisements through third-party networks such as HilltopAds. We are not responsible for the content of advertisements.'}
         </p>
 
         <h2 className="text-lg font-bold text-stone-300 mt-4">

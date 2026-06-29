@@ -4,9 +4,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useLocale } from '@/lib/i18n/localeStore';
 import { ARCADE_GAMES } from '@/lib/data/arcadeGames';
-import AdUnit from '@/components/layout/AdUnit';
 
-const AD_SLOT_MAIN = process.env.NEXT_PUBLIC_ADSENSE_SLOT_MAIN;
 
 export default function ArcadeHubPage() {
   const router = useRouter();
@@ -101,12 +99,6 @@ export default function ArcadeHubPage() {
         })}
       </section>
 
-      {/* 광고 */}
-      {AD_SLOT_MAIN && (
-        <section className="w-full max-w-2xl z-10 mb-6" aria-label={isKo ? '광고' : 'Advertisement'}>
-          <AdUnit slot={AD_SLOT_MAIN} format="horizontal" responsive className="my-2" />
-        </section>
-      )}
 
       <footer className="text-stone-700 text-[10px] text-center pb-4 z-10">
         <p className="font-serif italic">Abyssos Arcade</p>

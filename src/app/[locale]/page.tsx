@@ -12,7 +12,6 @@ import { CELESTIAL_RELICS } from '@/lib/data/paradiso';
 import { META_UPGRADES, loadMetaProgress, saveMetaProgress } from '@/lib/data/metaUpgrades';
 import AchievementPanel from '@/components/layout/AchievementPanel';
 import HiddenBossModal from '@/components/events/HiddenBossModal';
-import AdUnit from '@/components/layout/AdUnit';
 
 // 사이트 기준 URL (커스텀 도메인 우선, GitHub Pages 차선, 로컬 dev 폴백)
 const siteUrl = process.env.NEXT_PUBLIC_DOMAIN
@@ -232,7 +231,6 @@ function MetaUpgradePanel({ locale }: { locale: 'en' | 'ko' }) {
 }
 
 // ── Color palette per realm for inline style fallback ──
-const AD_SLOT_MAIN = process.env.NEXT_PUBLIC_ADSENSE_SLOT_MAIN;
 
 const REALM_COLORS: Record<string, { bg: string; border: string; text: string; glow: string }> = {
   inferno:    { bg: '#3b1108', border: '#991b1b', text: '#f87171', glow: '#ef444433' },
@@ -831,18 +829,6 @@ export default function HomePage() {
         <AchievementPanel />
       </motion.section>
 
-      {/* AdSense — placed above footer with safe spacing */}
-      {AD_SLOT_MAIN && (
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.85 }}
-          className="w-full max-w-md z-10 mb-4"
-          aria-label={locale === 'ko' ? '광고' : 'Advertisement'}
-        >
-          <AdUnit slot={AD_SLOT_MAIN} format="horizontal" responsive className="my-2" />
-        </motion.section>
-      )}
 
       {/* Footer */}
       <motion.footer
