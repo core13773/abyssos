@@ -200,14 +200,3 @@ text {
 .ring-transition {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-/* ── HilltopAds overlap guard (best-effort) ──
-   모바일에서 HilltopAds 런타임 고정 배너가 콘텐츠/UI를 가리지 않도록 본문 하단 여백을 확보합니다.
-   게임 캔버스 위에 광고가 뜨는 것(플레이 방해)은 사이트 코드로 막을 수 없으므로
-   HilltopAds 대시보드(Manage Sites & Zones)에서 해당 zone을 in-content/비-오버레이로
-   전환하거나 게임 페이지에서 스티키를 끄는 것으로 근본 해결해야 합니다.
-   --ad-safe-bottom 값을 실제 배너 높이에 맞춰 조절하세요. */
-:root { --ad-safe-bottom: 64px; }
-@media (max-width: 768px) {
-  body { padding-bottom: calc(var(--ad-safe-bottom) + env(safe-area-inset-bottom)); }
-}

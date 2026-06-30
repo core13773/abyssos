@@ -65,12 +65,12 @@ export default function PrivacyPage() {
         </p>
 
         <h2 className="text-lg font-bold text-stone-300 mt-4">
-          {isKo ? '4. 광고 (HilltopAds)' : '4. Advertising (HilltopAds)'}
+          {isKo ? '4. 광고 (Google AdSense)' : '4. Advertising (Google AdSense)'}
         </h2>
         <p>
           {isKo
-            ? '본 게임은 HilltopAds 등 제3자 광고 네트워크를 통해 광고를 게재할 수 있습니다. 이들 네트워크는 쿠키 또는 유사 기술을 사용하여 사용자의 방문 기록을 바탕으로 맞춤형 광고를 제공할 수 있습니다. 사용자는 AboutAds(aboutads.info)에서 맞춤형 광고를 비활성화할 수 있습니다.'
-            : 'We may display ads through HilltopAds and other third-party ad networks. These networks may use cookies or similar technologies to serve personalized ads based on your visit history. You can opt out of personalized ads at AboutAds (aboutads.info).'}
+            ? '본 게임은 Google AdSense 등 제3자 광고 네트워크를 통해 광고를 게재할 수 있습니다. 이들 네트워크는 쿠키 또는 유사 기술을 사용하여 사용자의 방문 기록을 바탕으로 맞춤형 광고를 제공할 수 있습니다. 사용자는 AboutAds(aboutads.info)에서 맞춤형 광고를 비활성화할 수 있습니다.'
+            : 'We may display ads through Google AdSense and other third-party ad networks. These networks may use cookies or similar technologies to serve personalized ads based on your visit history. You can opt out of personalized ads at AboutAds (aboutads.info).'}
         </p>
 
         <h2 className="text-lg font-bold text-stone-300 mt-4">
@@ -78,8 +78,8 @@ export default function PrivacyPage() {
         </h2>
         <p>
           {isKo
-            ? '본 게임은 직접적인 쿠키를 설정하지 않습니다. 단, Google Analytics 및 HilltopAds 등 제3자 광고 서비스가 쿠키를 사용할 수 있습니다.'
-            : 'The Game itself does not set cookies directly. However, third-party services such as Google Analytics and HilltopAds may use cookies.'}
+            ? '본 게임은 직접적인 쿠키를 설정하지 않습니다. 단, Google Analytics 및 Google AdSense 등 제3자 광고 서비스가 쿠키를 사용할 수 있습니다.'
+            : 'The Game itself does not set cookies directly. However, third-party services such as Google Analytics and Google AdSense may use cookies.'}
         </p>
 
         <h2 className="text-lg font-bold text-stone-300 mt-4">
